@@ -1,0 +1,98 @@
+[
+  {
+    "id": "DEFECT-01",
+    "area": "Income rules",
+    "summary": "Biweekly income is annualized with 24 periods instead of 26, overstating eligibility near a threshold.",
+    "evidence": "tests/probes/policy.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-02",
+    "area": "Income rules",
+    "summary": "Alaska and Hawaii poverty-guideline multipliers are ignored.",
+    "evidence": "tests/probes/policy.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-03",
+    "area": "Input validation",
+    "summary": "A zero-person household and a household-size/member-count mismatch are accepted.",
+    "evidence": "tests/probes/policy.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-04",
+    "area": "Tenant isolation",
+    "summary": "Tenant configuration is cached globally, so the first agency to load controls every later request.",
+    "evidence": "tests/probes/tenancy.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-05",
+    "area": "Authorization",
+    "summary": "Any authenticated applicant can read another applicant's screening by id.",
+    "evidence": "tests/probes/tenancy.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-06",
+    "area": "Data protection",
+    "summary": "Raw Social Security numbers are returned in application responses and written into timeline events.",
+    "evidence": "tests/probes/pii.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-07",
+    "area": "Async integration",
+    "summary": "A timed-out vendor call is retried with a new idempotency key, creating duplicate vendor verifications.",
+    "evidence": "tests/probes/async.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-08",
+    "area": "Webhook security",
+    "summary": "Signed vendor callbacks have no timestamp freshness check, so a captured request can be replayed.",
+    "evidence": "tests/probes/webhook.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-09",
+    "area": "Workflow rules",
+    "summary": "An application can be approved without proof of income or a successful vendor verification.",
+    "evidence": "tests/probes/state-machine.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-10",
+    "area": "Deadlines",
+    "summary": "Deadline dates are calculated from the UTC date instead of the agency's local date.",
+    "evidence": "tests/probes/deadline.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-11",
+    "area": "AI assistant",
+    "summary": "The shipping prompt follows injected instructions, guarantees eligibility, and invents dollar amounts.",
+    "evidence": "tests/probes/ai.probes.test.ts"
+  },
+  {
+    "id": "DEFECT-12",
+    "area": "Accessibility",
+    "summary": "The screener has an unlabeled input, low-contrast helper text, and an unnamed chat control.",
+    "evidence": "tests/probes/e2e/a11y.probes.spec.ts"
+  },
+  {
+    "id": "DEFECT-13",
+    "area": "Rules differential",
+    "summary": "API eligibility results disagree with the independent Python policy oracle for biweekly and Alaska households.",
+    "evidence": "tests/probes/differential.probes.test.ts"
+  },
+  {
+    "id": "GAP-01",
+    "area": "Performance",
+    "summary": "The load smoke test exercises two read/write endpoints at low concurrency only; peak traffic, saturation and long-run memory are not covered.",
+    "evidence": "scripts/load.mjs"
+  },
+  {
+    "id": "GAP-02",
+    "area": "Browser matrix",
+    "summary": "The local default runs Chromium; Firefox and WebKit run only in the CI matrix.",
+    "evidence": "playwright.config.ts"
+  },
+  {
+    "id": "GAP-03",
+    "area": "Real vendor",
+    "summary": "Vendor behavior is simulated; contract drift, schema changes and rate limits from a real vendor are not covered.",
+    "evidence": "product/server/lib/vendor.mjs"
+  }
+]

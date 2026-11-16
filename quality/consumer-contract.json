@@ -1,0 +1,45 @@
+[
+  {
+    "description": "The web app loads branding and enabled programs for the signed-in applicant",
+    "request": {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "tenantId": "agency-a",
+        "brandName": "Northstar Benefits",
+        "enabledPrograms": ["medicaid", "snap", "wic", "chip"],
+        "deadlineDays": 10,
+        "assistantPromptVersion": { "$type": "string" }
+      }
+    }
+  },
+  {
+    "description": "The web app submits a household and renders a screening result",
+    "request": {
+      "method": "POST",
+      "path": "/api/screenings",
+      "body": {
+        "state": "CA",
+        "householdSize": 2,
+        "incomeComplete": true,
+        "members": [
+          { "age": 35, "status": "citizen", "income": { "amount": 2000, "frequency": "monthly" } },
+          { "age": 33, "status": "citizen" }
+        ]
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "state": "CA",
+        "householdSize": 2,
+        "annualIncome": 24000,
+        "fplPercent": { "$type": "number" },
+        "results": { "$type": "array" }
+      }
+    }
+  }
+]

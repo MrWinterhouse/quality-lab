@@ -1,0 +1,12 @@
+node_modules/
+artifacts/
+.freebuff/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc

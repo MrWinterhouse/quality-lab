@@ -1,0 +1,50 @@
+[
+  {
+    "id": "R-01",
+    "summary": "Applicant data can cross agency boundaries through the screening detail endpoint and cached tenant configuration.",
+    "severity": "critical",
+    "status": "open",
+    "area": "authorization",
+    "owner": "platform"
+  },
+  {
+    "id": "R-02",
+    "summary": "Income annualization and state poverty-level adjustments can misstate eligibility for borderline households.",
+    "severity": "high",
+    "status": "open",
+    "area": "policy",
+    "owner": "eligibility"
+  },
+  {
+    "id": "R-03",
+    "summary": "A timed-out vendor verification is retried under a new idempotency key, creating duplicate vendor records.",
+    "severity": "high",
+    "status": "open",
+    "area": "async-integration",
+    "owner": "integrations"
+  },
+  {
+    "id": "R-04",
+    "summary": "The shipping assistant prompt follows injected instructions and states unsupported benefit amounts.",
+    "severity": "high",
+    "status": "open",
+    "area": "ai",
+    "owner": "assistant"
+  },
+  {
+    "id": "R-05",
+    "summary": "The screener has unlabeled inputs, low-contrast helper text, and an unnamed chat control.",
+    "severity": "medium",
+    "status": "open",
+    "area": "accessibility",
+    "owner": "web"
+  },
+  {
+    "id": "R-06",
+    "summary": "Full Social Security numbers are returned in application responses and written into timeline events.",
+    "severity": "critical",
+    "status": "open",
+    "area": "data-protection",
+    "owner": "platform"
+  }
+]

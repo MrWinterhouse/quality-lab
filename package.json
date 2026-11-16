@@ -1,0 +1,38 @@
+{
+  "name": "mirza-quality-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A deliberately imperfect benefits-eligibility product for practicing the Quality Engineer role at Mirza.",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "dev": "node --watch product/server/server.mjs",
+    "start": "node product/server/server.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:api": "node scripts/run-tests.mjs api",
+    "test:security": "node scripts/run-tests.mjs security",
+    "test:contract": "node scripts/run-tests.mjs contract",
+    "test:integration": "node scripts/run-tests.mjs integration",
+    "test:evals": "node scripts/run-tests.mjs evals",
+    "test:baseline": "node scripts/run-tests.mjs baseline",
+    "test:probes": "node scripts/run-tests.mjs probes",
+    "test:flaky": "node scripts/run-tests.mjs flaky",
+    "test:e2e": "playwright test",
+    "test:e2e:probes": "playwright test --config playwright.probes.config.ts",
+    "test:python": "node scripts/run-python-tests.mjs",
+    "evals": "node scripts/run-evals.mjs",
+    "load": "node scripts/load.mjs",
+    "report": "node scripts/report.mjs",
+    "verify:baseline": "npm run typecheck && npm run test:baseline && npm run test:e2e -- --project=chromium && npm run evals -- --gate",
+    "verify:release": "npm run typecheck && npm run test:baseline && npm run test:e2e && npm run evals -- --gate-shipping && npm run test:probes && npm run test:e2e:probes && npm run load && npm run report -- --gate",
+    "test": "npm run test:baseline"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}

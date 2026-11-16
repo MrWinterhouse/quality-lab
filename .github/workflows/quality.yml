@@ -1,0 +1,189 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:baseline
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts-baseline
+          path: artifacts/
+          if-no-files-found: warn
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright test --project=${{ matrix.browser }}
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.browser == 'chromium'
+        with:
+          name: artifacts-e2e
+          path: artifacts/playwright.json
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-html-${{ matrix.browser }}
+          path: artifacts/playwright-html/
+          if-no-files-found: ignore
+
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run evals -- --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts-evals
+          path: artifacts/evals.json
+          if-no-files-found: warn
+
+  python-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s python-oracle -p "test_*.py" -v
+
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run load
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts-load
+          path: artifacts/load.json
+          if-no-files-found: warn
+
+  # This job is the honest signal while the lab's seeded defects remain:
+  # it runs the defect probes, the shipping-prompt gate and the release gate,
+  # so it is expected to fail until the defects are fixed. It is non-blocking
+  # for the pipeline so the baseline suites stay actionable.
+  release-readiness:
+    needs: [baseline, e2e, evals, load]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: artifacts-*
+          path: artifacts
+          merge-multiple: true
+
+      - name: Known-defect probes (expected to fail while defects are open)
+        continue-on-error: true
+        run: npm run test:probes
+
+      - name: Accessibility probe (expected to fail while DEFECT-12 is open)
+        continue-on-error: true
+        run: npm run test:e2e:probes
+
+      - name: Shipping prompt eval gate
+        continue-on-error: true
+        run: npm run evals -- --gate-shipping
+
+      - name: Release gate
+        run: npm run report -- --gate
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts-readiness
+          path: artifacts/
+          if-no-files-found: warn
+
+  quality-report:
+    needs: [baseline, e2e, evals, load]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: artifacts-*
+          path: artifacts
+          merge-multiple: true
+      - run: npm run report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quality-report
+          path: artifacts/quality-report.md
+          if-no-files-found: warn

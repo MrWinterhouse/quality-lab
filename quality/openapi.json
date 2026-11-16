@@ -1,0 +1,448 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Benefits Eligibility API",
+    "version": "1.0.0",
+    "description": "Contract used by the provider-verification tests. Simplified for the lab."
+  },
+  "paths": {
+    "/api/config": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Tenant configuration",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TenantConfig" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/programs": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Programs enabled for the tenant",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProgramList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/screenings": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created screening",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Screening" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid household",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/screenings/{id}": {
+      "get": {
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Screening",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Screening" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created application",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Application" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}": {
+      "get": {
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Application" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/documents": {
+      "post": {
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "201": {
+            "description": "Document receipt",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DocumentReceipt" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/review": {
+      "post": {
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application under review",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Application" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/decision": {
+      "post": {
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decided application",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Application" }
+              }
+            }
+          },
+          "409": {
+            "description": "Invalid transition",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/events": {
+      "get": {
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application timeline",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EventList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assistant/messages": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Assistant reply",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AssistantReply" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/readiness": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Release readiness",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Readiness" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TenantConfig": {
+        "type": "object",
+        "required": [
+          "tenantId",
+          "brandName",
+          "brandColor",
+          "enabledPrograms",
+          "deadlineDays",
+          "timezone",
+          "assistantPromptVersion",
+          "showEstimatedAmounts"
+        ],
+        "properties": {
+          "tenantId": { "type": "string" },
+          "brandName": { "type": "string" },
+          "brandColor": { "type": "string" },
+          "enabledPrograms": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["medicaid", "snap", "wic", "chip"] }
+          },
+          "deadlineDays": { "type": "integer", "minimum": 1 },
+          "timezone": { "type": "string" },
+          "assistantPromptVersion": { "type": "string" },
+          "showEstimatedAmounts": { "type": "boolean" }
+        }
+      },
+      "ProgramList": {
+        "type": "object",
+        "required": ["tenantId", "programs"],
+        "properties": {
+          "tenantId": { "type": "string" },
+          "programs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "label", "thresholdPct"],
+              "properties": {
+                "id": { "type": "string", "enum": ["medicaid", "snap", "wic", "chip"] },
+                "label": { "type": "string" },
+                "thresholdPct": { "type": "integer", "minimum": 1 },
+                "incomeLimitAnnual": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        }
+      },
+      "ScreeningResult": {
+        "type": "object",
+        "required": ["programId", "label", "status", "fplPercent", "missing"],
+        "properties": {
+          "programId": { "type": "string", "enum": ["medicaid", "snap", "wic", "chip"] },
+          "label": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["likely_eligible", "likely_ineligible", "need_more_info"]
+          },
+          "reason": { "type": "string" },
+          "fplPercent": { "type": "number", "minimum": 0 },
+          "thresholdPct": { "type": "integer", "minimum": 1 },
+          "incomeLimitAnnual": { "type": "integer", "minimum": 0 },
+          "missing": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Screening": {
+        "type": "object",
+        "required": [
+          "id",
+          "state",
+          "householdSize",
+          "annualIncome",
+          "fplAnnual",
+          "fplPercent",
+          "results",
+          "createdAt"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "state": { "type": "string" },
+          "householdSize": { "type": "integer" },
+          "annualIncome": { "type": "number", "minimum": 0 },
+          "fplAnnual": { "type": "integer", "minimum": 0 },
+          "fplPercent": { "type": "number", "minimum": 0 },
+          "results": { "type": "array", "items": { "$ref": "#/components/schemas/ScreeningResult" } },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Document": {
+        "type": "object",
+        "required": ["id", "type", "fileName", "sizeBytes", "uploadedAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["income_proof", "id", "residency"] },
+          "fileName": { "type": "string" },
+          "sizeBytes": { "type": "integer", "minimum": 1 },
+          "uploadedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "TimelineEvent": {
+        "type": "object",
+        "required": ["id", "applicationId", "type", "at", "actor", "data"],
+        "properties": {
+          "id": { "type": "string" },
+          "applicationId": { "type": "string" },
+          "type": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" },
+          "actor": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "required": [
+          "id",
+          "screeningId",
+          "tenantId",
+          "status",
+          "applicant",
+          "householdHash",
+          "deadline",
+          "deadlineDate",
+          "vendor",
+          "documents",
+          "timeline",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "screeningId": { "type": "string" },
+          "tenantId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["submitted", "documents_pending", "under_review", "approved", "denied"]
+          },
+          "applicant": {
+            "type": "object",
+            "required": ["firstName", "lastName", "email", "ssn"],
+            "properties": {
+              "firstName": { "type": "string" },
+              "lastName": { "type": "string" },
+              "email": { "type": "string" },
+              "ssn": { "type": ["string", "null"] }
+            }
+          },
+          "householdHash": { "type": "string" },
+          "deadline": { "type": "string", "format": "date-time" },
+          "deadlineDate": { "type": "string", "format": "date" },
+          "vendor": {
+            "type": "object",
+            "required": ["status"],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["pending", "verified", "failed", "mismatch"]
+              },
+              "verificationId": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          },
+          "documents": { "type": "array", "items": { "$ref": "#/components/schemas/Document" } },
+          "timeline": { "type": "array", "items": { "$ref": "#/components/schemas/TimelineEvent" } },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "DocumentReceipt": {
+        "type": "object",
+        "required": ["document", "status"],
+        "properties": {
+          "document": { "$ref": "#/components/schemas/Document" },
+          "status": { "type": "string" }
+        }
+      },
+      "EventList": {
+        "type": "object",
+        "required": ["events"],
+        "properties": {
+          "events": { "type": "array", "items": { "$ref": "#/components/schemas/TimelineEvent" } }
+        }
+      },
+      "AssistantReply": {
+        "type": "object",
+        "required": ["reply", "citations", "refused", "guardrails", "promptVersion"],
+        "properties": {
+          "reply": { "type": "string" },
+          "citations": { "type": "array", "items": { "type": "string" } },
+          "refused": { "type": "boolean" },
+          "promptVersion": { "type": "string" },
+          "guardrails": {
+            "type": "object",
+            "required": ["violations", "blocked"],
+            "properties": {
+              "violations": { "type": "array", "items": { "type": "string" } },
+              "blocked": { "type": "boolean" }
+            }
+          }
+        }
+      },
+      "Readiness": {
+        "type": "object",
+        "required": ["decision", "generatedAt", "rationale", "openRisks", "evidence"],
+        "properties": {
+          "decision": { "type": "string", "enum": ["ready", "not_ready", "not_verified"] },
+          "generatedAt": { "type": "string", "format": "date-time" },
+          "rationale": { "type": "array", "items": { "type": "string" } },
+          "openRisks": { "type": "array", "items": { "type": "object" } },
+          "evidence": { "type": "object" }
+        }
+      },
+      "ErrorEnvelope": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "details": { "type": "array" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
