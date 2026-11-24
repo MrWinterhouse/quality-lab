@@ -218,9 +218,9 @@ in memory and deliberately contains security defects for practice.
 | `npm run verify:release` | The full gate; green only when every defect is fixed |
 
 CI (`.github/workflows/quality.yml`) runs the baseline, all three browsers in a matrix, the
-Python oracle, evals, load, the site's own accessibility and HTML checks, and a non-blocking
-release-readiness job that stays red while known defects remain. On `main` it also publishes
-the portfolio and these reports to GitHub Pages.
+Python oracle, evals, load, the site's own accessibility and HTML checks, and a
+release-readiness job that records the open defects in its job summary instead of failing the
+build. On `main` it also publishes the portfolio and these reports to GitHub Pages.
 
 ---
 
