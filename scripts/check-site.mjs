@@ -26,9 +26,10 @@ const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 // Both widths are scanned: horizontal overflow that only appears on a phone (tables, code
 // blocks) is a real keyboard trap and does not reproduce in a 1280px window.
 const VIEWPORTS = [
-  { label: '1280x900', width: 1280, height: 900 },
-  { label: '360x800', width: 360, height: 800 },
+  { width: 1280, height: 900 },
+  { width: 360, height: 800 },
 ];
+const viewportLabel = (viewport) => `${viewport.width}×${viewport.height}`;
 
 const VOID_ELEMENTS = new Set([
   'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
@@ -264,7 +265,8 @@ for (const file of pages) {
     );
     await page.close();
   }
-  const [violations = [], narrowViolations = []] = perViewport;
+  const violations = perViewport[0] ?? [];
+  const narrowViolations = perViewport[1] ?? [];
 
   results.push({
     page: path.relative(siteDir, file).split(path.sep).join('/'),
@@ -281,31 +283,22 @@ for (const file of pages) {
 
 await browser?.close();
 
-const count = (pick) => results.reduce((total, result) => total + pick(result).length, 0);
-const countNodes = (pick) =>
-  results.reduce(
-    (total, result) => total + pick(result).reduce((sum, v) => sum + v.nodes.length, 0),
-    0,
-  );
-const narrowAxeViolations = count((result) => result.narrowViolations);
-const narrowAxeNodes = countNodes((result) => result.narrowViolations);
-// axeViolations is the total for both widths, so the figure the published page states covers
-// the narrow pass too. The per-width counts stay in this report.
-const axeViolations = count((result) => result.violations) + narrowAxeViolations;
-const axeNodes = countNodes((result) => result.violations) + narrowAxeNodes;
+// The totals cover both widths, so the figure the published page states includes the narrow
+// pass. Per-width counts stay in the results and the report table.
+const allViolations = results.flatMap((result) => [...result.violations, ...result.narrowViolations]);
+const axeViolations = allViolations.length;
+const axeNodes = allViolations.reduce((total, violation) => total + violation.nodes.length, 0);
 const htmlErrors = results.reduce((total, result) => total + result.htmlProblems.length, 0);
 const deferredLinks = results.reduce((total, result) => total + result.deferredLinks, 0);
 const passed = axeViolations === 0 && htmlErrors === 0;
 const checkedAt = new Date().toISOString();
-const viewportLabels = VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`);
+const viewportLabels = VIEWPORTS.map(viewportLabel);
 
 const summary = {
   checkedAt,
   pages: results.length,
   axeViolations,
   axeNodes,
-  narrowAxeViolations,
-  narrowAxeNodes,
   htmlErrors,
   deferredLinks,
   passed,
@@ -331,7 +324,7 @@ const details = results
     const lines = [`### ${result.page}`, ''];
     for (const violation of result.violations) lines.push(...violationLines(violation));
     for (const violation of result.narrowViolations) {
-      lines.push(...violationLines(violation, ` at ${VIEWPORTS[1].label}`));
+      lines.push(...violationLines(violation, ` at ${viewportLabel(VIEWPORTS[1])}`));
     }
     for (const problem of result.htmlProblems) lines.push(`- **HTML** — ${problem}`);
     return lines.join('\n');
@@ -408,7 +401,7 @@ if (!passed) {
       const nodes = violation.nodes.length > 0 ? ` [${violation.nodes.join(', ')}]` : '';
       reportFinding(
         result,
-        `${violation.id} (${violation.impact}) ${violation.help}${nodes} at ${VIEWPORTS[1].label}`,
+        `${violation.id} (${violation.impact}) ${violation.help}${nodes} at ${viewportLabel(VIEWPORTS[1])}`,
       );
     }
     for (const problem of result.markupProblems) reportFinding(result, problem);
