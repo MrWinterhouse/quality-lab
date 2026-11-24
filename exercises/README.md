@@ -1,7 +1,7 @@
 # Exercises
 
-Fourteen concrete tasks. Each produces an artifact you can reuse in an interview or on the
-job. Do them in order if you are new to the codebase; otherwise pick by weakness.
+Fourteen concrete tasks. Each produces an artifact you can reuse on the job. Do them in
+order if you are new to the codebase; otherwise pick by weakness.
 
 The product has known defects. Probes describe intended behavior and fail until fixed. The
 answer key is in `docs/answer-key.md`.

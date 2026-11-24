@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quality engineering portfolio — benefits eligibility lab</title>
+<meta name="description" content="A deliberately imperfect benefits-eligibility product, its test infrastructure, and the release decision that says not ready. Four case studies with reproducible evidence.">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./"><span>◇</span> Quality engineering portfolio</a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="#case-studies">Case studies</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#approach">Approach</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="kicker">Benefits eligibility lab · quality engineering</p>
+        <h1 id="hero-title">I built the product, the test suite, and the release decision that says <em>don’t ship it</em>.</h1>
+        <p class="lede">
+          Four case studies from a deliberately imperfect benefits-eligibility system:
+          cross-tenant data exposure, a duplicate vendor verification, an assistant that
+          follows injected instructions, and an income calculation that disagrees with an
+          independent oracle.
+        </p>
+        <p class="byline">
+          <span>John Winterhouse</span>
+          <span>Quality Engineer</span>
+          <span><a href="https://github.com/MrWinterhouse/quality-lab">github.com/MrWinterhouse/quality-lab</a></span>
+        </p>
+      </div>
+
+      <aside class="verdict" aria-labelledby="verdict-title">
+        <span class="label" id="verdict-title">Release decision · <span data-figure="date">2026-11-16</span></span>
+        <p class="decision" data-figure="decision">NOT READY</p>
+        <p class="sub">Blocked on five items, each with a concrete failure attached.</p>
+        <ul>
+          <li><span>Open critical / high risks</span> <b data-figure="risk.open">5</b></li>
+          <li><span>Shipping prompt eval</span> <b data-figure="eval.shipping">10 / 13</b></li>
+          <li><span>Required behaviors unverified</span> <b data-figure="probes.failed">15</b></li>
+          <li><span>Baseline checks</span> <b><span data-figure="baseline.total">44</span> pass</b></li>
+          <li><span>Browser journeys</span> <b><span data-figure="e2e.passed">12</span> pass × 3</b></li>
+        </ul>
+        <p class="note">
+          A green suite would not have caught any of these. That is the point of the report.
+          <a href="reports/quality-report.html">Read the generated report →</a>
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="what-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">01 · The system</p>
+          <h2 id="what-title">A product worth testing, not a to-do list worth automating</h2>
+        </div>
+        <p>
+          Most QA portfolios automate a demo shop. This one starts with the thing that makes
+          quality engineering hard: rules that decide whether someone gets healthcare, a
+          vendor that fails after doing the work, two agencies that must never see each
+          other’s applicants, and a model whose output nobody can fully predict.
+        </p>
+      </div>
+
+      <div class="cols-2">
+        <div>
+          <p>
+            The product is a benefits-eligibility service for two tenant agencies. Applicants
+            screen a household against Medicaid, SNAP, WIC and CHIP, submit an application,
+            upload documents, and wait for an asynchronously verified income check. A
+            caseworker reviews and decides. An in-house assistant answers policy questions.
+          </p>
+          <p>
+            It runs offline on Node’s standard library with an in-memory store, so every claim
+            on this site reproduces from a clean checkout with <code>npm install</code> and one
+            command. No accounts, no API keys, no cloud spend.
+          </p>
+        </div>
+        <div>
+          <table>
+            <caption>What exists alongside the product</caption>
+            <tbody>
+              <tr><td>API, security, contract, integration</td><td class="num"><span data-figure="baseline.total">44</span> checks</td></tr>
+              <tr><td>End-to-end journeys, 3 browsers</td><td class="num"><span data-figure="e2e.passed">12</span> × 3</td></tr>
+              <tr><td>Accessibility scans (axe)</td><td class="num">1 suite</td></tr>
+              <tr><td>Assistant evals, 2 prompt versions</td><td class="num"><span data-figure="eval.cases">13</span> cases</td></tr>
+              <tr><td>Independent Python rules oracle</td><td class="num">1 impl.</td></tr>
+              <tr><td>Load smoke with p95 budget</td><td class="num"><span data-figure="load.requests">120</span> req</td></tr>
+              <tr><td>Defect probes (red by design)</td><td class="num"><span data-figure="probes.failed">15</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="green-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">02 · What green proves</p>
+          <h2 id="green-title">The suite passes. Here is what that is worth.</h2>
+        </div>
+        <p>
+          Every portfolio shows passing tests. Almost none shows the boundary of the claim.
+          Both columns below are generated from the same run, and the right-hand column is the
+          one I would put in front of a release owner.
+        </p>
+      </div>
+
+      <div class="cols-2">
+        <div class="table-wrap">
+          <table>
+            <caption>Verified on the last run</caption>
+            <thead>
+              <tr><th scope="col">Area</th><th scope="col">Result</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>API rules and applications</td><td class="pass" data-figure="suite.API rules and applications">15 pass</td></tr>
+              <tr><td>Security baseline</td><td class="pass" data-figure="suite.Security baseline">9 pass</td></tr>
+              <tr><td>Provider contract</td><td class="pass" data-figure="suite.Contract (provider)">10 pass</td></tr>
+              <tr><td>Integration and async workflow</td><td class="pass" data-figure="suite.Integration and async">8 pass</td></tr>
+              <tr><td>Eval harness</td><td class="pass" data-figure="suite.Eval harness">2 pass</td></tr>
+              <tr><td>End-to-end, Chromium</td><td class="pass" data-figure="suite.End-to-end (Chromium)">9 pass</td></tr>
+              <tr><td>Hardened prompt evals</td><td class="pass" data-figure="eval.hardened">13 / 13</td></tr>
+              <tr><td>Load smoke, c=8</td><td class="pass" data-figure="load.summary">p95 51 ms, 0 err</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <table>
+            <caption>Still unverified — and stated as such</caption>
+            <tbody>
+              <tr><td>Cross-tenant reads and config isolation</td><td class="num">open</td></tr>
+              <tr><td>Idempotency under vendor timeout</td><td class="num">open</td></tr>
+              <tr><td>Injection resistance on the shipping prompt</td><td class="num">open</td></tr>
+              <tr><td>Income annualization and AK/HI guidelines</td><td class="num">open</td></tr>
+              <tr><td>PII masking in responses and events</td><td class="num">open</td></tr>
+              <tr><td>Webhook replay protection</td><td class="num">open</td></tr>
+              <tr><td>Screen-reader journeys beyond automation</td><td class="num">gap</td></tr>
+              <tr><td>Peak traffic, real vendor, schema drift</td><td class="num">gap</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.88rem;color:var(--ink-soft)">
+            Gaps are tracked in <code>quality/known-gaps.json</code> and printed in every
+            generated report. A report that cannot say “not verified” is a status page, not a
+            quality signal.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="case-studies" aria-labelledby="cases-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">03 · Four defects</p>
+          <h2 id="cases-title">Triage, root cause, fix, regression</h2>
+        </div>
+        <p>
+          Each case study follows the same arc: the risk, the smallest reproduction, the line
+          of code that caused it, the test that now fails if it returns, and what the evidence
+          still does not cover. All four are seeded defects in the product — the probes that
+          catch them ship red on purpose.
+        </p>
+      </div>
+
+      <div class="case-grid">
+        <a class="case" href="case-studies/tenant-isolation.html">
+          <span class="tag">Case 01 · Authorization</span>
+          <h3>Every agency sees the first agency’s configuration</h3>
+          <p>
+            A module-level cache keys tenant config by nothing at all, and the screening
+            endpoint skips the ownership check that every other read enforces. Agency B reads
+            agency A’s applicants — and its programs, branding and 30-day deadline are
+            replaced by agency A’s 10-day one.
+          </p>
+          <span class="foot"><span>DEFECT-04 · DEFECT-05</span><span>Read →</span></span>
+        </a>
+
+        <a class="case" href="case-studies/vendor-idempotency.html">
+          <span class="tag">Case 02 · Async integration</span>
+          <h3>One application, two income verifications</h3>
+          <p>
+            The retry loop builds its idempotency key from the attempt number. A vendor that
+            processes the request and then times out produces a second, undeduplicated record
+            on retry — while the timeline shows a single, clean success.
+          </p>
+          <span class="foot"><span>DEFECT-07</span><span>Read →</span></span>
+        </a>
+
+        <a class="case" href="case-studies/assistant-guardrails.html">
+          <span class="tag">Case 03 · AI behavior</span>
+          <h3>The guardrail ran, found three violations, and shipped them</h3>
+          <p>
+            The vulnerable prompt discloses its own instructions, guarantees Medicaid
+            eligibility and invents $973 a month. The guardrail evaluator flagged all three —
+            the response path only enforces it on the newer prompt version, which agency A
+            does not use.
+          </p>
+          <span class="foot"><span>DEFECT-11</span><span>Read →</span></span>
+        </a>
+
+        <a class="case" href="case-studies/income-annualization.html">
+          <span class="tag">Case 04 · Rules and differential testing</span>
+          <h3>A family of four is told it qualifies. It doesn’t.</h3>
+          <p>
+            Biweekly pay is annualized over 24 periods instead of 26, and the Alaska/Hawaii
+            poverty multipliers are declared and then ignored. Two silent wrong answers in
+            opposite directions, found by comparing the API to an independently written oracle.
+          </p>
+          <span class="foot"><span>DEFECT-01 · -02 · -13</span><span>Read →</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="evidence" aria-labelledby="evidence-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">04 · Evidence</p>
+          <h2 id="evidence-title">Generated by CI on every push</h2>
+        </div>
+        <p>
+          These links are assembled by the Pages workflow from the artifacts of the run that
+          published this page. Nothing here is a screenshot: the reports, traces and JSON are
+          the actual outputs, and the commit that produced them is in the Actions log.
+        </p>
+      </div>
+
+      <p class="site-checks">
+        This site is checked by the same pipeline that publishes it:
+        <b data-figure="site.pages">5</b> pages scanned,
+        <b data-figure="site.axe">0</b> axe violations (WCAG 2.1 A/AA),
+        <b data-figure="site.html">0</b> HTML structure problems.
+      </p>
+
+      <ul class="reports">
+        <li>
+          <a href="reports/quality-report.html">
+            <span class="name">quality-report.html</span>
+            <span class="desc">The release decision: verified, not verified, open risks, and what would change the answer. Raw markdown sits beside it.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="reports/playwright/">
+            <span class="name">playwright/</span>
+            <span class="desc">HTML report from the browser journeys, with traces and screenshots retained on failure.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="reports/junit-baseline.xml">
+            <span class="name">junit-baseline.xml</span>
+            <span class="desc">JUnit output for the API, security, contract and integration suites.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="reports/junit-probes.xml">
+            <span class="name">junit-probes.xml</span>
+            <span class="desc">The fifteen defect probes, failing by design until each defect is fixed.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="reports/evals.json">
+            <span class="name">evals.json</span>
+            <span class="desc">Per-case assistant eval results for the shipping and hardened prompt versions.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="reports/load.json">
+            <span class="name">load.json</span>
+            <span class="desc">Load smoke: 120 requests at concurrency 8, p95 against the budget, error rate.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="reports/site-a11y.html">
+            <span class="name">site-a11y.html</span>
+            <span class="desc">Accessibility and HTML checks for this portfolio: axe WCAG 2.1 A/AA plus structure rules, run on every page.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/MrWinterhouse/quality-lab/actions">
+            <span class="name">Actions runs</span>
+            <span class="desc">Full CI history, including the non-blocking release-readiness job that stays red.</span>
+            <span class="go">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="approach" aria-labelledby="approach-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">05 · Approach</p>
+          <h2 id="approach-title">Four things I keep doing</h2>
+        </div>
+        <p>
+          None of these are tool choices. They are the decisions that made the difference
+          between a suite that reports green and a suite someone trusts before a release.
+        </p>
+      </div>
+
+      <dl class="principles">
+        <div>
+          <dt>Risk before coverage</dt>
+          <dd>
+            The first question is who gets hurt and how quietly, not which framework to use.
+            Tenancy and PII outrank a prettier page object.
+          </dd>
+        </div>
+        <div>
+          <dt>Independent oracles</dt>
+          <dd>
+            Rules are checked against a second implementation written from the specification,
+            not copied from production. Copied logic agrees with itself and proves nothing.
+          </dd>
+        </div>
+        <div>
+          <dt>Gates that can say no</dt>
+          <dd>
+            A report that always reads READY is decoration. This one returns NOT READY and
+            names the five things that would change it.
+          </dd>
+        </div>
+        <div>
+          <dt>Evidence over adjectives</dt>
+          <dd>
+            Every claim on this site links to a command, a file and a failing assertion.
+            “Tested thoroughly” is not a finding.
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer" id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="mailto:Jwinterhouse3@gmail.com">Jwinterhouse3@gmail.com</a></li>
+          <li><a href="https://github.com/MrWinterhouse">github.com/MrWinterhouse</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This project</h2>
+        <ul>
+          <li><a href="https://github.com/MrWinterhouse/quality-lab">Source repository</a></li>
+          <li><a href="https://github.com/MrWinterhouse/quality-lab/blob/main/docs/quality-strategy.md">Quality strategy</a></li>
+          <li><a href="https://github.com/MrWinterhouse/quality-lab/blob/main/docs/answer-key.md">Root causes and fixes</a></li>
+          <li><a href="https://github.com/MrWinterhouse/quality-lab/blob/main/quality/known-gaps.json">Known gaps</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Note</h2>
+        <p>
+          Synthetic data only. The product is a teaching fixture, not legal, policy or benefits
+          advice, and the app itself is deliberately not deployed — it contains the defects
+          described here.
+        </p>
+      </div>
+    </div>
+    <p class="colophon">
+      Static pages, no tracking, no cookies. Reports regenerate from CI on every push to main.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

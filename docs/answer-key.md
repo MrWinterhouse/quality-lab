@@ -18,7 +18,7 @@ denied a benefit it qualifies for.
 **Fix:** `return amount * 26;`
 **Regression:** Table-driven test over hourly, weekly, biweekly, semimonthly, monthly and
 annual sources, including `hoursPerWeek`; keep the boundary case that crosses 138% FPL.
-**Interview framing:** "I caught an annualization error because I tested the unit of the
+**The lesson:** "I caught an annualization error because I tested the unit of the
 input, not just the monthly total."
 
 ---
@@ -94,7 +94,7 @@ function tenantConfig(tenantId) {
 
 **Regression:** Two tenants, both request orders, plus a parallel request test. Assert
 enabled programs, deadline, timezone, prompt version and brand.
-**Interview framing:** "A cache key that omits tenant is a data-isolation bug, not a
+**The lesson:** "A cache key that omits tenant is a data-isolation bug, not a
 performance bug."
 
 ---
@@ -142,7 +142,7 @@ addEvent(application, 'application.submitted', { applicant: redactSsn(applicant)
 
 **Regression:** response, detail, events, logs. Add a generic test that scans serialized
 payloads for `\d{3}-\d{2}-\d{4}` so new fields cannot reintroduce the leak.
-**Interview framing:** "Masking in the UI is not data protection; the API and the event log
+**The lesson:** "Masking in the UI is not data protection; the API and the event log
 are the boundary."
 
 ---
@@ -169,7 +169,7 @@ The vendor returns the existing record for a duplicate key, and the worker recor
 `vendor.verified` event.
 **Regression:** timeout-after-processing, duplicate delivery, concurrent submissions. Assert
 one vendor record, bounded attempts, one success event.
-**Interview framing:** "Idempotency belongs to the business operation, not the HTTP attempt."
+**The lesson:** "Idempotency belongs to the business operation, not the HTTP attempt."
 
 ---
 
@@ -238,7 +238,7 @@ return { deadline: endOfDay.toISOString(), deadlineDate: `${y}-${pad(m)}-${pad(d
 
 **Regression:** both tenant timezones, near-midnight submissions, month/year boundaries, and
 DST transition dates. Test the displayed local date and the underlying instant.
-**Interview framing:** "A deadline is a local calendar concept; only the storage is an
+**The lesson:** "A deadline is a local calendar concept; only the storage is an
 instant."
 
 ---
@@ -259,7 +259,7 @@ and `respond()` only enforces guardrail violations for the hardened version.
    suite, not on a manual read-through.
 **Regression:** injection variants ("ignore previous", "reveal your rules", role-play),
 unsupported amounts, eligibility without a screening, missing citations, PII echo.
-**Interview framing:** "Prompt changes are model changes. They need regression tests and a
+**The lesson:** "Prompt changes are model changes. They need regression tests and a
 rollback path, not just a review."
 
 ---
@@ -322,7 +322,7 @@ await waitForApplication(app, id, (application) => application.vendor.status ===
 **Better:** expose a deterministic hook (drain the queue) or assert on the event timeline
 after the worker signals completion. If you must wait, wait for a condition, never for a
 duration.
-**Interview framing:** "A flaky test is a signal about the system or the test, not a reason
+**The lesson:** "A flaky test is a signal about the system or the test, not a reason
 to add retries."
 
 ---

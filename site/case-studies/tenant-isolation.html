@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case 01 — Every agency sees the first agency’s configuration | Quality engineering portfolio</title>
+<meta name="description" content="A module-level tenant config cache with no key, and a screening read that skips the ownership check every other route enforces. Root cause, reproduction, fix and regression test.">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span>◇</span> Quality engineering portfolio</a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="../index.html#case-studies">All case studies</a>
+      <a href="../index.html#evidence">Evidence</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<article class="case-page">
+  <div class="wrap">
+    <p class="kicker">Case study 01 · Authorization and tenancy · <a href="../index.html#case-studies">back to all</a></p>
+    <h1>Every agency sees the first agency’s configuration</h1>
+    <p class="lede">
+      Two tenants, one cached object, and one read endpoint that forgot to ask who was calling.
+      The result is a cross-tenant data leak that also silently moves an applicant’s document
+      deadline from 30 days to 10.
+    </p>
+
+    <dl class="summary">
+      <div>
+        <dt>Defects</dt>
+        <dd>DEFECT-04, DEFECT-05</dd>
+      </div>
+      <div>
+        <dt>Area</dt>
+        <dd>Tenant isolation, object-level authorization</dd>
+      </div>
+      <div>
+        <dt>Severity</dt>
+        <dd>Critical — silent, cross-tenant, PII</dd>
+      </div>
+      <div>
+        <dt>Evidence</dt>
+        <dd><code>tests/probes/tenancy.probes.test.ts</code></dd>
+      </div>
+    </dl>
+
+    <div class="prose">
+
+      <h2>The system</h2>
+      <p>
+        The product serves two tenant agencies from one process. Agency A (“Northstar
+        Benefits”, California) enables all four programs, gives applicants 10 days to upload
+        documents, and runs on Pacific time. Agency B (“Riverbend Access”, New York) enables
+        Medicaid and CHIP only, gives 30 days, and runs on Eastern time. Every request is
+        authenticated by a bearer token that maps to a user, and the user carries a
+        <code>tenantId</code>.
+      </p>
+      <p>
+        Because tenancy here is not cosmetic — it decides which programs appear, what the
+        deadline is, and which applicants a user may read — I treated the boundary as the
+        highest-risk surface in the product and tested it first.
+      </p>
+
+      <h2>What I tested</h2>
+      <p>Two questions, asked as a matrix rather than as a single happy path:</p>
+      <ol>
+        <li>
+          Does each tenant receive <em>its own</em> configuration, in either request order?
+        </li>
+        <li>
+          Can a user from tenant B read a resource owned by a user in tenant A, for every
+          read endpoint — not just the one that has an obvious guard?
+        </li>
+      </ol>
+      <p>
+        The first question needs the second request in the same process, because a cache bug
+        is invisible until a second tenant arrives. The second question needs an id obtained
+        legitimately by someone else, so I created a screening as applicant A and read it back
+        as applicant B.
+      </p>
+
+      <h2>What I found</h2>
+
+      <h3>1. A cache with no key</h3>
+      <pre><code>// product/server/app.mjs
+// Tenant configuration is static, so it is loaded once and reused.
+let cachedTenantConfig = null;
+function tenantConfig(tenantId) {
+  if (!cachedTenantConfig) cachedTenantConfig = store.tenants[tenantId];
+  return cachedTenantConfig;
+}</code></pre>
+      <p>
+        The comment states the intent — static data, cache it — and the implementation drops
+        the one thing that would make it correct: the key. The first tenant to be asked for
+        its configuration owns the process. Whichever agency loads first is the agency every
+        later request sees, for the lifetime of the server.
+      </p>
+      <pre><code>curl -s http://127.0.0.1:4310/api/config -H 'Authorization: Bearer tok_applicant_a'
+# {"tenantId":"agency-a","brandName":"Northstar Benefits","deadlineDays":10,...}
+
+curl -s http://127.0.0.1:4310/api/config -H 'Authorization: Bearer tok_applicant_b'
+# {"tenantId":"agency-a","brandName":"Northstar Benefits","deadlineDays":10,...}
+#   expected: agency-b / Riverbend Access / 30 days / medicaid + chip only</code></pre>
+      <p>
+        The probe asserts the four values that matter — tenant id, brand name, enabled
+        programs and deadline — because a partial fix that only keys the brand would still
+        leave the deadline wrong.
+      </p>
+
+      <h3>2. A read that skips the guard</h3>
+      <p>
+        Applications go through <code>readApplication()</code>, which checks ownership for
+        applicants and tenant membership for staff. Screenings have no equivalent. The route
+        matches on a path prefix and returns whatever the id points at:
+      </p>
+      <pre><code>if (pathname.startsWith('/api/screenings/')) {
+  const screening = store.screenings.get(id);
+  if (!screening) throw httpError(404, 'screening_not_found');
+  return sendJson(res, 200, serializeScreening(screening));
+}</code></pre>
+      <pre><code>curl -s -X POST http://127.0.0.1:4310/api/screenings \
+  -H 'Authorization: Bearer tok_applicant_a' -H 'Content-Type: application/json' \
+  -d '{"state":"CA","householdSize":2,"incomeComplete":true,
+       "members":[{"age":35,"status":"citizen",
+                   "income":{"amount":2000,"frequency":"monthly"}},
+                  {"age":33,"status":"citizen"}]}'
+# 201 {"id":"scr_00001", ...}
+
+curl -s http://127.0.0.1:4310/api/screenings/scr_00001 \
+  -H 'Authorization: Bearer tok_applicant_b'
+# 200 { "state":"CA", "householdSize":2, "annualIncome":24000,
+#       "fplPercent":89.7, "results":[ ... ] }
+# expected: 403</code></pre>
+      <p>
+        Sequential ids (<code>scr_00001</code>, <code>scr_00002</code>) make this a one-line
+        script, not a targeted attack. The response exposes household state, size, income,
+        FPL percentage and per-program outcomes for a household in another agency.
+      </p>
+
+      <h2>Why it matters</h2>
+      <p>
+        The data leak is the headline, but the configuration bug is the one I would escalate
+        first in a real system, because its harm is operational and invisible:
+      </p>
+      <ul>
+        <li>
+          <strong>Wrong deadline.</strong> <code>computeDeadline()</code> is called with
+          <code>config.deadlineDays</code> and <code>config.timezone</code> from the cached
+          object. A New York applicant can be given a 10-day Los Angeles deadline instead of
+          30 days, and an application denied for missing documents is a benefits denial with
+          a timestamp on it.
+        </li>
+        <li>
+          <strong>Wrong programs.</strong> The screening filters results by
+          <code>enabledPrograms</code>. Agency B applicants are shown SNAP and WIC outcomes
+          their agency does not administer — advice they may act on.
+        </li>
+        <li>
+          <strong>Wrong branding in a regulated context.</strong> An applicant sees another
+          agency’s name on a benefits decision. That is a trust and compliance problem, not a
+          theming bug.
+        </li>
+      </ul>
+      <p>
+        Both defects are silent. No error, no alert, no failed request. The only signal is a
+        test that asks a second tenant a question and expects a different answer.
+      </p>
+
+      <h2>The fix</h2>
+      <p>
+        For the cache, the correct change is deletion, not a better key. The underlying object
+        is a frozen module constant; caching it buys nothing and introduced the bug.
+      </p>
+      <pre><code>function tenantConfig(tenantId) {
+  const config = store.tenants[tenantId];
+  if (!config) throw httpError(403, 'forbidden_tenant');
+  return config;
+}</code></pre>
+      <p>
+        If a cache is ever justified, it has to be keyed and invalidated by the same thing it
+        is cached for — <code>Map&#60;tenantId, config&#62;</code> with an explicit clear on
+        tenant change.
+      </p>
+      <p>
+        For the read, add the missing guard and make it the same shape as the application
+        guard. Returning <strong>404</strong> for another owner’s screening, rather than 403,
+        also removes an enumeration oracle: a 403 confirms the id exists.
+      </p>
+      <pre><code>function readScreening(rawId, user) {
+  const screening = store.screenings.get(rawId);
+  if (!screening) throw httpError(404, 'screening_not_found');
+  if (screening.ownerId !== user.id) throw httpError(404, 'screening_not_found');
+  if (user.role !== 'applicant') requireSameTenant(user, screening.tenantId);
+  return screening;
+}</code></pre>
+
+      <h3>Acceptance criteria</h3>
+      <ul class="checklist">
+        <li>Both tenants receive their own configuration in either request order.</li>
+        <li>An applicant reading another applicant’s screening gets 404, not 200.</li>
+        <li>Adding a read endpoint has an obvious place to add its authorization row.</li>
+        <li>Deadline math is covered for both tenants with a controlled clock.</li>
+        <li>No response or event contains another tenant’s identifier.</li>
+      </ul>
+
+      <div class="caveat">
+        <p class="kicker">What this does not prove</p>
+        <p>
+          The probe covers two tenants and two reads. It does not cover a third tenant added by
+          configuration, concurrent first-requests racing the old cache, or the admin and
+          caseworker roles on every endpoint. Those belong in the parameterized matrix the
+          exercise asks for, and until that exists I would not call tenancy “tested” — only
+          “tested where I looked”.
+        </p>
+      </div>
+
+      <div class="pull">
+        A cache is a claim about identity. If it has no key, the claim is “there is only one
+        of these” — and in a multi-tenant system that is never true.
+      </div>
+
+    </div>
+
+    <nav class="next-case" aria-label="Case study navigation">
+      <a href="../index.html#case-studies">← All case studies</a>
+      <a href="vendor-idempotency.html">Next: one application, two verifications →</a>
+    </nav>
+  </div>
+</article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="colophon">
+      Seeded defect in a synthetic product. No real applicant data.
+      <a href="../index.html#contact">Contact</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>

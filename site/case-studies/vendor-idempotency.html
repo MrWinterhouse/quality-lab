@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case 02 — One application, two income verifications | Quality engineering portfolio</title>
+<meta name="description" content="A retry loop builds its idempotency key from the attempt number, so a vendor timeout after processing produces a duplicate verification while the timeline shows one clean success.">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span>◇</span> Quality engineering portfolio</a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="../index.html#case-studies">All case studies</a>
+      <a href="../index.html#evidence">Evidence</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<article class="case-page">
+  <div class="wrap">
+    <p class="kicker">Case study 02 · Async integration · <a href="../index.html#case-studies">back to all</a></p>
+    <h1>One application, two income verifications</h1>
+    <p class="lede">
+      The vendor processes the request, then times out. The retry loop asks again with a new
+      idempotency key, so the vendor records a second verification — and the application
+      timeline reports a single, clean success.
+    </p>
+
+    <dl class="summary">
+      <div>
+        <dt>Defect</dt>
+        <dd>DEFECT-07</dd>
+      </div>
+      <div>
+        <dt>Area</dt>
+        <dd>Retries, idempotency, event truthfulness</dd>
+      </div>
+      <div>
+        <dt>Severity</dt>
+        <dd>High — silent duplication</dd>
+      </div>
+      <div>
+        <dt>Evidence</dt>
+        <dd><code>tests/probes/async.probes.test.ts</code></dd>
+      </div>
+    </dl>
+
+    <div class="prose">
+
+      <h2>The system</h2>
+      <p>
+        Submitting an application kicks off an asynchronous income check. A worker calls a
+        simulated third-party vendor with the application id, a hash of the household data,
+        and an idempotency key. The vendor either returns a verification, returns a
+        duplicate of one it already has, or fails. The application records the result as an
+        event on its timeline.
+      </p>
+      <p>
+        The vendor simulator is deliberately crueller than a happy-path stub. It can fail
+        before doing anything, fail always, or — the case that matters here — <em>complete
+        the work and then fail</em>, which is what a real timeout looks like from the caller’s
+        side.
+      </p>
+
+      <h2>What I tested</h2>
+      <p>
+        Idempotency is only interesting under failure, so I ignored the success path and drove
+        the three failure modes through the public API, asserting on the vendor’s state rather
+        than on the HTTP response:
+      </p>
+      <ul>
+        <li><strong>Fail after recording</strong> — the vendor stores the verification, then returns 504.</li>
+        <li><strong>Always down</strong> — every attempt fails; the workflow must terminate, not spin.</li>
+        <li><strong>Fail before recording</strong> — a retry should legitimately create the first record.</li>
+      </ul>
+      <p>
+        The assertion that matters is not “it eventually succeeded”. It is <em>how many
+        verification records exist for one application</em> after the dust settles.
+      </p>
+
+      <h2>What I found</h2>
+      <p>The retry loop builds its key inside the loop, from the attempt counter:</p>
+      <pre><code>for (let attempt = 1; attempt &lt;= 3; attempt += 1) {
+  try {
+    const idempotencyKey = `${application.id}:${attempt}`;   // ← changes per attempt
+    const result = await vendor.verify({
+      applicationId: application.id,
+      householdHash: application.householdHash,
+      idempotencyKey,
+    });
+    application.vendor = { status: 'verified', verificationId: result.verificationId };
+    store.addEvent(application, 'vendor.verified', { verificationId: result.verificationId });
+    return;
+  } catch (error) {
+    if (attempt === 3) { /* mark failed */ return; }
+    await delay(10);
+  }
+}</code></pre>
+      <p>
+        An idempotency key is a promise that “this is the same logical request as before”.
+        Deriving it from the attempt number promises the opposite: every retry declares itself
+        a new operation. The vendor has no way to deduplicate, because it was never told these
+        calls were related.
+      </p>
+      <pre><code>curl -s -X POST http://127.0.0.1:4310/internal/vendor/config \
+  -H 'Content-Type: application/json' -d '{"failAfterRecord":1}'
+# then create a screening, submit an application, wait for verification
+
+curl -s http://127.0.0.1:4310/internal/vendor/state
+# { "attempts": 2,
+#   "verifications": [
+#     { "verificationId":"vrf_00001", "idempotencyKey":"app_00001:1" },
+#     { "verificationId":"vrf_00002", "idempotencyKey":"app_00001:2" } ] }
+# expected: one record</code></pre>
+      <p>
+        Two records for one application, produced by one user action. The probe asserts
+        <code>records.length === 1</code> and <code>attempts &gt;= 2</code>, so a “fix” that
+        simply stops retrying fails the second assertion and a fix that reuses the key passes
+        both.
+      </p>
+
+      <h3>The part that makes it worse</h3>
+      <p>
+        The timeline shows one event:
+      </p>
+      <pre><code>{ "type": "vendor.verified",
+  "data": { "verificationId": "vrf_00002", "duplicate": false } }</code></pre>
+      <p>
+        There is no trace of <code>vrf_00001</code> — no failure event for the timeout, no
+        acknowledgement that two records exist. An auditor reading the application sees a
+        single clean verification. The duplicate lives only in the vendor’s system, where
+        nobody in this product is looking.
+      </p>
+
+      <h2>Why it matters</h2>
+      <p>
+        In the lab the consequence is an extra row. In a benefits system the verification
+        record is what an approval hangs on, and duplication compounds:
+      </p>
+      <ul>
+        <li>
+          <strong>Duplicate approvals.</strong> Two verification records for one household can
+          drive two approvals, two payments, and a reconciliation break that surfaces months
+          later.
+        </li>
+        <li>
+          <strong>An untrue audit trail.</strong> The timeline is the artifact a caseworker and
+          an auditor rely on. It reports one success and omits the failure that caused the
+          retry, which is the single most important fact about the transaction.
+        </li>
+        <li>
+          <strong>Vendor cost and rate limits.</strong> Every timeout is billed and counted;
+          retrying under a new key turns a transient failure into a duplicate charge.
+        </li>
+      </ul>
+      <p>
+        It is also the failure mode most likely to be missed, because it needs the vendor to
+        fail <em>after</em> doing the work. A test suite that only simulates “vendor is down”
+        never reaches it.
+      </p>
+
+      <h2>The fix</h2>
+      <p>
+        Key the logical operation, not the attempt. The verification is identified by the
+        application and the household data it validates; if either changes, it is a different
+        operation and deserves a different key.
+      </p>
+      <pre><code>const idempotencyKey = `verify:${application.id}:${application.householdHash}`;
+for (let attempt = 1; attempt &lt;= 3; attempt += 1) {
+  try {
+    const result = await vendor.verify({ applicationId: application.id,
+                                         householdHash: application.householdHash,
+                                         idempotencyKey });
+    ...
+  } catch (error) {
+    // record the failed attempt on the timeline, not just the final outcome
+  }
+}</code></pre>
+      <p>
+        Two smaller changes belong with it. Record each failed attempt as an event, so the
+        timeline explains the retry. And replace the fixed 10 ms <code>delay</code> with
+        bounded exponential backoff plus jitter — three attempts 10 ms apart is a retry storm
+        against a vendor that is already struggling, not resilience.
+      </p>
+
+      <h3>Acceptance criteria</h3>
+      <ul class="checklist">
+        <li>A timeout after processing produces exactly one vendor record.</li>
+        <li>The retry reuses the same key and the vendor returns the existing record as a duplicate.</li>
+        <li>An always-down vendor terminates in a failed state after a bounded number of attempts.</li>
+        <li>The timeline contains a failed attempt and one success, not one success alone.</li>
+        <li>The test asserts vendor state and timeline, not just the HTTP response.</li>
+      </ul>
+
+      <div class="caveat">
+        <p class="kicker">What this does not prove</p>
+        <p>
+          The simulator is cooperative: it records before failing on request. A real vendor may
+          time out after its own internal commit, return a partial payload, or accept the
+          duplicate with a different id. The probe proves the caller now sends a stable key and
+          handles the duplicate it gets back. It does not prove a specific vendor honours it —
+          that needs a contract test against the vendor’s sandbox and an alert on duplicate
+          rate in production.
+        </p>
+        <p>
+          Adjacent defect in the same area, found while testing this one: the vendor webhook
+          verifies the HMAC but never checks the timestamp, so a captured callback can be
+          replayed (DEFECT-08). Same lesson, different door.
+        </p>
+      </div>
+
+      <div class="pull">
+        Retries are where a system’s real contract shows up. If the retry cannot say “this is
+        the same request”, the integration has no idempotency — only an intention.
+      </div>
+
+    </div>
+
+    <nav class="next-case" aria-label="Case study navigation">
+      <a href="tenant-isolation.html">← Previous: every agency sees the first agency’s configuration</a>
+      <a href="assistant-guardrails.html">Next: the guardrail ran and shipped →</a>
+    </nav>
+  </div>
+</article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="colophon">
+      Seeded defect in a synthetic product. No real applicant data.
+      <a href="../index.html#contact">Contact</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>

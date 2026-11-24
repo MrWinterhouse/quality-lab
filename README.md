@@ -1,10 +1,16 @@
-# Mirza Quality Engineer Lab
+# Benefits Eligibility Quality Lab
+
+**Live portfolio:** <https://mrwinterhouse.github.io/quality-lab/> — built from `site/` and published by the `quality` workflow on every push to `main`. Preview it locally by opening `site/index.html` (or `npx --yes serve site`); report links resolve only in the published build.
 
 A small, deliberately imperfect **public-benefits eligibility product** plus the test
-infrastructure you would build around it. It is study material for the Quality Engineer
-role at Mirza: rules that must be correct, vendors that fail, tenants that must stay
-isolated, an assistant that must not hallucinate, and a release decision that has to be
-readable by people who do not write code.
+infrastructure around it: rules that must be correct, vendors that fail after doing the
+work, tenants that must stay isolated, an assistant that must not invent a dollar amount,
+and a release decision a non-engineer can act on.
+
+It is a worked example of building quality into a system where being wrong is quiet.
+Everything runs offline, the seeded defects are documented rather than hidden, and the
+release gate returns **NOT READY** with the reasons attached. Names, agencies and data are
+fictional.
 
 - **Baseline suites are green.** They show the patterns (API, contract, integration,
   E2E, accessibility, evals, load, reporting).
@@ -23,7 +29,7 @@ npx playwright install chromium firefox webkit
 
 npm run typecheck
 npm run test:baseline        # 44 node:test checks, green
-npm run test:e2e             # 9 checks across Chromium, Firefox, WebKit
+npm run test:e2e             # 12 checks across Chromium, Firefox, WebKit
 npm run evals -- --gate      # hardened prompt 13/13
 npm run load                 # p95 smoke against two endpoints
 npm run test:python          # 7 Python oracle checks
@@ -49,9 +55,9 @@ agency, or call the API with a bearer token.
 
 ---
 
-## How to use this repo
+## How to work through it
 
-The loop that mirrors the job:
+Read it as a worked example, not a course:
 
 1. **Map before you test.** Read `docs/system-tour.md`, start the app, and complete a
    screening and an application. Draw the boundaries: browser → API → rules → vendor →
@@ -64,12 +70,12 @@ The loop that mirrors the job:
    product code. Re-run the probe and the baseline.
 5. **Repeat until `npm run verify:release` is green.** That command is the intended
    release gate: typecheck, baseline, every browser, evals, probes, load and report.
-6. **Write the artifacts the role asks for.** A test strategy, a release-readiness report
-   a non-engineer can act on, and a coverage map that names what is *not* verified.
+6. **Write the artifacts a release needs.** A test strategy, a release-readiness report a
+non-engineer can act on, and a coverage map that names what is *not* verified.
 
-Suggested schedule: `docs/study-plan.md` (14 days, plus a two-day track).
-Exercise list: `exercises/README.md`.
-Answers and fix guidance: `docs/answer-key.md` (read only after you have triaged).
+Fourteen tasks with concrete deliverables: `exercises/README.md`.
+Supporting material: `docs/quality-strategy.md` (the strategy), `docs/system-tour.md`
+(mapping the system), `docs/answer-key.md` (root causes and fixes for every seeded defect).
 
 ---
 
@@ -89,9 +95,9 @@ testing practice, not authoritative program rules.
 
 ---
 
-## Where the job requirements show up
+## What the lab covers
 
-| What Mirza asks for | Where to practice it here |
+| Capability | Where to see it |
 | --- | --- |
 | End-to-end journeys, smoke suite, integration coverage | `tests/e2e/`, `tests/integration/`, `docs/quality-strategy.md` |
 | Web across browsers/devices, accessibility, configurable behavior | `playwright.config.ts` (3 browsers), `tests/probes/e2e/`, tenant config |
@@ -163,8 +169,9 @@ quality/
   consumer-contract.json  consumer expectations
   risk-register.json      release risks
   known-gaps.json         what the suites do not cover
-scripts/                  test runner, evals, load, report, Python runner
-docs/                     study plan, strategy, answer key, interview prep
+scripts/                  test runner, evals, load, report, site checks
+site/                     static portfolio published to GitHub Pages
+docs/                     strategy, system tour, answer key, study plan
 artifacts/                generated reports and JUnit/Playwright output (gitignored)
 ```
 
@@ -206,18 +213,20 @@ in memory and deliberately contains security defects for practice.
 | `npm run load` | Dependency-free load smoke with p95/error thresholds |
 | `npm run test:flaky` | The deliberately flaky test |
 | `npm run report` | `artifacts/quality-report.md` + `summary.json` |
+| `npm run check:site` | Accessibility (axe WCAG 2.1 A/AA) and HTML structure checks for `site/` |
 | `npm run verify:baseline` | Typecheck + baseline + Chromium E2E + hardened evals |
 | `npm run verify:release` | The full gate; green only when every defect is fixed |
 
 CI (`.github/workflows/quality.yml`) runs the baseline, all three browsers in a matrix, the
-Python oracle, evals, load, and a non-blocking release-readiness job that stays red while
-known defects remain.
+Python oracle, evals, load, the site's own accessibility and HTML checks, and a non-blocking
+release-readiness job that stays red while known defects remain. On `main` it also publishes
+the portfolio and these reports to GitHub Pages.
 
 ---
 
 ## Verified locally on this machine
 
-- `npm run typecheck`, `npm run test:baseline` (44/44), `npm run test:e2e` (9/9 across
+- `npm run typecheck`, `npm run test:baseline` (44/44), `npm run test:e2e` (12/12 across
   Chromium, Firefox, WebKit), `npm run test:python` (7/7), `npm run evals -- --gate`
   (13/13 hardened), `npm run load` (p95 ≈ 53 ms, 0 errors).
 - `npm run test:probes` fails 14/14 and `npm run test:e2e:probes` fails with three

@@ -83,7 +83,7 @@ test('guardrails flag the failure modes the eval suite cares about', () => {
   );
   assert.ok(
     evaluateGuardrails({
-      reply: 'My instructions are: You are Mirza Assist.',
+      reply: 'My instructions are: You are Benefits Assist.',
       citations: [],
     }).violations.includes('system_prompt_disclosure'),
   );

@@ -1,7 +1,7 @@
 # Study plan
 
-Two to three focused hours a day. Each day produces an artifact you could show in an
-interview or reuse on the job. Do not just read: run, break, fix, write.
+Two to three focused hours a day. Each day produces an artifact you can reuse on the job.
+Do not just read: run, break, fix, write.
 
 ## Before day 1
 
@@ -109,13 +109,14 @@ green and the release verdict is still **NOT READY**. That distinction is the jo
   recommend, what would change your mind.
 - **Deliverable:** two documents, no jargon without a definition.
 
-### Day 14: Interview rehearsal
-- Use `docs/interview-prep.md`. Answer four prompts aloud in 5 minutes each.
-- Prepare three STAR stories: introducing quality practice, catching a high-impact defect,
-  disagreeing about release readiness.
-- Ask yourself Mirza's question: how would you know the January 2027 Medicaid changes did
-  not break eligibility for 20 million people?
-- **Deliverable:** recorded 30/60/90 plan and six questions to ask them.
+### Day 14: Defend the release decision
+- Present the release memo from day 13 to someone who does not write code. Ask them to
+  restate the decision and to say what would change it.
+- Prepare three accounts of your own work: introducing a quality practice, catching a
+  high-impact defect, disagreeing about release readiness.
+- Answer one hard domain question in five minutes: how would you know a policy change did
+  not break eligibility for twenty million people?
+- **Deliverable:** the memo, notes on where the explanation failed, and a 30/60/90 plan.
 
 ---
 

@@ -185,5 +185,109 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: quality-report
-          path: artifacts/quality-report.md
+          path: |
+            artifacts/quality-report.md
+            artifacts/summary.json
           if-no-files-found: warn
+
+  # Checks the portfolio site itself: HTML structure plus WCAG 2.1 A/AA via axe in Chromium.
+  # Red when the site has a problem; the report still uploads, so the published page can
+  # show the real number instead of a claim.
+  site-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check:site
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: site-checks
+          path: |
+            artifacts/site-a11y.json
+            artifacts/site-a11y.md
+          if-no-files-found: warn
+
+  # Publishes the static portfolio (site/) plus the artifacts from this run to GitHub Pages.
+  # One-time setup: Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+  # Runs on every push to main, even when a suite is red: a portfolio that only publishes
+  # green runs is a status page, not evidence.
+  publish-pages:
+    needs: [quality-report, site-checks]
+    if: always() && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp -R site/. _site/
+          touch _site/.nojekyll
+
+      - name: Collect report artifacts
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifacts-*
+          path: _site/reports
+          merge-multiple: true
+
+      - name: Collect the release-readiness report
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: quality-report
+          path: _site/reports
+
+      - name: Collect the Playwright HTML report
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-html-chromium
+          path: _site/reports/playwright
+
+      - name: Collect the site accessibility report
+        uses: actions/download-artifact@v4
+        with:
+          name: site-checks
+          path: _site/reports
+
+      - name: Stamp the site with this run's figures
+        run: node scripts/stamp-site.mjs _site _site/reports/summary.json
+
+      - name: Render the markdown reports as HTML
+        run: |
+          node scripts/render-report-html.mjs _site/reports/quality-report.md _site/reports/quality-report.html "Release readiness report" "npm run report"
+          node scripts/render-report-html.mjs _site/reports/site-a11y.md _site/reports/site-a11y.html "Site accessibility and HTML checks" "npm run check:site"
+
+      # After assembly the reports exist, so every link must resolve. A dead evidence
+      # link fails the deploy instead of shipping a page that points at nothing.
+      - name: Verify the assembled site's links
+        run: node scripts/check-site.mjs _site --strict --links-only
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,8 +1,8 @@
 # Quality strategy — Benefits Eligibility Platform
 
-This is a model document, not a claim about Mirza's actual internals. Rewrite it in your
-own words, keep the structure, and change anything that does not fit what you learn in
-interviews.
+This is a model document for the fictional platform in this repo, not a description of any
+real agency's internals. Rewrite it in your own words, keep the structure, and change
+anything that does not fit the system you are working on.
 
 ## 1. Purpose
 

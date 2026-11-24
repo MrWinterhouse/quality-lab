@@ -29,7 +29,7 @@ breach, or misleading advice.
 | Area | Evidence | Result |
 | --- | --- | --- |
 | Screening, applications, access control basics | 44 API/security/contract/integration checks | Pass |
-| Critical applicant journeys (3 browsers) | 9 Playwright checks | Pass |
+| Critical applicant journeys (3 browsers) | 12 Playwright checks | Pass |
 | Assistant behavior on the hardened prompt | 13 golden cases | 13/13 |
 | Rules implementation vs independent oracle | Python unit suite | Pass for covered cases |
 | Response time under a light load | 120 requests, concurrency 8 | p95 53 ms, 0 errors |

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case 04 — A family of four is told it qualifies. It doesn’t. | Quality engineering portfolio</title>
+<meta name="description" content="Biweekly pay annualized over 24 periods instead of 26, and Alaska/Hawaii poverty multipliers declared but never applied. Found by differential testing against an independent Python oracle.">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html"><span>◇</span> Quality engineering portfolio</a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="../index.html#case-studies">All case studies</a>
+      <a href="../index.html#evidence">Evidence</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<article class="case-page">
+  <div class="wrap">
+    <p class="kicker">Case study 04 · Rules and differential testing · <a href="../index.html#case-studies">back to all</a></p>
+    <h1>A family of four is told it qualifies. It doesn’t.</h1>
+    <p class="lede">
+      Biweekly pay is annualized over 24 periods instead of 26, and the Alaska and Hawaii
+      poverty multipliers are declared, then multiplied by one. Two silent wrong answers in
+      opposite directions, found by comparing the API to an independently written oracle.
+    </p>
+
+    <dl class="summary">
+      <div>
+        <dt>Defects</dt>
+        <dd>DEFECT-01, DEFECT-02, DEFECT-13</dd>
+      </div>
+      <div>
+        <dt>Area</dt>
+        <dd>Policy rules, arithmetic, differential testing</dd>
+      </div>
+      <div>
+        <dt>Severity</dt>
+        <dd>Critical — silent wrong eligibility</dd>
+      </div>
+      <div>
+        <dt>Evidence</dt>
+        <dd><code>tests/probes/policy.probes.test.ts</code>, <code>differential.probes.test.ts</code></dd>
+      </div>
+    </dl>
+
+    <div class="prose">
+
+      <h2>The system</h2>
+      <p>
+        Screening takes a household — state, size, members, each member’s income and
+        frequency, immigration status, pregnancy, whether income is complete — and returns a
+        status per program: Medicaid, SNAP, WIC, CHIP. Medicaid’s limit is 138% of the federal
+        poverty level in expansion states and 100% elsewhere. SNAP uses 130%, WIC 185% with a
+        categorical requirement, CHIP 200% with a child under 19.
+      </p>
+      <p>
+        The interesting property of this class of code is that it is <em>pure arithmetic with
+        a policy sentence on top</em>. Nothing crashes. A wrong answer looks exactly like a
+        right one — a status field and a percentage — and the person on the other side acts on
+        it.
+      </p>
+
+      <h2>What I tested</h2>
+      <p>
+        Three layers, because unit tests written by the same person who wrote the code tend to
+        inherit the same misunderstanding:
+      </p>
+      <ol>
+        <li>
+          <strong>Table-driven boundaries.</strong> For each program, just below, exactly at,
+          and just above the limit, for each income frequency.
+        </li>
+        <li>
+          <strong>An independent oracle.</strong> <code>python-oracle/rules.py</code>, standard
+          library only, written from the specification rather than ported from the JavaScript.
+          The probe pipes household JSON in and compares the program statuses that come back.
+        </li>
+        <li>
+          <strong>Invariants.</strong> More income never increases eligibility; adding a member
+          never decreases the income limit; the same household screened twice returns the same
+          answer.
+        </li>
+      </ol>
+      <p>
+        The oracle is the part that found these. A unit test asserting the code’s own
+        arithmetic agrees with itself; a second implementation written from the spec does not.
+      </p>
+
+      <h2>What I found</h2>
+
+      <h3>1. Biweekly is not semimonthly</h3>
+      <pre><code>// product/server/lib/policy.mjs
+case 'weekly':      return amount * 52;
+case 'biweekly':    return amount * 24;   // ← 26 pay periods exist
+case 'semimonthly': return amount * 24;   // correct</code></pre>
+      <p>
+        Two labels that look interchangeable are not. Semimonthly is 24 paycheques a year —
+        twice a month. Biweekly is every two weeks, which is 26. Fold them together and you
+        understate annual income by 7.7%, which is exactly enough to move someone across a
+        threshold.
+      </p>
+      <p>
+        A family of four in California, one earner paid $1,800 every two weeks:
+      </p>
+      <div class="table-wrap">
+        <table>
+          <caption>Same household, two arithmetic paths</caption>
+          <thead>
+            <tr>
+              <th scope="col">Quantity</th>
+              <th scope="col">Product (×24)</th>
+              <th scope="col">Correct (×26)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Annual income</td><td class="num">$43,200</td><td class="num">$46,800</td></tr>
+            <tr><td>FPL for 4 in CA</td><td class="num">$32,150</td><td class="num">$32,150</td></tr>
+            <tr><td>Percent of FPL</td><td class="num">134.4%</td><td class="num">145.6%</td></tr>
+            <tr><td>Medicaid limit (expansion)</td><td class="num">138%</td><td class="num">138%</td></tr>
+            <tr><td>Status</td><td class="num">likely_eligible</td><td class="num">likely_ineligible</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        One wrong multiplier, one flipped status, no error anywhere. The household is told it
+        likely qualifies for Medicaid when it is $2,450 of income over the line.
+      </p>
+
+      <h3>2. A multiplier that multiplies by one</h3>
+      <pre><code>export function fplAnnual(householdSize, state) {
+  const base = /* table lookup */;
+  const stateMultiplier = 1;          // ← computed, then unused
+  return Math.round(base * stateMultiplier);
+}</code></pre>
+      <p>
+        Alaska and Hawaii have their own, higher poverty guidelines. The oracle encodes them
+        as 1.25 and 1.70; the product encodes 1 for every state in the country. The dead
+        variable is the tell — someone intended to look the value up and shipped the default.
+      </p>
+      <p>
+        A single adult in Alaska earning $1,834 a month:
+      </p>
+      <div class="table-wrap">
+        <table>
+          <caption>The opposite error, same function</caption>
+          <thead>
+            <tr>
+              <th scope="col">Quantity</th>
+              <th scope="col">Product (×1.0)</th>
+              <th scope="col">Correct (×1.25)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Annual income</td><td class="num">$22,008</td><td class="num">$22,008</td></tr>
+            <tr><td>FPL for 1 in AK</td><td class="num">$15,650</td><td class="num">$19,563</td></tr>
+            <tr><td>Percent of FPL</td><td class="num">140.6%</td><td class="num">112.5%</td></tr>
+            <tr><td>Status</td><td class="num">likely_ineligible</td><td class="num">likely_eligible</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Note the direction. The biweekly defect overstates eligibility, which creates improper
+        enrollment and audit exposure. The Alaska defect understates it, which denies coverage
+        to someone who qualifies. Both are silent, both are one line, and neither would be
+        caught by a test that only asserts “a response came back”.
+      </p>
+
+      <h3>3. The differential probe</h3>
+      <p>
+        The probe spawns Python, feeds it the same households the API receives, and compares
+        four statuses per case:
+      </p>
+      <pre><code>const expected = runOracle(python, CASES);        // python-oracle/rules.py
+const actual = [];
+for (const testCase of CASES) {
+  const screening = await createScreening(app, testCase);
+  actual.push({ medicaid: ..., snap: ..., wic: ..., chip: ... });
+}
+assert.deepEqual(actual, expected.map(...), 'the API and the independent oracle disagree');</code></pre>
+      <p>
+        It fails on the biweekly case and the Alaska case, and passes on a plain monthly
+        California household. That third case matters: a differential test that fails
+        everywhere tells you the harness is broken, not the product. One green case keeps the
+        oracle honest.
+      </p>
+
+      <h2>Why it matters</h2>
+      <ul>
+        <li>
+          <strong>It is a determination, not a display.</strong> The status feeds an
+          application, a caseworker queue and a letter. A false eligible can become an
+          improper payment; a false ineligible can become a denied benefit with an appeal
+          deadline attached.
+        </li>
+        <li>
+          <strong>It is silent and plausible.</strong> The response contains a percentage and a
+          reason code. Nothing about “134.4% of FPL” looks wrong unless you recompute it.
+        </li>
+        <li>
+          <strong>It is systematic.</strong> The same multiplier is applied to every biweekly
+          household in the system, and every household in two states. This is not an edge case;
+          it is a bias.
+        </li>
+        <li>
+          <strong>It survives ordinary testing.</strong> All 44 baseline checks pass, because
+          the baseline checks assert the arithmetic the code actually performs.
+        </li>
+      </ul>
+
+      <h2>The fix</h2>
+      <p>
+        Make the frequencies data instead of a switch, so the 24/26 distinction is a value
+        someone can review, and test it at the boundary for every entry:
+      </p>
+      <pre><code>const PAY_PERIODS = { hourly: null, weekly: 52, biweekly: 26,
+                      semimonthly: 24, monthly: 12, annual: 1 };</code></pre>
+      <p>
+        For the guidelines, replace the constant with a versioned table keyed by state and
+        effective date, and delete the dead multiplier. Then make the differential suite
+        blocking in CI with generated households seeded around every threshold — not three
+        hand-picked cases.
+      </p>
+      <p>
+        One honest caveat on the fix itself: the real guidelines publish separate Alaska and
+        Hawaii tables, not a multiplier. The lab uses 1.25 and 1.70 as a simplification, and
+        the fix has to bring the published table with its effective dates, not a tidier
+        constant. Policy arithmetic that ignores effective dates is the same class of bug
+        waiting for January.
+      </p>
+
+      <h3>Acceptance criteria</h3>
+      <ul class="checklist">
+        <li>Every income frequency has a table-driven test at the limit, ±$1.</li>
+        <li>Biweekly and semimonthly produce different annual figures for the same amount.</li>
+        <li>Alaska and Hawaii use their own guideline table, versioned by effective date.</li>
+        <li>The differential suite is blocking and runs on generated households.</li>
+        <li>A rule change is a fixture diff a reviewer can read, not a code edit they must trust.</li>
+      </ul>
+
+      <div class="caveat">
+        <p class="kicker">What this does not prove</p>
+        <p>
+          The oracle is independent in implementation, not in policy. It was written from the
+          same simplified specification, so it cannot tell me whether 138% is the right
+          threshold or whether this state should be an expansion state — only whether the API
+          computes what the spec says. Both implementations also share my assumptions about
+          which programs exist. Independence buys arithmetic agreement, not policy truth, and
+          the fixture tables are not authoritative for any real program.
+        </p>
+      </div>
+
+      <div class="pull">
+        A unit test that recomputes the implementation proves the implementation is
+        consistent. Only a second implementation, written from the sentence, can prove it is
+        correct.
+      </div>
+
+    </div>
+
+    <nav class="next-case" aria-label="Case study navigation">
+      <a href="assistant-guardrails.html">← Previous: the guardrail ran and shipped</a>
+      <a href="../index.html#case-studies">All case studies →</a>
+    </nav>
+  </div>
+</article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="colophon">
+      Seeded defect in a synthetic product. No real applicant data.
+      <a href="../index.html#contact">Contact</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>
