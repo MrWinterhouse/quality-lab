@@ -286,7 +286,11 @@ jobs:
       - name: Verify the assembled site's links
         run: node scripts/check-site.mjs _site --strict --links-only
 
+      # enablement lets the first run create the Pages site instead of failing with a 404;
+      # it is a no-op once Settings -> Pages -> Source is "GitHub Actions".
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
