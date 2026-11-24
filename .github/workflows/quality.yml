@@ -221,7 +221,7 @@ jobs:
   #
   # release-readiness is in needs because junit-probes.xml is only produced there; without it
   # the assembled site can point at a probe report that has not been uploaded yet.
-  publish-pages:
+  build-pages:
     needs: [quality-report, site-checks, release-readiness]
     if: always() && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
@@ -230,12 +230,6 @@ jobs:
       contents: read
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    concurrency:
-      group: pages
-      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
@@ -288,9 +282,27 @@ jobs:
 
       - uses: actions/configure-pages@v5
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
 
+  # Deploying is a separate job because upload-pages-artifact and deploy-pages in the same job
+  # race: the lookup can run before the artifact is listed and fail with "No artifacts named
+  # github-pages were found" even though the upload step is green.
+  deploy-pages:
+    needs: build-pages
+    if: success() && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
