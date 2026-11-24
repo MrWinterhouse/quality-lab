@@ -23,6 +23,12 @@ const linksOnly = args.includes('--links-only');
 const siteDir = args.find((arg) => !arg.startsWith('--')) ?? 'site';
 const OUT_DIR = 'artifacts';
 const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+// Both widths are scanned: horizontal overflow that only appears on a phone (tables, code
+// blocks) is a real keyboard trap and does not reproduce in a 1280px window.
+const VIEWPORTS = [
+  { label: '1280x900', width: 1280, height: 900 },
+  { label: '360x800', width: 360, height: 800 },
+];
 
 const VOID_ELEMENTS = new Set([
   'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
@@ -228,9 +234,13 @@ if (!linksOnly) {
   browser = await chromium.launch();
 }
 
-const context = browser
-  ? await browser.newContext({ viewport: { width: 1280, height: 900 } })
-  : null;
+const contexts = browser
+  ? await Promise.all(
+      VIEWPORTS.map((viewport) =>
+        browser.newContext({ viewport: { width: viewport.width, height: viewport.height } }),
+      ),
+    )
+  : [];
 const results = [];
 
 for (const file of pages) {
@@ -239,19 +249,22 @@ for (const file of pages) {
   const markupProblems = checkMarkup(source);
   const htmlProblems = [...markupProblems, ...links.problems.map((problem) => problem.message)];
 
-  let violations = [];
-  if (context) {
+  const perViewport = [];
+  for (const context of contexts) {
     const page = await context.newPage();
     await page.goto(pathToFileURL(path.resolve(file)).href, { waitUntil: 'load' });
     const scan = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-    violations = scan.violations.map((violation) => ({
-      id: violation.id,
-      impact: violation.impact ?? 'unknown',
-      help: violation.help,
-      nodes: violation.nodes.map((node) => node.target.join(' ')),
-    }));
+    perViewport.push(
+      scan.violations.map((violation) => ({
+        id: violation.id,
+        impact: violation.impact ?? 'unknown',
+        help: violation.help,
+        nodes: violation.nodes.map((node) => node.target.join(' ')),
+      })),
+    );
     await page.close();
   }
+  const [violations = [], narrowViolations = []] = perViewport;
 
   results.push({
     page: path.relative(siteDir, file).split(path.sep).join('/'),
@@ -262,41 +275,63 @@ for (const file of pages) {
     linkProblems: links.problems,
     deferredLinks: links.deferred,
     violations,
+    narrowViolations,
   });
 }
 
 await browser?.close();
 
-const axeViolations = results.reduce((total, result) => total + result.violations.length, 0);
-const axeNodes = results.reduce(
-  (total, result) => total + result.violations.reduce((sum, v) => sum + v.nodes.length, 0),
-  0,
-);
+const count = (pick) => results.reduce((total, result) => total + pick(result).length, 0);
+const countNodes = (pick) =>
+  results.reduce(
+    (total, result) => total + pick(result).reduce((sum, v) => sum + v.nodes.length, 0),
+    0,
+  );
+const narrowAxeViolations = count((result) => result.narrowViolations);
+const narrowAxeNodes = countNodes((result) => result.narrowViolations);
+// axeViolations is the total for both widths, so the figure the published page states covers
+// the narrow pass too. The per-width counts stay in this report.
+const axeViolations = count((result) => result.violations) + narrowAxeViolations;
+const axeNodes = countNodes((result) => result.violations) + narrowAxeNodes;
 const htmlErrors = results.reduce((total, result) => total + result.htmlProblems.length, 0);
 const deferredLinks = results.reduce((total, result) => total + result.deferredLinks, 0);
 const passed = axeViolations === 0 && htmlErrors === 0;
 const checkedAt = new Date().toISOString();
+const viewportLabels = VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`);
 
 const summary = {
   checkedAt,
   pages: results.length,
   axeViolations,
   axeNodes,
+  narrowAxeViolations,
+  narrowAxeNodes,
   htmlErrors,
   deferredLinks,
   passed,
   standard: 'WCAG 2.1 A/AA (axe-core)',
-  viewport: '1280x900',
+  viewports: viewportLabels,
   results,
 };
 
+const violationLines = (violation, suffix = '') => {
+  const lines = [`- **${violation.id}** (${violation.impact}${suffix}) — ${violation.help}`];
+  for (const node of violation.nodes) lines.push(`  - \`${node}\``);
+  return lines;
+};
+
 const details = results
-  .filter((result) => result.violations.length > 0 || result.htmlProblems.length > 0)
+  .filter(
+    (result) =>
+      result.violations.length > 0 ||
+      result.narrowViolations.length > 0 ||
+      result.htmlProblems.length > 0,
+  )
   .map((result) => {
     const lines = [`### ${result.page}`, ''];
-    for (const violation of result.violations) {
-      lines.push(`- **${violation.id}** (${violation.impact}) — ${violation.help}`);
-      for (const node of violation.nodes) lines.push(`  - \`${node}\``);
+    for (const violation of result.violations) lines.push(...violationLines(violation));
+    for (const violation of result.narrowViolations) {
+      lines.push(...violationLines(violation, ` at ${VIEWPORTS[1].label}`));
     }
     for (const problem of result.htmlProblems) lines.push(`- **HTML** — ${problem}`);
     return lines.join('\n');
@@ -309,22 +344,25 @@ _Generated ${checkedAt} by \`npm run check:site\`._
 
 ## Result
 
-**${passed ? 'PASS' : 'FAIL'}** — ${results.length} pages, **${axeViolations}** axe violation(s)
-across ${axeNodes} node(s), **${htmlErrors}** HTML structure problem(s).
+**${passed ? 'PASS' : 'FAIL'}** — ${results.length} pages at ${viewportLabels.join(' and ')},
+**${axeViolations}** axe violation(s) across ${axeNodes} node(s), **${htmlErrors}** HTML structure
+problem(s).
 
-| Page | axe violations | HTML problems |
-| --- | ---: | ---: |
+| Page | axe ${VIEWPORTS[0].width} | axe ${VIEWPORTS[1].width} | HTML problems |
+| --- | ---: | ---: | ---: |
 ${results
   .map(
     (result) =>
-      `| \`${result.page}\` | ${result.violations.length} | ${result.htmlProblems.length} |`,
+      `| \`${result.page}\` | ${result.violations.length} | ${result.narrowViolations.length} | ${result.htmlProblems.length} |`,
   )
   .join('\n')}
 
 ${passed ? '' : `## Findings\n\n${details}\n`}
 ## What this checks
 
-- axe-core WCAG 2.1 A/AA rules in Chromium at 1280×900, on every page in \`site/\`.
+- axe-core WCAG 2.1 A/AA rules in Chromium at ${viewportLabels.join(' and ')}, on every page in
+  \`site/\`. The narrow pass is what catches tables and code blocks that scroll sideways on a
+  phone and cannot be reached with the keyboard.
 - Exactly one \`<h1>\`, no skipped heading levels, unique ids, \`lang\`, \`<title>\`, viewport meta.
 - Accessible names for links, \`alt\` on images, no inline event handlers.
 - Balanced tags, and every internal link and asset inside site/ resolving, in-page
@@ -351,7 +389,7 @@ if (!linksOnly) {
 
 const scope = linksOnly
   ? 'links and markup only'
-  : `${axeViolations} axe violation(s) in ${axeNodes} node(s)`;
+  : `${axeViolations} axe violation(s) in ${axeNodes} node(s) at ${viewportLabels.join(' and ')}`;
 console.log(
   `[check-site] ${passed ? 'PASS' : 'FAIL'} — ${results.length} pages, ${scope}, ` +
     `${htmlErrors} HTML problem(s)${strict ? ' [strict]' : ''}`,
@@ -364,6 +402,13 @@ if (!passed) {
       reportFinding(
         result,
         `${violation.id} (${violation.impact}) ${violation.help}${nodes}`,
+      );
+    }
+    for (const violation of result.narrowViolations) {
+      const nodes = violation.nodes.length > 0 ? ` [${violation.nodes.join(', ')}]` : '';
+      reportFinding(
+        result,
+        `${violation.id} (${violation.impact}) ${violation.help}${nodes} at ${VIEWPORTS[1].label}`,
       );
     }
     for (const problem of result.markupProblems) reportFinding(result, problem);
