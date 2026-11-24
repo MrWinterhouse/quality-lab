@@ -68,6 +68,14 @@ async function start() {
     'I answer from a closed knowledge base: the case studies, the test infrastructure and what the evidence does not cover. Nothing you type leaves this page.',
   );
 
+  // The controls stay disabled until the knowledge base is loaded, so a click during
+  // load is impossible rather than silently dropped.
+  for (const control of document.querySelectorAll(
+    '#chat-input, #chat-form button, .chat-suggestion, #chat-clear',
+  )) {
+    control.disabled = false;
+  }
+
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     ask(input.value);

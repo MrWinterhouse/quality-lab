@@ -282,6 +282,8 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run check:site
+      - name: Exercise the hiring assistant page in a browser
+        run: npm run check:chatbot-page
       - uses: actions/upload-artifact@v6
         if: always()
         with:

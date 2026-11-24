@@ -104,7 +104,7 @@ testing practice, not authoritative program rules.
 | Web across browsers/devices, accessibility, configurable behavior | `playwright.config.ts` (3 browsers), `tests/probes/e2e/`, tenant config |
 | APIs, events, external systems, contract testing, bad dependencies | `tests/contract/`, `tests/integration/workflow.test.ts`, vendor simulator |
 | AI evals, golden data, prompt regression, guardrails | `tests/evals/`, `scripts/run-evals.mjs`, `product/server/lib/assistant.mjs` |
-| Portfolio hiring assistant, golden dataset, published per-case report | `site/chat/`, `tests/chatbot/golden.json`, `scripts/chatbot-evals.mjs` — page at `site/chat.html` |
+| Portfolio hiring assistant, golden dataset, page test, published report | `site/chat/`, `tests/chatbot/golden.json`, `scripts/chatbot-evals.mjs`, `scripts/check-chat-page.mjs` — page at `site/chat.html` |
 | Acceptance testing with implementation teams | `docs/quality-strategy.md` + exercises 2 and 14 |
 | Reporting for non-engineers | `scripts/report.mjs`, `docs/readiness-report.md` |
 | Raising the bar on engineer-owned tests | exercises 4–9, `docs/answer-key.md` |
