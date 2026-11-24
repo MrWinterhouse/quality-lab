@@ -8,6 +8,9 @@
  *
  *   --strict      report links must resolve; run it against the assembled _site
  *   --links-only  skip axe and the report artifacts, so no browser is needed
+ *
+ * In GitHub Actions every finding is also emitted as a ::error annotation, so a red run names
+ * the page, line and problem on the run page instead of only in the raw step log.
  */
 import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
@@ -29,6 +32,25 @@ const VOID_ELEMENTS = new Set([
 ]);
 
 const stripComments = (html) => html.replace(/<!--[\s\S]*?-->/g, '');
+
+// GitHub turns a `::error` workflow command into a step annotation, which is why a failing
+// run can point at the file and line instead of leaving the reason in the log. Locally the
+// same finding is written to stderr as plain text.
+const ANNOTATIONS = process.env.GITHUB_ACTIONS === 'true';
+const escapeData = (text) =>
+  String(text).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+const escapeProperty = (text) => escapeData(text).replace(/:/g, '%3A').replace(/,/g, '%2C');
+
+function annotate(message, { file, line } = {}) {
+  if (!ANNOTATIONS) {
+    console.error(`  ${file ? `${file}${line ? `:${line}` : ''}: ` : ''}${message}`);
+    return;
+  }
+  const properties = ['title=check-site'];
+  if (file) properties.push(`file=${escapeProperty(file)}`);
+  if (line) properties.push(`line=${line}`);
+  console.log(`::error ${properties.join(',')}::${escapeData(message)}`);
+}
 
 function checkMarkup(html) {
   const problems = [];
@@ -101,6 +123,8 @@ function checkMarkup(html) {
 // job runs over the built site, a missing target is a failure.
 const REPORT_PREFIX = 'reports/';
 
+const lineOf = (html, index) => html.slice(0, index).split('\n').length;
+
 function checkLinks(html, file, strict) {
   const problems = [];
   let deferred = 0;
@@ -110,7 +134,10 @@ function checkLinks(html, file, strict) {
 
     if (ref.startsWith('#')) {
       if (ref.length > 1 && !html.includes(`id="${ref.slice(1)}"`)) {
-        problems.push(`anchor without a target: "${ref}"`);
+        problems.push({
+          message: `anchor without a target: "${ref}"`,
+          line: lineOf(html, match.index),
+        });
       }
       continue;
     }
@@ -127,7 +154,10 @@ function checkLinks(html, file, strict) {
       continue;
     }
 
-    problems.push(`broken internal link "${ref}"`);
+    problems.push({
+      message: `broken internal link "${ref}"`,
+      line: lineOf(html, match.index),
+    });
   }
 
   return { problems, deferred };
@@ -162,7 +192,8 @@ const results = [];
 for (const file of pages) {
   const source = await readFile(file, 'utf8');
   const links = checkLinks(source, file, strict);
-  const htmlProblems = [...checkMarkup(source), ...links.problems];
+  const markupProblems = checkMarkup(source);
+  const htmlProblems = [...markupProblems, ...links.problems.map((problem) => problem.message)];
 
   let violations = [];
   if (context) {
@@ -180,8 +211,11 @@ for (const file of pages) {
 
   results.push({
     page: path.relative(siteDir, file).split(path.sep).join('/'),
+    file: file.split(path.sep).join('/'),
     url: pathToFileURL(path.resolve(file)).href,
     htmlProblems,
+    markupProblems,
+    linkProblems: links.problems,
     deferredLinks: links.deferred,
     violations,
   });
@@ -282,10 +316,17 @@ console.log(
 if (!passed) {
   for (const result of results) {
     for (const violation of result.violations) {
-      console.error(`  ${result.page}: ${violation.id} (${violation.impact}) ${violation.help}`);
-      for (const node of violation.nodes) console.error(`    ${node}`);
+      const nodes = violation.nodes.length > 0 ? ` [${violation.nodes.join(', ')}]` : '';
+      annotate(`${result.page}: ${violation.id} (${violation.impact}) ${violation.help}${nodes}`, {
+        file: result.file,
+      });
     }
-    for (const problem of result.htmlProblems) console.error(`  ${result.page}: ${problem}`);
+    for (const problem of result.markupProblems) {
+      annotate(`${result.page}: ${problem}`, { file: result.file });
+    }
+    for (const problem of result.linkProblems) {
+      annotate(`${result.page}: ${problem.message}`, { file: result.file, line: problem.line });
+    }
   }
   process.exitCode = 1;
 }
