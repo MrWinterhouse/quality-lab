@@ -119,15 +119,14 @@ jobs:
           path: artifacts/load.json
           if-no-files-found: warn
 
-  # This job is the honest signal while the lab's seeded defects remain:
-  # it runs the defect probes, the shipping-prompt gate and the release gate,
-  # so it is expected to fail until the defects are fixed. It is non-blocking
-  # for the pipeline so the baseline suites stay actionable.
+  # The seeded defects are part of the lab, so this job expects the probes, the shipping-prompt
+  # gate and the release gate to report failures. It passes by recording that state in the job
+  # summary and the published report, and fails on anything that is not the expected failure: a
+  # check that cannot run, one that suddenly passes, or a report that cannot be built.
   release-readiness:
     needs: [baseline, e2e, evals, load]
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -142,20 +141,75 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      # Exit 1 is the expected result for the three checks below while the defects are open.
+      # Each step also has to prove the check actually ran, and has to fail if it stops failing.
       - name: Known-defect probes (expected to fail while defects are open)
-        continue-on-error: true
-        run: npm run test:probes
+        run: |
+          set +e
+          npm run test:probes
+          status=$?
+          set -e
+          if [ ! -s artifacts/junit-probes.xml ]; then
+            echo "::error title=known-defect probes::The probe run wrote no JUnit output (exit $status)."
+            exit 1
+          fi
+          if [ "$status" -eq 0 ]; then
+            echo "::error title=known-defect probes::The probes passed, so quality/known-gaps.json no longer matches the product."
+            exit 1
+          fi
+          if [ "$status" -ne 1 ]; then
+            echo "::error title=known-defect probes::The probe run exited $status instead of failing tests."
+            exit 1
+          fi
+          echo "- Known-defect probes: failing as expected while the defects are open (\`artifacts/junit-probes.xml\`)." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Accessibility probe (expected to fail while DEFECT-12 is open)
-        continue-on-error: true
-        run: npm run test:e2e:probes
+        run: |
+          set +e
+          npm run test:e2e:probes
+          status=$?
+          set -e
+          if [ ! -s artifacts/playwright-probes.json ]; then
+            echo "::error title=accessibility probe::The probe run wrote no Playwright JSON (exit $status)."
+            exit 1
+          fi
+          if [ "$status" -eq 0 ]; then
+            echo "::error title=accessibility probe::The accessibility probe passed, so DEFECT-12 is fixed or the probe stopped asserting."
+            exit 1
+          fi
+          if [ "$status" -ne 1 ]; then
+            echo "::error title=accessibility probe::The probe run exited $status instead of failing tests."
+            exit 1
+          fi
+          echo "- Accessibility probe: failing as expected while DEFECT-12 is open." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Shipping prompt eval gate
-        continue-on-error: true
-        run: npm run evals -- --gate-shipping
+        run: |
+          set +e
+          npm run evals -- --gate-shipping
+          status=$?
+          set -e
+          if [ ! -s artifacts/evals.json ]; then
+            echo "::error title=shipping prompt gate::The eval run wrote no artifacts/evals.json (exit $status)."
+            exit 1
+          fi
+          if [ "$status" -eq 0 ]; then
+            echo "::error title=shipping prompt gate::The shipping prompt passed, so DEFECT-11 is fixed or the gate stopped asserting."
+            exit 1
+          fi
+          if [ "$status" -ne 1 ]; then
+            echo "::error title=shipping prompt gate::The eval run exited $status instead of failing the gate."
+            exit 1
+          fi
+          echo "- Shipping prompt: below the eval threshold as expected while DEFECT-11 is open." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Release gate
-        run: npm run report -- --gate
+        run: |
+          set +e
+          npm run report -- --gate
+          status=$?
+          set -e
+          node scripts/release-gate.mjs "$status"
 
       - uses: actions/upload-artifact@v6
         if: always()
@@ -282,7 +336,7 @@ jobs:
 
       - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
@@ -305,4 +359,4 @@ jobs:
       cancel-in-progress: false
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
