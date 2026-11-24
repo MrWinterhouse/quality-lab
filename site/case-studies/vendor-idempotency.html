@@ -86,7 +86,7 @@
 
       <h2>What I found</h2>
       <p>The retry loop builds its key inside the loop, from the attempt counter:</p>
-      <pre><code>for (let attempt = 1; attempt &lt;= 3; attempt += 1) {
+      <pre tabindex="0"><code>for (let attempt = 1; attempt &lt;= 3; attempt += 1) {
   try {
     const idempotencyKey = `${application.id}:${attempt}`;   // ← changes per attempt
     const result = await vendor.verify({
@@ -108,7 +108,7 @@
         a new operation. The vendor has no way to deduplicate, because it was never told these
         calls were related.
       </p>
-      <pre><code>curl -s -X POST http://127.0.0.1:4310/internal/vendor/config \
+      <pre tabindex="0"><code>curl -s -X POST http://127.0.0.1:4310/internal/vendor/config \
   -H 'Content-Type: application/json' -d '{"failAfterRecord":1}'
 # then create a screening, submit an application, wait for verification
 
@@ -129,7 +129,7 @@ curl -s http://127.0.0.1:4310/internal/vendor/state
       <p>
         The timeline shows one event:
       </p>
-      <pre><code>{ "type": "vendor.verified",
+      <pre tabindex="0"><code>{ "type": "vendor.verified",
   "data": { "verificationId": "vrf_00002", "duplicate": false } }</code></pre>
       <p>
         There is no trace of <code>vrf_00001</code> — no failure event for the timeout, no
@@ -171,7 +171,7 @@ curl -s http://127.0.0.1:4310/internal/vendor/state
         application and the household data it validates; if either changes, it is a different
         operation and deserves a different key.
       </p>
-      <pre><code>const idempotencyKey = `verify:${application.id}:${application.householdHash}`;
+      <pre tabindex="0"><code>const idempotencyKey = `verify:${application.id}:${application.householdHash}`;
 for (let attempt = 1; attempt &lt;= 3; attempt += 1) {
   try {
     const result = await vendor.verify({ applicationId: application.id,

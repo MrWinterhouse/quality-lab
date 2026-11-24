@@ -89,7 +89,7 @@
       <h2>What I found</h2>
 
       <h3>1. A cache with no key</h3>
-      <pre><code>// product/server/app.mjs
+      <pre tabindex="0"><code>// product/server/app.mjs
 // Tenant configuration is static, so it is loaded once and reused.
 let cachedTenantConfig = null;
 function tenantConfig(tenantId) {
@@ -102,7 +102,7 @@ function tenantConfig(tenantId) {
         its configuration owns the process. Whichever agency loads first is the agency every
         later request sees, for the lifetime of the server.
       </p>
-      <pre><code>curl -s http://127.0.0.1:4310/api/config -H 'Authorization: Bearer tok_applicant_a'
+      <pre tabindex="0"><code>curl -s http://127.0.0.1:4310/api/config -H 'Authorization: Bearer tok_applicant_a'
 # {"tenantId":"agency-a","brandName":"Northstar Benefits","deadlineDays":10,...}
 
 curl -s http://127.0.0.1:4310/api/config -H 'Authorization: Bearer tok_applicant_b'
@@ -120,12 +120,12 @@ curl -s http://127.0.0.1:4310/api/config -H 'Authorization: Bearer tok_applicant
         applicants and tenant membership for staff. Screenings have no equivalent. The route
         matches on a path prefix and returns whatever the id points at:
       </p>
-      <pre><code>if (pathname.startsWith('/api/screenings/')) {
+      <pre tabindex="0"><code>if (pathname.startsWith('/api/screenings/')) {
   const screening = store.screenings.get(id);
   if (!screening) throw httpError(404, 'screening_not_found');
   return sendJson(res, 200, serializeScreening(screening));
 }</code></pre>
-      <pre><code>curl -s -X POST http://127.0.0.1:4310/api/screenings \
+      <pre tabindex="0"><code>curl -s -X POST http://127.0.0.1:4310/api/screenings \
   -H 'Authorization: Bearer tok_applicant_a' -H 'Content-Type: application/json' \
   -d '{"state":"CA","householdSize":2,"incomeComplete":true,
        "members":[{"age":35,"status":"citizen",
@@ -178,7 +178,7 @@ curl -s http://127.0.0.1:4310/api/screenings/scr_00001 \
         For the cache, the correct change is deletion, not a better key. The underlying object
         is a frozen module constant; caching it buys nothing and introduced the bug.
       </p>
-      <pre><code>function tenantConfig(tenantId) {
+      <pre tabindex="0"><code>function tenantConfig(tenantId) {
   const config = store.tenants[tenantId];
   if (!config) throw httpError(403, 'forbidden_tenant');
   return config;
@@ -193,7 +193,7 @@ curl -s http://127.0.0.1:4310/api/screenings/scr_00001 \
         guard. Returning <strong>404</strong> for another owner’s screening, rather than 403,
         also removes an enumeration oracle: a 403 confirms the id exists.
       </p>
-      <pre><code>function readScreening(rawId, user) {
+      <pre tabindex="0"><code>function readScreening(rawId, user) {
   const screening = store.screenings.get(rawId);
   if (!screening) throw httpError(404, 'screening_not_found');
   if (screening.ownerId !== user.id) throw httpError(404, 'screening_not_found');

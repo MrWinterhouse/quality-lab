@@ -97,7 +97,7 @@
       <h2>What I found</h2>
 
       <h3>1. Biweekly is not semimonthly</h3>
-      <pre><code>// product/server/lib/policy.mjs
+      <pre tabindex="0"><code>// product/server/lib/policy.mjs
 case 'weekly':      return amount * 52;
 case 'biweekly':    return amount * 24;   // ← 26 pay periods exist
 case 'semimonthly': return amount * 24;   // correct</code></pre>
@@ -135,7 +135,7 @@ case 'semimonthly': return amount * 24;   // correct</code></pre>
       </p>
 
       <h3>2. A multiplier that multiplies by one</h3>
-      <pre><code>export function fplAnnual(householdSize, state) {
+      <pre tabindex="0"><code>export function fplAnnual(householdSize, state) {
   const base = /* table lookup */;
   const stateMultiplier = 1;          // ← computed, then unused
   return Math.round(base * stateMultiplier);
@@ -178,7 +178,7 @@ case 'semimonthly': return amount * 24;   // correct</code></pre>
         The probe spawns Python, feeds it the same households the API receives, and compares
         four statuses per case:
       </p>
-      <pre><code>const expected = runOracle(python, CASES);        // python-oracle/rules.py
+      <pre tabindex="0"><code>const expected = runOracle(python, CASES);        // python-oracle/rules.py
 const actual = [];
 for (const testCase of CASES) {
   const screening = await createScreening(app, testCase);
@@ -220,7 +220,7 @@ assert.deepEqual(actual, expected.map(...), 'the API and the independent oracle 
         Make the frequencies data instead of a switch, so the 24/26 distinction is a value
         someone can review, and test it at the boundary for every entry:
       </p>
-      <pre><code>const PAY_PERIODS = { hourly: null, weekly: 52, biweekly: 26,
+      <pre tabindex="0"><code>const PAY_PERIODS = { hourly: null, weekly: 52, biweekly: 26,
                       semimonthly: 24, monthly: 12, annual: 1 };</code></pre>
       <p>
         For the guidelines, replace the constant with a versioned table keyed by state and
