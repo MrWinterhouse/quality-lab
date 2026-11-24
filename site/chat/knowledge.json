@@ -1,0 +1,442 @@
+[
+  {
+    "id": "pitch",
+    "title": "The pitch",
+    "answer": "I built a deliberately imperfect benefits-eligibility product, the test infrastructure around it, and the release decision that says not ready. The lab holds 44 baseline checks, 12 browser journeys across three browsers, 15 defect probes that fail on purpose, and a report that names five open high or critical risks. The reason to hire me is not the green suite — it is that the suite is honest about what it has not verified.",
+    "keywords": [
+      "hire",
+      "hiring",
+      "why you",
+      "why should",
+      "should we",
+      "fit",
+      "candidate",
+      "strength",
+      "bring",
+      "value",
+      "stand out",
+      "different",
+      "interview",
+      "defect probes",
+      "strongest"
+    ],
+    "citations": [
+      {
+        "id": "release-report",
+        "label": "Release readiness report",
+        "href": "reports/quality-report.html"
+      },
+      {
+        "id": "portfolio-index",
+        "label": "Portfolio overview",
+        "href": "./"
+      }
+    ]
+  },
+  {
+    "id": "role",
+    "title": "What role fits",
+    "answer": "The work fits a quality engineering role that owns the release signal: test strategy, automation, the eval harness, and the decision to block. What I bring is breadth across rules engines, asynchronous integrations, tenancy and LLM behaviour, rather than depth in one framework. Judge it from the four case studies — each one starts with a risk, not a tool.",
+    "keywords": [
+      "role",
+      "position",
+      "job",
+      "title",
+      "senior",
+      "staff",
+      "quality engineer",
+      "looking for",
+      "team",
+      "opening"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-index",
+        "label": "Portfolio overview",
+        "href": "./"
+      },
+      {
+        "id": "case-tenant-isolation",
+        "label": "Case 01 — tenant isolation",
+        "href": "case-studies/tenant-isolation.html"
+      }
+    ]
+  },
+  {
+    "id": "first-90",
+    "title": "First 90 days",
+    "answer": "First 90 days: map the system before writing tests, run the existing baseline and write down what it does not prove, then triage by harm — who gets hurt and how quietly. Then instrument the pipeline so each risk has a named check, and make the release gate able to say no with reasons attached. That order is deliberate: coverage without a risk map is just automation.",
+    "keywords": [
+      "90 days",
+      "first 90",
+      "first month",
+      "first week",
+      "onboard",
+      "starting",
+      "plan"
+    ],
+    "citations": [
+      {
+        "id": "quality-strategy",
+        "label": "Quality strategy",
+        "href": "https://github.com/MrWinterhouse/quality-lab/blob/main/docs/quality-strategy.md"
+      }
+    ]
+  },
+  {
+    "id": "case-tenant-isolation",
+    "title": "Cross-tenant data exposure",
+    "answer": "Agency B could read agency A's applicants because a module-level cache keyed tenant configuration by nothing at all, and the screening endpoint skipped the ownership check every other read enforced. The same bug replaced agency B's branding and its 30-day deadline with agency A's 10-day one. The fix was a per-tenant cache key plus the missing ownership check, with a regression test that fails if any tenant can read another's screening.",
+    "keywords": [
+      "tenant",
+      "tenancy",
+      "isolation",
+      "multi-tenant",
+      "cross-tenant",
+      "agency b",
+      "authorization",
+      "exposure",
+      "privacy",
+      "isolation bug"
+    ],
+    "citations": [
+      {
+        "id": "case-tenant-isolation",
+        "label": "Case study 01 — every agency sees the first agency's configuration",
+        "href": "case-studies/tenant-isolation.html"
+      }
+    ]
+  },
+  {
+    "id": "case-vendor-idempotency",
+    "title": "Duplicate vendor verification",
+    "answer": "The retry loop built its idempotency key from the attempt number, so a vendor that processed the request and then timed out produced a second, undeduplicated verification on retry — while the timeline showed one clean success. The lesson is that a retry is only safe if the key describes the work, not the attempt.",
+    "keywords": [
+      "idempotency",
+      "idempotent",
+      "duplicate",
+      "retry",
+      "vendor",
+      "timeout",
+      "async",
+      "webhook",
+      "double charge"
+    ],
+    "citations": [
+      {
+        "id": "case-vendor-idempotency",
+        "label": "Case study 02 — one application, two income verifications",
+        "href": "case-studies/vendor-idempotency.html"
+      }
+    ]
+  },
+  {
+    "id": "case-assistant-guardrails",
+    "title": "Assistant guardrails that reported but did not block",
+    "answer": "The shipping prompt followed an injected instruction, disclosed its setup text, guaranteed Medicaid eligibility and invented a monthly amount. The guardrail evaluator flagged all three violations and the response path still returned the text, because enforcement was conditional on the hardened prompt version. That is a log line wearing a control's uniform: the check belongs at the boundary, for every version, failing closed.",
+    "keywords": [
+      "prompt",
+      "injection",
+      "guardrail",
+      "llm",
+      "hallucinat",
+      "assistant",
+      "jailbreak",
+      "model",
+      "invent"
+    ],
+    "citations": [
+      {
+        "id": "case-assistant-guardrails",
+        "label": "Case study 03 — the guardrail ran and shipped the violations",
+        "href": "case-studies/assistant-guardrails.html"
+      }
+    ]
+  },
+  {
+    "id": "case-income-annualization",
+    "title": "Income annualization and the differential oracle",
+            "answer": "A family of four was told it qualified when it did not: biweekly pay was annualized over 24 periods instead of 26, and the Alaska and Hawaii poverty multipliers were declared and then ignored. Both are silent wrong answers in opposite directions. I found them with a differential oracle: a second implementation written from the specification, not copied from production.",
+    "keywords": [
+      "income",
+      "annualization",
+      "annualized",
+      "poverty",
+      "alaska",
+      "hawaii",
+      "oracle",
+      "differential",
+      "biweekly",
+      "calculation",
+      "rules engine"
+    ],
+    "citations": [
+      {
+        "id": "case-income-annualization",
+        "label": "Case study 04 — a family of four is told it qualifies",
+        "href": "case-studies/income-annualization.html"
+      }
+    ]
+  },
+  {
+    "id": "green-limits",
+    "title": "What green does not prove",
+    "answer": "The suite passes and the report still says not ready. Five high or critical risks are open, the shipping prompt is below its eval threshold, and the probes describe behaviour the product does not have. The known gaps are named rather than implied: screen-reader journeys beyond automation, peak traffic, a real vendor, schema drift. A report that cannot say not verified is a status page, not a quality signal.",
+    "keywords": [
+      "weakness",
+      "gap",
+      "limitation",
+      "not verified",
+      "blind spot",
+      "missing",
+      "green",
+      "honest",
+      "risk",
+      "what green",
+      "not ready",
+      "pass",
+      "prove",
+      "suite"
+    ],
+    "citations": [
+      {
+        "id": "known-gaps",
+        "label": "Known gaps (quality/known-gaps.json)",
+        "href": "https://github.com/MrWinterhouse/quality-lab/blob/main/quality/known-gaps.json"
+      },
+      {
+        "id": "release-report",
+        "label": "Release readiness report",
+        "href": "reports/quality-report.html"
+      }
+    ]
+  },
+  {
+    "id": "ai-testing",
+    "title": "Testing an AI assistant",
+    "answer": "Two prompt versions, thirteen golden cases and one deterministic assistant, so an eval failure is a code change rather than sampling noise. The cases assert refusal, forbidden strings, required citations and guardrail violations per version; the shipping version scores 10 of 13 and the gate stays red while the defect is open. The honest limit is that the guardrails are regexes over the reply: they will not catch a paraphrase or a claim split across two turns.",
+    "keywords": [
+      "test ai",
+      "testing ai",
+      "ai testing",
+      "test llm",
+      "evals",
+      "eval",
+      "golden set",
+      "prompt version",
+      "how do you test"
+    ],
+    "citations": [
+      {
+        "id": "case-assistant-guardrails",
+        "label": "Case study 03 — assistant guardrails",
+        "href": "case-studies/assistant-guardrails.html"
+      },
+      {
+        "id": "evals-json",
+        "label": "Per-case eval results (reports/evals.json)",
+        "href": "reports/evals.json"
+      }
+    ]
+  },
+  {
+    "id": "golden-dataset",
+    "title": "This assistant's golden dataset",
+    "answer": "This assistant has its own golden dataset: every question on this page plus the boundary cases, each with expected substrings, forbidden strings, required citations and a refusal flag. One command runs the exact engine file the browser loads against that dataset and fails on any case, naming the case and the assertion that broke. The per-case result is published beside the rest of the evidence.",
+    "keywords": [
+      "this chatbot",
+      "this assistant",
+      "this bot",
+      "your chatbot",
+      "golden dataset",
+      "how is this tested",
+      "how do you test this"
+    ],
+    "citations": [
+      {
+        "id": "golden-dataset",
+        "label": "Golden dataset (tests/chatbot/golden.json)",
+        "href": "https://github.com/MrWinterhouse/quality-lab/blob/main/tests/chatbot/golden.json"
+      },
+      {
+        "id": "chatbot-report",
+        "label": "Chatbot evaluation report",
+        "href": "reports/chatbot-eval.html"
+      }
+    ]
+  },
+  {
+    "id": "process",
+    "title": "How the work is done",
+    "answer": "Four habits: risk before coverage (who gets hurt, and how quietly), independent oracles (a second implementation written from the specification, because copied logic agrees with itself), gates that can say no, and evidence over adjectives. The last one is the filter for everything here — each claim links to a command, a file and a failing assertion.",
+    "keywords": [
+      "process",
+      "approach",
+      "principle",
+      "method",
+      "strategy",
+      "philosophy",
+      "oracles",
+      "risk before"
+    ],
+    "citations": [
+      {
+        "id": "quality-strategy",
+        "label": "Quality strategy",
+        "href": "https://github.com/MrWinterhouse/quality-lab/blob/main/docs/quality-strategy.md"
+      },
+      {
+        "id": "case-income-annualization",
+        "label": "Case study 04 — the differential oracle",
+        "href": "case-studies/income-annualization.html"
+      }
+    ]
+  },
+  {
+    "id": "pushback",
+    "title": "Disagreeing about a release",
+    "answer": "The release gate is that story: the product's suite is green and the decision is still not ready, because five high or critical risks are open and one prompt version is below its eval threshold. Saying no is easy to write and hard to defend, so the report names what would change the answer for each blocker. That is how a disagreement stays about evidence instead of seniority.",
+    "keywords": [
+      "disagree",
+      "pushback",
+      "push back",
+      "conflict",
+      "said no",
+      "block a release",
+      "blocked",
+      "stakeholder"
+    ],
+    "citations": [
+      {
+        "id": "release-report",
+        "label": "Release readiness report",
+        "href": "reports/quality-report.html"
+      }
+    ]
+  },
+  {
+    "id": "ci",
+    "title": "The pipeline",
+    "answer": "The pipeline builds the published report from the artifacts of the run that publishes the site, and stamps the page with those figures so the page cannot disagree with the report. The publish job re-checks every internal link after assembly, so a dead evidence link fails the deploy. Expected failures are asserted by exit code and artifact presence, so a check that cannot run, or one that suddenly passes, fails the job instead of quietly annotating it.",
+    "keywords": [
+      "pipeline",
+      "ci",
+      "github actions",
+      "workflow",
+      "annotations",
+      "publish",
+      "deploy",
+      "build"
+    ],
+    "citations": [
+      {
+        "id": "workflow",
+        "label": "Workflow (.github/workflows/quality.yml)",
+        "href": "https://github.com/MrWinterhouse/quality-lab/blob/main/.github/workflows/quality.yml"
+      },
+      {
+        "id": "release-report",
+        "label": "Release readiness report",
+        "href": "reports/quality-report.html"
+      }
+    ]
+  },
+  {
+    "id": "a11y",
+    "title": "Accessibility of this site",
+    "answer": "Every page here is scanned with axe-core at 1280 and 360 pixels, plus HTML structure rules: one h1, no skipped heading levels, unique ids, accessible names. The narrow pass exists because a scrollable table or code block is a keyboard trap on a phone and looks fine on a desktop. It is a scan, not a screen-reader journey, and the report says so.",
+    "keywords": [
+      "accessibility",
+      "accessible",
+      "a11y",
+      "axe",
+      "screen reader",
+      "wcag",
+      "keyboard",
+      "contrast"
+    ],
+    "citations": [
+      {
+        "id": "site-a11y-report",
+        "label": "Site accessibility report",
+        "href": "reports/site-a11y.html"
+      }
+    ]
+  },
+  {
+    "id": "tools",
+    "title": "Tools and stack",
+    "answer": "Node's test runner and TypeScript for the API, security, contract and integration suites; Playwright and axe-core for the browser and accessibility work; GitHub Actions for the pipeline; a Python unittest oracle for differential testing. There are no cloud dependencies, so every claim reproduces from a clean checkout.",
+    "keywords": [
+      "tools",
+      "stack",
+      "technology",
+      "playwright",
+      "typescript",
+      "framework",
+      "languages",
+      "node",
+      "pytest"
+    ],
+    "citations": [
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "contact",
+    "title": "Contact",
+    "answer": "Email Jwinterhouse3@gmail.com, or read the source at github.com/MrWinterhouse/quality-lab. The release report, the eval JSON and the failing probes are all linked from the portfolio.",
+    "keywords": [
+      "contact",
+      "email",
+      "reach",
+      "github",
+      "linkedin",
+      "resume",
+      "cv",
+      "portfolio link"
+    ],
+    "citations": [
+      {
+        "id": "contact",
+        "label": "Jwinterhouse3@gmail.com",
+        "href": "mailto:Jwinterhouse3@gmail.com"
+      },
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "boundary",
+    "title": "Not published here",
+    "answer": "That is not published here, and I would rather say so than invent it. What is published is the work: the product, the defects, and the evidence behind each one. Ask John directly at Jwinterhouse3@gmail.com.",
+    "keywords": [],
+    "citations": [
+      {
+        "id": "contact",
+        "label": "Jwinterhouse3@gmail.com",
+        "href": "mailto:Jwinterhouse3@gmail.com"
+      }
+    ]
+  },
+  {
+    "id": "compensation",
+    "title": "Compensation",
+    "answer": "There is no salary figure on this site, and I will not invent one. Compensation is a conversation rather than a number on a page: Jwinterhouse3@gmail.com.",
+    "keywords": [],
+    "citations": [
+      {
+        "id": "contact",
+        "label": "Jwinterhouse3@gmail.com",
+        "href": "mailto:Jwinterhouse3@gmail.com"
+      }
+    ]
+  }
+]

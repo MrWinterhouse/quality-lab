@@ -81,6 +81,7 @@ const probes = {
 
 const evals = await readJson('artifacts/evals.json');
 const load = await readJson('artifacts/load.json');
+const chatbotEval = await readJson('artifacts/chatbot-eval.json');
 const risks = (await readJson('quality/risk-register.json')) ?? [];
 const knownGaps = (await readJson('quality/known-gaps.json')) ?? [];
 
@@ -94,13 +95,20 @@ const e2eGreen = Boolean(e2e) && e2e.failed === 0 && e2e.passed > 0;
 const evalsGreen = Boolean(evals?.versions?.length) &&
   evals.versions.every((version) => version.passRate >= evals.threshold);
 const loadGreen = Boolean(load?.passed);
+const chatbotGreen = Boolean(chatbotEval?.total) && chatbotEval.failed === 0;
 const probesGreen = probes.present && probes.failed === 0;
 const openBlocking = risks.filter(
   (risk) => risk.status === 'open' && ['critical', 'high'].includes(risk.severity),
 );
 
 const allGreen =
-  baselineGreen && e2eGreen && evalsGreen && loadGreen && probesGreen && openBlocking.length === 0;
+  baselineGreen &&
+  e2eGreen &&
+  evalsGreen &&
+  loadGreen &&
+  chatbotGreen &&
+  probesGreen &&
+  openBlocking.length === 0;
 
 const decision = !baselinePresent && !e2e && !evals ? 'NOT VERIFIED' : allGreen ? 'READY' : 'NOT READY';
 
@@ -132,6 +140,17 @@ const summary = {
         concurrency: load.concurrency,
       }
     : null,
+  chatbot: chatbotEval
+    ? {
+        total: chatbotEval.total,
+        passed: chatbotEval.passed,
+        failed: chatbotEval.failed,
+        passRate: chatbotEval.passRate,
+        threshold: chatbotEval.threshold,
+        categories: chatbotEval.categories ?? [],
+        dataset: chatbotEval.dataset,
+      }
+    : null,
   knownGaps,
 };
 
@@ -156,6 +175,8 @@ if (!baselineGreen) reasons.push('The baseline API/contract/integration suites a
 if (!e2eGreen) reasons.push('End-to-end coverage is missing or failing.');
 if (!evalsGreen) reasons.push('One or more assistant prompt versions fall below the eval threshold.');
 if (!loadGreen) reasons.push('The load smoke test is missing or outside its performance thresholds.');
+if (!chatbotGreen)
+  reasons.push("The portfolio assistant's golden-dataset eval is missing or failing.");
 if (!probesGreen) reasons.push('One or more known-defect probes are still failing, so the behavior they describe is not verified.');
 
 const report = `# Release readiness — Benefits Eligibility API
@@ -196,6 +217,14 @@ Load smoke: ${
 Known-defect probes: ${
   probes.present
     ? `${probes.passed} passing, **${probes.failed} failing** (these describe behavior we do not yet have).`
+    : 'Not run.'
+}
+
+Portfolio assistant (golden dataset \`tests/chatbot/golden.json\`): ${
+  chatbotEval
+    ? `**${chatbotEval.passed}/${chatbotEval.total}** cases passed with the shipping engine — ${
+        chatbotEval.failed === 0 ? 'PASS' : `**${chatbotEval.failed} failing**`
+      }. Per-case results are in \`reports/chatbot-eval.html\`.`
     : 'Not run.'
 }
 

@@ -107,6 +107,19 @@ const figures = {
           state: siteReport.htmlErrors ? 'fail' : 'pass',
         }
       : null,
+  'chatbot.cases': () =>
+    summary.chatbot ? { value: String(summary.chatbot.total ?? 0) } : { value: 'not run', state: 'missing' },
+  'chatbot.passed': () =>
+    summary.chatbot
+      ? { value: String(summary.chatbot.passed ?? 0) }
+      : { value: 'not run', state: 'missing' },
+  'chatbot.failed': () =>
+    summary.chatbot
+      ? {
+          value: String(summary.chatbot.failed ?? 0),
+          state: summary.chatbot.failed ? 'fail' : 'pass',
+        }
+      : { value: 'not run', state: 'missing' },
   'load.summary': () => {
     if (!summary.load) return { value: 'not run', state: 'missing' };
     const errorRate = Number(((summary.load.errorRate ?? 0) * 100).toFixed(2));

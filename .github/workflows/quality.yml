@@ -91,6 +91,29 @@ jobs:
           path: artifacts/evals.json
           if-no-files-found: warn
 
+  # The portfolio's hiring assistant: the golden dataset runs against the exact engine file
+  # the published page loads. One failed case fails this job; the per-case report uploads
+  # even then, so a red run can be read without the raw log.
+  chatbot-evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:chatbot
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: artifacts-chatbot
+          path: |
+            artifacts/chatbot-eval.json
+            artifacts/chatbot-eval.md
+          if-no-files-found: warn
+
   python-oracle:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -124,7 +147,7 @@ jobs:
   # summary and the published report, and fails on anything that is not the expected failure: a
   # check that cannot run, one that suddenly passes, or a report that cannot be built.
   release-readiness:
-    needs: [baseline, e2e, evals, load]
+    needs: [baseline, e2e, evals, load, chatbot-evals]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -219,7 +242,7 @@ jobs:
           if-no-files-found: warn
 
   quality-report:
-    needs: [baseline, e2e, evals, load]
+    needs: [baseline, e2e, evals, load, chatbot-evals]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -328,6 +351,7 @@ jobs:
         run: |
           node scripts/render-report-html.mjs _site/reports/quality-report.md _site/reports/quality-report.html "Release readiness report" "npm run report"
           node scripts/render-report-html.mjs _site/reports/site-a11y.md _site/reports/site-a11y.html "Site accessibility and HTML checks" "npm run check:site"
+          node scripts/render-report-html.mjs _site/reports/chatbot-eval.md _site/reports/chatbot-eval.html "Hiring assistant — golden-dataset evaluation" "npm run test:chatbot"
 
       # After assembly the reports exist, so every link must resolve. A dead evidence
       # link fails the deploy instead of shipping a page that points at nothing.

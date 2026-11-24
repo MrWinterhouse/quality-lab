@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask why I should be hired — hiring assistant | Quality engineering portfolio</title>
+<meta name="description" content="A hiring assistant that answers from a closed knowledge base about the benefits-eligibility quality lab, with a golden dataset and a published evaluation report.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./"><span>◇</span> Quality engineering portfolio</a>
+    <nav class="site-nav" aria-label="Sections">
+      <a href="chat.html" aria-current="page">Ask me</a>
+      <a href="index.html#case-studies">Case studies</a>
+      <a href="index.html#evidence">Evidence</a>
+      <a href="#how-tested">How it is tested</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="chat-page" aria-labelledby="chat-title">
+    <div class="wrap">
+      <p class="kicker">Hiring assistant · closed knowledge base</p>
+      <h1 id="chat-title">Ask why I should be hired</h1>
+      <p class="lede">
+        Ask about the defects, the test strategy, or what the evidence does not cover.
+        Every answer is drawn from this portfolio, and every answer names its sources.
+      </p>
+
+      <div class="chat">
+        <p class="kicker" id="chat-log-label">Conversation</p>
+        <ol class="chat-log" id="chat-log" aria-labelledby="chat-log-label" aria-live="polite" aria-relevant="additions">
+          <li class="chat-msg chat-msg--assistant">
+            <span class="chat-who">Assistant</span>
+            <p class="chat-text">Loading the knowledge base…</p>
+          </li>
+        </ol>
+
+        <form class="chat-form" id="chat-form">
+          <label class="chat-label" for="chat-input">Your question</label>
+          <div class="chat-row">
+            <input class="chat-input" id="chat-input" name="message" type="text" autocomplete="off" maxlength="300" placeholder="e.g. Why should we hire you?" required>
+            <button class="chat-ask" type="submit">Ask</button>
+          </div>
+        </form>
+
+        <div class="chat-suggestions">
+          <p class="kicker" id="suggest-label">Suggested questions</p>
+          <ul class="chat-chips" aria-labelledby="suggest-label">
+            <li><button type="button" class="chat-suggestion">Why should we hire you?</button></li>
+            <li><button type="button" class="chat-suggestion">How do you test an AI assistant?</button></li>
+            <li><button type="button" class="chat-suggestion">What is not verified?</button></li>
+            <li><button type="button" class="chat-suggestion">How is this chatbot tested?</button></li>
+            <li><button type="button" class="chat-suggestion">What would you do in your first 90 days?</button></li>
+          </ul>
+        </div>
+
+        <p class="chat-meta">
+          <span>No model call, no API key, nothing you type leaves the page.</span>
+          <button type="button" class="chat-clear" id="chat-clear">Clear conversation</button>
+        </p>
+      </div>
+
+      <noscript>
+        <p class="chat-noscript">
+          The assistant needs JavaScript. The same answers are in the
+          <a href="index.html#case-studies">four case studies</a>, and the testing approach is
+          described below.
+        </p>
+      </noscript>
+    </div>
+  </section>
+
+  <section id="how-tested" aria-labelledby="how-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">02 · Evidence</p>
+          <h2 id="how-title">How this chatbot is tested</h2>
+        </div>
+        <p>
+          A chatbot that answers questions about its own quality work should be the easiest
+          thing on the site to audit. It is the same pattern as the product assistant: a
+          golden dataset, programmatic assertions, and a gate that fails the build rather
+          than describing the failure afterwards.
+        </p>
+      </div>
+
+      <p class="site-checks">
+        Latest run: <b data-figure="chatbot.cases">28</b> golden cases,
+        <b data-figure="chatbot.passed">28</b> passed,
+        <b data-figure="chatbot.failed">0</b> failed.
+        <a href="reports/chatbot-eval.html">Read the per-case report →</a>
+      </p>
+
+      <div class="cols-2">
+        <div>
+          <h3>What the dataset asserts</h3>
+          <ul>
+            <li><strong>Routing.</strong> The reply must come from the expected knowledge-base entry, so a keyword change cannot silently turn a hiring answer into a security answer.</li>
+            <li><strong>Required facts.</strong> Concrete figures such as the 26 pay periods, the 15 probes and the five open risks have to appear, not be approximated.</li>
+            <li><strong>Forbidden content.</strong> No invented salary, no location, no availability date, no echoed SSN, no leaked setup text.</li>
+            <li><strong>Citations.</strong> Every substantive answer carries at least one source; refusals cite the contact instead of nothing.</li>
+            <li><strong>Refusal flag and length.</strong> The machine-readable field must agree with the prose, and a rambling answer fails its word budget.</li>
+          </ul>
+          <p>
+            <code>npm run test:chatbot</code> runs the golden dataset against
+            <code>site/chat/engine.js</code> — the exact file the browser loads — and exits
+            non-zero on a single failed case, naming the case and the assertion.
+          </p>
+        </div>
+        <div>
+          <h3>What it does not prove</h3>
+          <div class="caveat">
+            <p>
+              Matching is keyword-based, not semantic. A paraphrase the dataset does not
+              contain can route to the wrong entry or to the out-of-scope refusal. The dataset
+              was written by the same person who wrote the answers, so it checks consistency
+              and grounding, not whether these are the best answers to give.
+            </p>
+            <p>
+              A 100% pass rate is evidence about the cases in the file. It is not a claim that
+              the assistant cannot mislead — which is why it refuses instead of guessing when
+              the knowledge base has nothing.
+            </p>
+          </div>
+          <ul class="chat-links">
+            <li><a href="reports/chatbot-eval.html">Golden-dataset report</a> — every case, routing, citations and failures.</li>
+            <li><a href="https://github.com/MrWinterhouse/quality-lab/blob/main/tests/chatbot/golden.json">tests/chatbot/golden.json</a> — the dataset itself.</li>
+            <li><a href="https://github.com/MrWinterhouse/quality-lab/blob/main/site/chat/knowledge.json">site/chat/knowledge.json</a> — the closed knowledge base.</li>
+            <li><a href="https://github.com/MrWinterhouse/quality-lab/blob/main/scripts/chatbot-evals.mjs">scripts/chatbot-evals.mjs</a> — the runner and its assertions.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Contact</h2>
+        <ul>
+          <li><a href="mailto:Jwinterhouse3@gmail.com">Jwinterhouse3@gmail.com</a></li>
+          <li><a href="https://github.com/MrWinterhouse">github.com/MrWinterhouse</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This project</h2>
+        <ul>
+          <li><a href="index.html#case-studies">Four case studies</a></li>
+          <li><a href="index.html#evidence">Generated evidence</a></li>
+          <li><a href="https://github.com/MrWinterhouse/quality-lab">Source repository</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Note</h2>
+        <p>
+          Synthetic data only. The assistant answers from a closed knowledge base; it is not
+          a general-purpose model and it is not legal, policy or benefits advice.
+        </p>
+      </div>
+    </div>
+    <p class="colophon">
+      Static page, no tracking, no cookies, no third-party requests. The dataset and the
+      evaluation report are regenerated by CI on every push to main.
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="chat/chat.js"></script>
+</body>
+</html>

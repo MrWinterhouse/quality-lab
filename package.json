@@ -19,6 +19,7 @@
     "test:baseline": "node scripts/run-tests.mjs baseline",
     "test:probes": "node scripts/run-tests.mjs probes",
     "test:flaky": "node scripts/run-tests.mjs flaky",
+    "test:chatbot": "node scripts/chatbot-evals.mjs",
     "test:e2e": "playwright test",
     "test:e2e:probes": "playwright test --config playwright.probes.config.ts",
     "test:python": "node scripts/run-python-tests.mjs",
