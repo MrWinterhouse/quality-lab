@@ -16,8 +16,6 @@ import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { chromium } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
 
 const args = process.argv.slice(2);
 const strict = args.includes('--strict');
@@ -43,7 +41,8 @@ const escapeProperty = (text) => escapeData(text).replace(/:/g, '%3A').replace(/
 
 function annotate(message, { file, line } = {}) {
   if (!ANNOTATIONS) {
-    console.error(`  ${file ? `${file}${line ? `:${line}` : ''}: ` : ''}${message}`);
+    // The message already names the page, so the file only matters to the annotation.
+    console.error(`  ${message}`);
     return;
   }
   const properties = ['title=check-site'];
@@ -215,7 +214,20 @@ async function htmlFiles(dir) {
 }
 
 const pages = await htmlFiles(siteDir);
-const browser = linksOnly ? null : await chromium.launch();
+
+// Loaded here rather than at the top of the file: the publish job runs the strict link check
+// from a bare checkout with no node_modules, and only the axe pass needs these packages.
+let browser = null;
+let AxeBuilder = null;
+if (!linksOnly) {
+  const [{ chromium }, axe] = await Promise.all([
+    import('@playwright/test'),
+    import('@axe-core/playwright'),
+  ]);
+  AxeBuilder = axe.default;
+  browser = await chromium.launch();
+}
+
 const context = browser
   ? await browser.newContext({ viewport: { width: 1280, height: 900 } })
   : null;
