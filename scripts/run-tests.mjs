@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdirSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -66,12 +66,33 @@ function runSuite(suite) {
   return result.status ?? 1;
 }
 
+// The published site links one baseline report, while report.mjs reads the per-suite files, so
+// the suites are also merged into artifacts/junit-baseline.xml. Node's JUnit reporter writes a
+// <testsuites> root with flat <testcase> children, so a merge is concatenation inside one root.
+function mergeBaselineJunit(suites) {
+  const bodies = [];
+  for (const suite of suites) {
+    const file = path.join('artifacts', `junit-${suite}.xml`);
+    if (!existsSync(file)) continue;
+    const match = readFileSync(file, 'utf8').match(/<testsuites[^>]*>([\s\S]*)<\/testsuites>/);
+    if (match) bodies.push(match[1].trimEnd());
+  }
+  if (bodies.length === 0) return;
+
+  writeFileSync(
+    path.join('artifacts', 'junit-baseline.xml'),
+    `<?xml version="1.0" encoding="utf-8"?>\n<testsuites>\n${bodies.join('\n')}\n</testsuites>\n`,
+  );
+}
+
 if (requested === 'baseline') {
+  const baselineSuites = ['api', 'security', 'contract', 'integration', 'evals'];
   let failed = false;
-  for (const suite of ['api', 'security', 'contract', 'integration', 'evals']) {
+  for (const suite of baselineSuites) {
     const status = runSuite(suite);
     if (status !== 0) failed = true;
   }
+  mergeBaselineJunit(baselineSuites);
   process.exit(failed ? 1 : 0);
 }
 

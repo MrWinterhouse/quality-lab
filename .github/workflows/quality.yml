@@ -218,8 +218,11 @@ jobs:
   # One-time setup: Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
   # Runs on every push to main, even when a suite is red: a portfolio that only publishes
   # green runs is a status page, not evidence.
+  #
+  # release-readiness is in needs because junit-probes.xml is only produced there; without it
+  # the assembled site can point at a probe report that has not been uploaded yet.
   publish-pages:
-    needs: [quality-report, site-checks]
+    needs: [quality-report, site-checks, release-readiness]
     if: always() && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 10
