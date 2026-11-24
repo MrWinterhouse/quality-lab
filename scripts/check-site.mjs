@@ -52,6 +52,38 @@ function annotate(message, { file, line } = {}) {
   console.log(`::error ${properties.join(',')}::${escapeData(message)}`);
 }
 
+// Annotations are kept only for files in the checked-out tree, so a finding in the assembled
+// _site build is filed against the source page it was copied from; the assembled path and line
+// stay in the message. Line numbers are only trusted when the annotation points at the file
+// that was actually read, since stamp-site rewrites the assembled copies.
+const ASSEMBLED_ALIASES = new Map([['_site', 'site']]);
+function annotationPath(file) {
+  const segments = file.split('/');
+  const source = ASSEMBLED_ALIASES.get(segments[0]);
+  return source ? [source, ...segments.slice(1)].join('/') : file;
+}
+
+function reportFinding(result, message, line) {
+  const file = annotationPath(result.file);
+  const located = file === result.file;
+  const where = located ? result.page : result.file;
+  const prefix = line && !located ? `line ${line}: ` : '';
+  annotate(`${where}: ${prefix}${message}`, { file, line: located ? line : undefined });
+}
+
+// A crash (ENOENT on an artifact that never downloaded, a browser that will not launch) is a
+// finding too: without this the step only says "exited with code 1". A rejected top-level
+// await arrives as an uncaughtException, not as an unhandledRejection, so both are covered.
+let crashed = false;
+function reportCrash(error) {
+  if (crashed) return;
+  crashed = true;
+  annotate(`check-site crashed before reporting findings: ${error?.stack ?? error}`);
+  process.exitCode = 1;
+}
+process.on('unhandledRejection', reportCrash);
+process.on('uncaughtException', reportCrash);
+
 function checkMarkup(html) {
   const problems = [];
   if (!/<!doctype\s+html/i.test(html)) problems.push('missing <!doctype html>');
@@ -317,15 +349,14 @@ if (!passed) {
   for (const result of results) {
     for (const violation of result.violations) {
       const nodes = violation.nodes.length > 0 ? ` [${violation.nodes.join(', ')}]` : '';
-      annotate(`${result.page}: ${violation.id} (${violation.impact}) ${violation.help}${nodes}`, {
-        file: result.file,
-      });
+      reportFinding(
+        result,
+        `${violation.id} (${violation.impact}) ${violation.help}${nodes}`,
+      );
     }
-    for (const problem of result.markupProblems) {
-      annotate(`${result.page}: ${problem}`, { file: result.file });
-    }
+    for (const problem of result.markupProblems) reportFinding(result, problem);
     for (const problem of result.linkProblems) {
-      annotate(`${result.page}: ${problem.message}`, { file: result.file, line: problem.line });
+      reportFinding(result, problem.message, problem.line);
     }
   }
   process.exitCode = 1;
