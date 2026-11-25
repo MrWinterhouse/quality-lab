@@ -18,7 +18,9 @@
       "different",
       "interview",
       "defect probes",
-      "strongest"
+      "strongest",
+      "pitch",
+      "fail on purpose"
     ],
     "citations": [
       {
@@ -190,6 +192,7 @@
       "blind spot",
       "missing",
       "green",
+      "weak",
       "honest",
       "risk",
       "what green",
@@ -224,7 +227,10 @@
       "eval",
       "golden set",
       "prompt version",
-      "how do you test"
+      "how do you test",
+      "llm feature",
+      "llm quality",
+      "chatbot"
     ],
     "citations": [
       {
@@ -303,6 +309,8 @@
       "conflict",
       "said no",
       "block a release",
+      "release gate",
+      "ready to ship",
       "blocked",
       "stakeholder"
     ],

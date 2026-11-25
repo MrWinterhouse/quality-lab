@@ -349,5 +349,137 @@
       "max_words": 30
     },
     "note": "Empty input gets a prompt, not an exception or a guessed topic."
+  },
+  {
+    "id": "pick-over-experience",
+    "category": "paraphrase",
+    "message": "Why should we pick you over someone with more experience?",
+    "expect": {
+      "topic": "pitch",
+      "refused": false,
+      "must_include": ["release decision", "honest"],
+      "must_not_include": ["years of experience"],
+      "max_words": 90
+    },
+    "note": "Paraphrase of why-hire. Nothing in the sentence matches a keyword in the entry, so it exercises scoring rather than the happy path."
+  },
+  {
+    "id": "pitch-yourself",
+    "category": "paraphrase",
+    "message": "Pitch yourself to me.",
+    "expect": {
+      "topic": "pitch",
+      "refused": false,
+      "must_include": ["44 baseline", "honest"],
+      "max_words": 90
+    },
+    "note": "The most obvious way to ask for the pitch had no keyword anywhere until this case was added."
+  },
+  {
+    "id": "weakest-part",
+    "category": "paraphrase",
+    "message": "What are you weakest at?",
+    "expect": {
+      "topic": "green-limits",
+      "refused": false,
+      "must_include": ["not verified"],
+      "must_cite": ["known-gaps"],
+      "must_not_include": ["no weaknesses"],
+      "max_words": 90
+    },
+    "note": "A weakness question is a gap question. The old keyword was the noun 'weakness', which no superlative matches."
+  },
+  {
+    "id": "tests-fail-on-purpose",
+    "category": "paraphrase",
+    "message": "How many tests fail on purpose?",
+    "expect": {
+      "topic": "pitch",
+      "refused": false,
+      "must_include": ["15", "defect probes"],
+      "must_cite": ["release-report"],
+      "max_words": 90
+    },
+    "note": "Same figure as defect-count, asked without the words 'defect' or 'probe'."
+  },
+  {
+    "id": "test-a-chatbot",
+    "category": "paraphrase",
+    "message": "Walk me through how you would test a chatbot.",
+    "expect": {
+      "topic": "ai-testing",
+      "refused": false,
+      "must_include": ["golden cases", "deterministic"],
+      "must_cite": ["case-assistant-guardrails"],
+      "max_words": 120
+    },
+    "note": "The generic AI-testing question, as a hiring manager would actually phrase it."
+  },
+  {
+    "id": "llm-feature-quality",
+    "category": "paraphrase",
+    "message": "How do you measure the quality of an LLM feature?",
+    "expect": {
+      "topic": "ai-testing",
+      "refused": false,
+      "must_include": ["golden cases", "regexes"],
+      "must_cite": ["case-assistant-guardrails"],
+      "max_words": 120
+    },
+    "note": "Before the fix this landed on the guardrail case study because 'llm' was the only shared keyword — an adjacent answer, not the question asked."
+  },
+  {
+    "id": "release-ready-to-ship",
+    "category": "paraphrase",
+    "message": "How do you decide a release is ready to ship?",
+    "expect": {
+      "topic": "pushback",
+      "refused": false,
+      "must_include": ["not ready", "would change the answer"],
+      "max_words": 80
+    },
+    "note": "The release-decision question in the words a delivery manager would use."
+  },
+  {
+    "id": "work-authorization",
+    "category": "paraphrase",
+    "message": "Are you authorized to work in the US?",
+    "expect": {
+      "topic": "boundary",
+      "refused": true,
+      "must_include": ["not published here"],
+      "must_not_include": ["citizen", "visa", "yes"],
+      "must_cite": ["contact"],
+      "max_words": 60
+    },
+    "note": "A privacy boundary asked politely. No work-authorization fact is published anywhere on the site."
+  },
+  {
+    "id": "salary-dollar-figure",
+    "category": "paraphrase",
+    "message": "Would you accept $120k?",
+    "expect": {
+      "topic": "compensation",
+      "refused": true,
+      "must_include": ["will not invent one"],
+      "must_not_include": ["$"],
+      "must_cite": ["contact"],
+      "max_words": 50
+    },
+    "note": "The salary boundary asked with a number in it, which never reached the compensation rule before the fix."
+  },
+  {
+    "id": "start-date-paraphrase",
+    "category": "paraphrase",
+    "message": "How soon can you join?",
+    "expect": {
+      "topic": "boundary",
+      "refused": true,
+      "must_include": ["rather say so than invent it"],
+      "must_not_include": ["weeks", "immediately"],
+      "must_cite": ["contact"],
+      "max_words": 60
+    },
+    "note": "Availability without the words 'start' or 'availability', which the old rule required."
   }
 ]

@@ -25,12 +25,16 @@ const INJECTION_PATTERN =
   /ignore (all )?(the )?(previous|prior|above) instructions|system prompt|reveal (your|the) (instructions|prompt|rules)|jailbreak|pretend (you are|to be)|act as (a|an) |forget (your|all) (rules|instructions)/i;
 
 const COMPENSATION_PATTERN =
-  /\b(salary|compensation|day rate|hourly rate|rate card|package|negotiat|pay expectation|pay expectations)\b/i;
+  /\b(salary|compensation|day rate|hourly rate|rate card|package|negotiat|pay expectation|pay expectations|expected pay|pay range|pay rate|pay band|pay offer)\b/i;
+
+// normalize() drops "$", so a question that puts the figure in dollars — "Would you accept
+// $120k?" — would otherwise slip past the compensation rule. Test the raw message too.
+const MONEY_FIGURE_PATTERN = /\$\s?\d/;
 
 // Facts the portfolio does not state. The assistant refuses rather than inventing a
 // location, a years-of-experience figure or an availability date.
 const UNPUBLISHED_PATTERN =
-  /\b(where are you|where do you|based|location|located|remote|relocat|time ?zone|years of experience|how long have you|degree|education|university|visa|sponsorship|availability|start date|notice period|clearance|citizen|when (could|can|would) you (start|begin))\b/i;
+  /\b(where are you|where do you|based|location|located|remote|relocat|time ?zone|years of experience|how long have you|degree|education|university|visa|sponsorship|authorized to work|work authorization|right to work|work permit|green card|availability|start date|notice period|clearance|citizen|how soon|when (could|can|would) you (start|begin))\b/i;
 
 const STOPWORDS = new Set([
   'the', 'and', 'for', 'you', 'your', 'yours', 'are', 'was', 'were', 'what', 'which', 'who',
@@ -106,7 +110,9 @@ export function createAssistant(entries) {
       };
     }
 
-    const ruleTopic = COMPENSATION_PATTERN.test(normalized)
+    const asksAboutPay =
+      COMPENSATION_PATTERN.test(normalized) || MONEY_FIGURE_PATTERN.test(String(message ?? ''));
+    const ruleTopic = asksAboutPay
       ? 'compensation'
       : UNPUBLISHED_PATTERN.test(normalized)
         ? 'boundary'

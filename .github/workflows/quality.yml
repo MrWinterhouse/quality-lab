@@ -241,8 +241,11 @@ jobs:
           path: artifacts/
           if-no-files-found: warn
 
+  # release-readiness is a dependency because the report has to include the probe results it
+  # records: without them the published summary says "probes: not run" while the hiring
+  # assistant's knowledge base states 15 failing probes.
   quality-report:
-    needs: [baseline, e2e, evals, load, chatbot-evals]
+    needs: [baseline, e2e, evals, load, chatbot-evals, release-readiness]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -348,6 +351,11 @@ jobs:
 
       - name: Stamp the site with this run's figures
         run: node scripts/stamp-site.mjs _site _site/reports/summary.json
+
+      # The hiring assistant answers with these figures, so its knowledge base has to agree
+      # with the summary and report being published. Strict: no report, no deploy.
+      - name: Check the assistant's figures against the evidence
+        run: node scripts/check-chatbot-figures.mjs _site/reports/summary.json _site/reports/quality-report.md --strict
 
       - name: Render the markdown reports as HTML
         run: |

@@ -122,6 +122,7 @@ const summary = {
   loadGreen,
   probesGreen,
   openBlockingRisks: openBlocking.length,
+  evalThreshold: evals?.threshold ?? null,
   suites,
   probes,
   evals: evals?.versions?.map((version) => ({

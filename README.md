@@ -104,7 +104,7 @@ testing practice, not authoritative program rules.
 | Web across browsers/devices, accessibility, configurable behavior | `playwright.config.ts` (3 browsers), `tests/probes/e2e/`, tenant config |
 | APIs, events, external systems, contract testing, bad dependencies | `tests/contract/`, `tests/integration/workflow.test.ts`, vendor simulator |
 | AI evals, golden data, prompt regression, guardrails | `tests/evals/`, `scripts/run-evals.mjs`, `product/server/lib/assistant.mjs` |
-| Portfolio hiring assistant, golden dataset, page test, published report | `site/chat/`, `tests/chatbot/golden.json`, `scripts/chatbot-evals.mjs`, `scripts/check-chat-page.mjs` — page at `site/chat.html` |
+| Portfolio hiring assistant, golden dataset, page test, figure drift check, published report | `site/chat/`, `tests/chatbot/golden.json`, `scripts/chatbot-evals.mjs`, `scripts/check-chat-page.mjs`, `scripts/check-chatbot-figures.mjs` — page at `site/chat.html` |
 | Acceptance testing with implementation teams | `docs/quality-strategy.md` + exercises 2 and 14 |
 | Reporting for non-engineers | `scripts/report.mjs`, `docs/readiness-report.md` |
 | Raising the bar on engineer-owned tests | exercises 4–9, `docs/answer-key.md` |
@@ -215,6 +215,7 @@ in memory and deliberately contains security defects for practice.
 | `npm run load` | Dependency-free load smoke with p95/error thresholds |
 | `npm run test:flaky` | The deliberately flaky test |
 | `npm run report` | `artifacts/quality-report.md` + `summary.json` |
+| `npm run check:chatbot-figures` | Fails when a figure in `site/chat/knowledge.json` disagrees with the generated summary or report (needs `npm run report` first; CI runs it `--strict` before publishing) |
 | `npm run check:site` | Accessibility (axe WCAG 2.1 A/AA) and HTML structure checks for `site/` |
 | `npm run verify:baseline` | Typecheck + baseline + Chromium E2E + hardened evals |
 | `npm run verify:release` | The full gate; green only when every defect is fixed |
