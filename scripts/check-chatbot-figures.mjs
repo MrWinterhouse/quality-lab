@@ -23,6 +23,11 @@
  * element are stamped from the summary at publish; the prose around them is not, so the front
  * page is checked here against the same sources as the answers.
  *
+ * The four case studies repeat the figures in prose too — "All 44 baseline checks pass", the
+ * 24/26 pay periods, the 30- and 10-day deadlines, thirteen golden cases — so each page gets
+ * its own claim list, read from the same summary and fixtures. Numbers with no machine-readable
+ * source ("three violations", "two verifications") are left alone rather than approximated.
+ *
  * A claim that disappears is a failure too: a figure quietly deleted from an answer is the
  * same drift as one left stale.
  *
@@ -107,6 +112,18 @@ try {
   caseStudyPages = [];
 }
 
+// The page count the front page states is the number check-site scans: every page under site/
+// except the assembled reports directory, which is generated at publish.
+let sitePageCount = null;
+try {
+  const siteEntries = await readdir(new URL('../site', import.meta.url), { recursive: true });
+  sitePageCount = siteEntries.filter(
+    (name) => /\.html$/i.test(name) && !String(name).split(/[\\/]/).includes('reports'),
+  ).length;
+} catch {
+  sitePageCount = null;
+}
+
 const summaryText = await readTextOr(summaryPath);
 if (!summaryText) {
   const message = `[figures] No generated summary at ${summaryPath}. Run \`npm run report\` first.`;
@@ -129,17 +146,22 @@ if (!reportText) {
   console.warn(`${message} Skipping the report cross-check.`);
 }
 
-// Page copy is prose, so check the text a reader sees rather than the markup around it.
+// Page copy is prose, so check the text a reader sees rather than the markup around it. The
+// meta description counts: it is the copy a search result or link preview shows, and it is
+// where a second copy of a claim tends to survive a fix to the visible one.
 async function visibleTextOf(file) {
   const html = await readTextOr(file);
   if (!html) return null;
-  return html
+  const meta = [...html.matchAll(/<meta[^>]+name="description"[^>]+content="([^"]*)"/gi)]
+    .map((match) => match[1])
+    .join(' ');
+  return `${meta} ${html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&[a-z#0-9]+;/gi, ' ')
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, ' ')}`;
 }
 
 const chatText = await visibleTextOf(chatPath);
@@ -166,6 +188,7 @@ const probes = summary.probes ?? {};
 const biweeklyAnnualized = annualizeIncome({ amount: 1, frequency: 'biweekly' });
 const weeklyAnnualized = annualizeIncome({ amount: 1, frequency: 'weekly' });
 const biweeklyCorrect = weeklyAnnualized / 2;
+const semimonthlyPeriods = annualizeIncome({ amount: 1, frequency: 'semimonthly' });
 const deadlineA = TENANTS['agency-a']?.deadlineDays ?? null;
 const deadlineB = TENANTS['agency-b']?.deadlineDays ?? null;
 const caseStudyCount = caseStudyPages.length || null;
@@ -173,9 +196,13 @@ const viewportWidths = [...siteCheckSource.matchAll(/width:\s*(\d+)/g)].map((mat
   Number(match[1]),
 );
 
-if (!Number.isFinite(biweeklyAnnualized) || !Number.isFinite(biweeklyCorrect)) {
+if (
+  !Number.isFinite(biweeklyAnnualized) ||
+  !Number.isFinite(biweeklyCorrect) ||
+  !Number.isFinite(semimonthlyPeriods)
+) {
   problems.push(
-    'product/server/lib/policy.mjs: could not derive the weekly and biweekly period counts, so "24 periods instead of 26" cannot be checked.',
+    'product/server/lib/policy.mjs: could not derive the weekly, biweekly and semimonthly period counts, so "24 periods instead of 26" cannot be checked.',
   );
 }
 if (typeof deadlineA !== 'number' || typeof deadlineB !== 'number') {
@@ -456,6 +483,12 @@ const indexClaims = [
     evidence: 'the VIEWPORTS widths in scripts/check-site.mjs',
   },
   {
+    label: 'pages scanned',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) pages scanned\\b`, 'gi'),
+    expected: [sitePageCount],
+    evidence: 'the .html pages under site/, which is what scripts/check-site.mjs scans',
+  },
+  {
     label: 'load requests and concurrency',
     pattern: new RegExp(
       `\\b(${NUMBER_TOKEN}) requests at concurrency (${NUMBER_TOKEN})\\b`,
@@ -512,6 +545,116 @@ function checkPageClaims(pagePath, text, pageClaims) {
 
 checkPageClaims(chatPath, chatText, chatClaims);
 checkPageClaims(indexPath, indexText, indexClaims);
+
+// One claim list per case study. "Three violations" and "two verifications" are deliberately
+// absent: no fixture exposes either as a count, and a gate that guesses is worse than none.
+const caseStudyClaims = [
+  {
+    page: 'income-annualization.html',
+    label: 'baseline checks that pass',
+    pattern: new RegExp(`\\bAll (${NUMBER_TOKEN}) baseline checks pass\\b`, 'gi'),
+    expected: [baselineChecks],
+    evidence: 'sum of the passing baseline suites in summary.suites',
+  },
+  {
+    page: 'income-annualization.html',
+    label: 'pay periods',
+    pattern: new RegExp(
+      `\\bover (${NUMBER_TOKEN}) periods instead of (${NUMBER_TOKEN})\\b`,
+      'gi',
+    ),
+    expected: [biweeklyAnnualized, biweeklyCorrect],
+    evidence: 'annualizeIncome() in product/server/lib/policy.mjs',
+  },
+  {
+    page: 'income-annualization.html',
+    label: 'semimonthly paycheques',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) paycheques a year\\b`, 'gi'),
+    expected: [semimonthlyPeriods],
+    evidence: "annualizeIncome() with frequency 'semimonthly'",
+  },
+  {
+    page: 'income-annualization.html',
+    label: 'biweekly periods per year',
+    pattern: new RegExp(`\\bevery two weeks, which is (${NUMBER_TOKEN})\\b`, 'gi'),
+    expected: [biweeklyCorrect],
+    evidence: 'weekly pay at 52 in product/server/lib/policy.mjs, halved',
+  },
+  {
+    page: 'assistant-guardrails.html',
+    label: 'golden cases',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) golden cases\\b`, 'gi'),
+    expected: [goldenCases],
+    evidence: 'summary.evals[].total',
+  },
+  {
+    page: 'assistant-guardrails.html',
+    label: 'prompt versions',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) prompt versions\\b`, 'gi'),
+    expected: [versions.length || null],
+    evidence: 'the versions in summary.evals',
+  },
+  {
+    page: 'assistant-guardrails.html',
+    label: 'shipping prompt score',
+    pattern: /“([\w]+)\/([\w]+)”/g,
+    expected: shipping ? [shipping.passed, shipping.total] : [null, null],
+    evidence: 'the shipping entry in summary.evals',
+  },
+  {
+    page: 'tenant-isolation.html',
+    label: 'tenant deadlines',
+    pattern: new RegExp(`\\bfrom (${NUMBER_TOKEN}) days to (${NUMBER_TOKEN})\\b`, 'gi'),
+    expected: [deadlineB, deadlineA],
+    evidence: 'deadlineDays in product/server/lib/store.mjs (agency-b then agency-a)',
+  },
+  {
+    page: 'tenant-isolation.html',
+    label: 'agency A deadline',
+    pattern: new RegExp(`\\bgives applicants (${NUMBER_TOKEN}) days\\b`, 'gi'),
+    expected: [deadlineA],
+    evidence: "TENANTS['agency-a'].deadlineDays",
+  },
+  {
+    page: 'tenant-isolation.html',
+    label: 'agency B deadline',
+    pattern: new RegExp(`\\bgives (${NUMBER_TOKEN}) days\\b`, 'gi'),
+    expected: [deadlineB],
+    evidence: "TENANTS['agency-b'].deadlineDays",
+  },
+  {
+    page: 'tenant-isolation.html',
+    label: 'deadline swap',
+    pattern: new RegExp(
+      `\\b(${NUMBER_TOKEN})-day Los Angeles deadline instead of (${NUMBER_TOKEN}) days\\b`,
+      'gi',
+    ),
+    expected: [deadlineA, deadlineB],
+    evidence: 'deadlineDays in product/server/lib/store.mjs (agency-a then agency-b)',
+  },
+];
+
+const caseStudyText = new Map();
+for (const page of caseStudyPages) {
+  caseStudyText.set(page, await visibleTextOf(`site/case-studies/${page}`));
+}
+
+const claimsByPage = new Map();
+for (const claim of caseStudyClaims) {
+  if (!claimsByPage.has(claim.page)) claimsByPage.set(claim.page, []);
+  claimsByPage.get(claim.page).push(claim);
+}
+
+for (const [page, claims] of claimsByPage) {
+  const path = `site/case-studies/${page}`;
+  if (!caseStudyText.has(page)) {
+    problems.push(
+      `site copy: ${path} was not found, so the figures in that case study cannot be checked.`,
+    );
+    continue;
+  }
+  checkPageClaims(path, caseStudyText.get(page), claims);
+}
 
 // The report is what the site links to, so it has to state the same numbers as the summary.
 const reportChecks = [
@@ -608,8 +751,8 @@ const derived = [
   ['golden cases', goldenCases === null ? 'inconsistent totals' : String(goldenCases)],
   ['shipping prompt', shipping ? `${shipping.passed}/${shipping.total}` : 'missing'],
   [
-    'biweekly periods',
-    `${biweeklyAnnualized} in policy.mjs, ${biweeklyCorrect} correct`,
+    'pay periods',
+    `${biweeklyAnnualized} biweekly in policy.mjs, ${biweeklyCorrect} correct, ${semimonthlyPeriods} semimonthly`,
   ],
   ['tenant deadlines', `A ${deadlineA} / B ${deadlineB} days`],
   ['case-study pages', String(caseStudyCount ?? 'missing')],
@@ -617,6 +760,10 @@ const derived = [
   [
     'page copy',
     `${chatClaims.length} figures in ${chatPath}, ${indexClaims.length} in ${indexPath}`,
+  ],
+  [
+    'case-study copy',
+    `${caseStudyClaims.length} figures in ${caseStudyText.size} pages`,
   ],
 ];
 

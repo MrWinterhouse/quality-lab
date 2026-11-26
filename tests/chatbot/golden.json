@@ -481,5 +481,32 @@
       "max_words": 60
     },
     "note": "Availability without the words 'start' or 'availability', which the old rule required."
+  },
+  {
+    "id": "what-can-you-answer",
+    "category": "method",
+    "message": "What can you help me with?",
+    "expect": {
+      "topic": "help",
+      "refused": false,
+      "must_include": ["closed knowledge base", "case studies", "unverified"],
+      "must_cite": ["portfolio-index", "release-report"],
+      "max_words": 80
+    },
+    "note": "The assistant can be asked what it covers. The reply lists the areas in the knowledge base instead of demanding a matching keyword."
+  },
+  {
+    "id": "closest-published-topics",
+    "category": "paraphrase",
+    "message": "Have you done load testing before?",
+    "expect": {
+      "topic": "out-of-scope",
+      "refused": true,
+      "must_include": ["rather not guess", "closest published topics"],
+      "must_not_include": ["years of experience"],
+      "must_cite": ["contact"],
+      "max_words": 90
+    },
+    "note": "A question the dataset does not cover names the nearest published topic instead of dead-ending, and still invents nothing."
   }
 ]

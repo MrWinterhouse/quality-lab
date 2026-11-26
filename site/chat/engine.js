@@ -3,8 +3,11 @@
  *
  * The page has no server, no API key and no model call, so this is a retrieval
  * assistant rather than an LLM: it selects one entry from a closed knowledge base and
- * returns that entry's curated answer with its citations. If nothing in the knowledge
- * base supports the question, it says so instead of guessing.
+ * returns that entry's curated answer with its citations. A keyword matches when its words
+ * appear in any order, so a phrasing the dataset never listed still reaches the answer, and
+ * a question about the assistant itself gets a reply that lists what it covers. When nothing
+ * published supports the question it still refuses rather than guessing, but it names the
+ * closest published topics so the conversation has somewhere to go.
  *
  * The same file is imported by the browser (site/chat/chat.js) and by the eval runner
  * (scripts/chatbot-evals.mjs), so the tests exercise the code that ships.
@@ -18,6 +21,22 @@ export const OUT_OF_SCOPE_REFUSAL =
 
 export const EMPTY_REFUSAL =
   'Ask a question about the work — the case studies, the testing approach, or what is not verified yet.';
+
+// Answered from the knowledge base's own scope, so the reply cannot drift into topics the
+// portfolio does not publish. The page renders no test panel for it unless a golden case
+// covers it, which is why the dataset has one.
+export const HELP_REPLY =
+  'I answer from a closed knowledge base, so every reply is sourced: the pitch and role fit, the case studies, how the work is tested (evals, the Python oracle, CI), what is still unverified, and how to reach John. Ask in your own words — when nothing fits, I name the closest topics instead of guessing.';
+
+const HELP_CITATIONS = [
+  { id: 'portfolio-index', label: 'Portfolio overview', href: './' },
+  { id: 'release-report', label: 'Release readiness report', href: 'reports/quality-report.html' },
+];
+
+// Matched against the whole normalized message: "help me understand the tenant bug" is a
+// question about the bug, not a request for the menu.
+const HELP_PATTERN =
+  /^(help|help me|what can you (answer|help)( me)?( with)?|what topics( can i ask about)?|what can i ask( about)?|how can you help( me)?|what should i ask|what do you know( about)?)$/;
 
 // Rule checks run before scoring: these questions must never be answered by a
 // best-effort keyword match, even if one of the entries happens to share a word.
@@ -64,12 +83,32 @@ function phraseMatches(text, phrase) {
 }
 
 export function scoreEntry(entry, normalizedMessage) {
+  const tokens = normalizedMessage.split(' ').filter(Boolean);
   let score = 0;
+
+  // A keyword made only of content words may appear in any order: "which probes fail on
+  // purpose" should reach "defect probes" without the dataset listing that phrasing. A
+  // keyword containing function words ("how is this tested") keeps its order, because those
+  // words say nothing on their own and flexing them matches half the page.
   for (const keyword of entry.keywords ?? []) {
-    if (phraseMatches(normalizedMessage, normalize(keyword))) {
-      score += keyword.includes(' ') ? 4 : 2;
-    }
+    const words = normalize(keyword).split(' ').filter(Boolean);
+    if (words.length === 0) continue;
+    const flexible = words.length > 1 && words.every((word) => !STOPWORDS.has(word));
+    const matched = flexible
+      ? words.every((word) => phraseMatches(normalizedMessage, word))
+      : phraseMatches(normalizedMessage, normalize(keyword));
+    if (matched) score += words.length > 1 ? 4 : 2;
   }
+
+  // A title word the question already uses is a weak signal: enough to break a tie between
+  // two keyword matches, never enough on its own to answer a question nothing else matched.
+  const titleWords = new Set(
+    normalize(entry.title ?? '')
+      .split(' ')
+      .filter((word) => word.length >= 5 && !STOPWORDS.has(word)),
+  );
+  if (tokens.some((token) => token.length >= 5 && titleWords.has(token))) score += 0.5;
+
   return score;
 }
 
@@ -110,6 +149,16 @@ export function createAssistant(entries) {
       };
     }
 
+    if (HELP_PATTERN.test(normalized)) {
+      return {
+        reply: HELP_REPLY,
+        citations: HELP_CITATIONS,
+        refused: false,
+        topic: 'help',
+        score: 0,
+      };
+    }
+
     const asksAboutPay =
       COMPENSATION_PATTERN.test(normalized) || MONEY_FIGURE_PATTERN.test(String(message ?? ''));
     const ruleTopic = asksAboutPay
@@ -127,8 +176,17 @@ export function createAssistant(entries) {
 
     const best = ranked[0];
     if (!best || best.score < 2) {
+      // A dead end is the rigidity people notice. The question still gets no invented answer,
+      // but the entries it already echoes are named, so the next question can be a real one.
+      const suggestions = ranked
+        .filter((candidate) => candidate.score > 0)
+        .slice(0, 2)
+        .map((candidate) => `“${candidate.entry.title}”`);
+      const lead = suggestions.length
+        ? ` Closest published topics: ${suggestions.join(' and ')}.`
+        : '';
       return {
-        reply: OUT_OF_SCOPE_REFUSAL,
+        reply: `${OUT_OF_SCOPE_REFUSAL}${lead}`,
         citations: contactCitations,
         refused: true,
         topic: 'out-of-scope',

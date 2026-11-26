@@ -33,7 +33,7 @@ npm run test:e2e             # 12 checks across Chromium, Firefox, WebKit
 npm run evals -- --gate      # hardened prompt 13/13
 npm run load                 # p95 smoke against two endpoints
 npm run test:python          # 7 Python oracle checks
-npm run test:chatbot         # hiring assistant golden dataset, 38/38
+npm run test:chatbot         # hiring assistant golden dataset, 40/40
 ```
 
 See the defects:
@@ -216,7 +216,7 @@ in memory and deliberately contains security defects for practice.
 | `npm run test:flaky` | The deliberately flaky test |
 | `npm run report` | `artifacts/quality-report.md` + `summary.json` |
 | `npm run test:chatbot` | Hiring assistant golden dataset against `site/chat/engine.js`; `--write-coverage` regenerates `site/chat/coverage.json`, and a stale copy fails the run |
-| `npm run check:chatbot-figures` | Fails when a figure in `site/chat/knowledge.json` or in the `site/chat.html` and `site/index.html` copy disagrees with the generated summary, the report, or the fixtures behind the case-study answers: `policy.mjs` pay periods, tenant deadlines, the case-study pages, the axe viewports (needs `npm run report` first; CI runs it `--strict` on every pull request and again before publishing) |
+| `npm run check:chatbot-figures` | Fails when a figure in `site/chat/knowledge.json` or in the `site/chat.html` and `site/index.html` copy, or in the case-study prose, disagrees with the generated summary, the report, or the fixtures behind the case-study answers: `policy.mjs` pay periods, tenant deadlines, the case-study pages, the axe viewports (needs `npm run report` first; CI runs it `--strict` on every pull request and again before publishing) |
 | `npm run check:site` | Accessibility (axe WCAG 2.1 A/AA) and HTML structure checks for `site/` |
 | `npm run verify:baseline` | Typecheck + baseline + Chromium E2E + hardened evals |
 | `npm run verify:release` | The full gate; green only when every defect is fixed |

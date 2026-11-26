@@ -95,8 +95,8 @@
       </div>
 
       <p class="site-checks">
-        Latest run: <b data-figure="chatbot.cases">38</b> golden cases,
-        <b data-figure="chatbot.passed">38</b> passed,
+        Latest run: <b data-figure="chatbot.cases">40</b> golden cases,
+        <b data-figure="chatbot.passed">40</b> passed,
         <b data-figure="chatbot.failed">0</b> failed.
         <a href="reports/chatbot-eval.html">Read the per-case report →</a>
       </p>
@@ -129,10 +129,11 @@
           <h3>What it does not prove</h3>
           <div class="caveat">
             <p>
-              Matching is keyword-based, not semantic. A paraphrase the dataset does not
-              contain can route to the wrong entry or to the out-of-scope refusal. The dataset
-              was written by the same person who wrote the answers, so it checks consistency
-              and grounding, not whether these are the best answers to give.
+                        Matching is keyword-based, not semantic: keyword words may appear in any order, and a
+          question nothing matches still refuses, naming the closest published topics. A
+          paraphrase the dataset does not contain can still route to the wrong entry. The dataset
+          was written by the same person who wrote the answers, so it checks consistency and
+          grounding, not whether these are the best answers to give.
             </p>
             <p>
               A 100% pass rate is evidence about the cases in the file. It is not a claim that
