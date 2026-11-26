@@ -1,0 +1,7 @@
+{
+  "fixture": "quality/resume.json",
+  "fixtureSha256": "4a9b097332272fa994521912d1032b05bf9f99ec32ddf76a33acf6dfddad775d",
+  "pdf": "site/resume.pdf",
+  "bytes": 90713,
+  "generatedBy": "npm run build:resume"
+}

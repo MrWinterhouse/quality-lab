@@ -40,6 +40,7 @@
  * the report yet. The report job and the publish job pass `--strict`, so a pull request or a
  * published page cannot ship figures the evidence does not back.
  */
+import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { VENDOR_RETRY, attemptIdempotencyKey } from '../product/server/app.mjs';
 import { annualizeIncome } from '../product/server/lib/policy.mjs';
@@ -123,6 +124,13 @@ const connectHealth = resumeRole('Connect for Health Colorado');
 const catalyst = resumeRole('Catalyst Healthcare');
 const direwolf = resumeRole('Dire Wolf Digital');
 const resumePdf = await readFile(new URL('../site/resume.pdf', import.meta.url)).catch(() => null);
+const resumeFixtureText = (
+  await readFile(new URL('../quality/resume.json', import.meta.url), 'utf8')
+).replace(/\r\n/g, '\n');
+const resumeFixtureHash = createHash('sha256').update(resumeFixtureText).digest('hex');
+const resumeManifest = await readTextOr(new URL('../quality/resume.pdf.json', import.meta.url))
+  .then((text) => (text ? JSON.parse(text) : null))
+  .catch(() => null);
 const roleDatePattern = (role) =>
   new RegExp(`\\b(${role.startYear})[\u2013-](${role.endYear})\\b`, 'g');
 
@@ -278,6 +286,11 @@ if (caseStudyCount === null) {
 if (!resumePdf || resumePdf.length < 2000) {
   problems.push(
     'site/resume.pdf: missing or too small, so the resume link and the pages that state resume facts cannot be checked. Run `npm run build:resume`.',
+  );
+}
+if (!resumeManifest || resumeManifest.fixtureSha256 !== resumeFixtureHash) {
+  problems.push(
+    'quality/resume.pdf.json: site/resume.pdf was not built from the current quality/resume.json, so the published resume can describe a different career than the page. Run `npm run build:resume`.',
   );
 }
 

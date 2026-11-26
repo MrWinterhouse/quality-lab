@@ -9,10 +9,15 @@
  *
  * Usage: node scripts/build-resume.mjs [outputPath]
  */
-import { readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { readFile, stat, writeFile } from 'node:fs/promises';
 import { chromium } from '@playwright/test';
 
-const resume = JSON.parse(await readFile('quality/resume.json', 'utf8'));
+const fixturePath = 'quality/resume.json';
+// Hash the LF form: a Windows checkout rewrites the fixture with CRLF, and the published
+// PDF must not look stale just because of line endings.
+const fixtureText = (await readFile(fixturePath, 'utf8')).replace(/\r\n/g, '\n');
+const resume = JSON.parse(fixtureText);
 const output = process.argv[2] ?? resume.resumeFile;
 
 const roleLine = (role) => `${role.startYear}–${role.endYear}`;
@@ -163,4 +168,23 @@ try {
   await browser.close();
 }
 
-console.log(`[resume] wrote ${output} from quality/resume.json`);
+// The manifest is what the figure gate compares quality/resume.json against: a fixture edit
+// without a rebuild fails the gate instead of leaving a published PDF that describes a
+// different career.
+await writeFile(
+  'quality/resume.pdf.json',
+  `${JSON.stringify(
+    {
+      fixture: fixturePath,
+      fixtureSha256: createHash('sha256').update(fixtureText).digest('hex'),
+      pdf: output,
+      bytes: (await stat(output)).size,
+      generatedBy: 'npm run build:resume',
+    },
+    null,
+    2,
+  )}\n`,
+  'utf8',
+);
+
+console.log(`[resume] wrote ${output} from ${fixturePath}`);
