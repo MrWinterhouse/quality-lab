@@ -6,8 +6,10 @@
  * case is an exact assertion, the same file the browser loads is imported here, and any
  * single failure exits 1 with the case name and the broken assertion.
  *
- * Usage: node scripts/chatbot-evals.mjs
- * Writes artifacts/chatbot-eval.json and artifacts/chatbot-eval.md.
+ * Usage: node scripts/chatbot-evals.mjs [--write-coverage]
+ * Writes artifacts/chatbot-eval.json and artifacts/chatbot-eval.md. It also checks that
+ * site/chat/coverage.json — the per-answer case list the chat page renders — still matches
+ * the dataset; `--write-coverage` regenerates it after the dataset changes.
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createAssistant } from '../site/chat/engine.js';
@@ -76,6 +78,60 @@ for (const testCase of golden) {
   });
 }
 
+// The chat page shows, under each answer, the cases that assert that answer's topic. That
+// list is generated from the dataset here rather than written by hand, and the committed
+// copy is checked, so a new case cannot be added without the page learning about it.
+const WRITE_COVERAGE = process.argv.includes('--write-coverage');
+const coverageUrl = new URL('../site/chat/coverage.json', import.meta.url);
+const topicTitles = new Map(knowledge.map((entry) => [entry.id, entry.title]));
+
+function describeExpectations(expect) {
+  const checks = [];
+  if (expect.refused === true) checks.push('refuses instead of answering');
+  else if (expect.refused === false) checks.push('answers');
+  if (expect.topic && topicTitles.has(expect.topic)) {
+    checks.push(`comes from “${topicTitles.get(expect.topic)}”`);
+  }
+  for (const text of expect.must_include ?? []) checks.push(`contains “${text}”`);
+  for (const text of expect.must_not_include ?? []) checks.push(`never contains “${text}”`);
+  for (const citation of expect.must_cite ?? []) checks.push(`cites ${citation}`);
+  if (typeof expect.citation_count === 'number') {
+    checks.push(
+      expect.citation_count === 0 ? 'cites nothing' : `cites exactly ${expect.citation_count}`,
+    );
+  }
+  if (expect.max_words) checks.push(`stays within ${expect.max_words} words`);
+  return checks;
+}
+
+const topics = {};
+for (const testCase of golden) {
+  const topic = testCase.expect?.topic ?? 'out-of-scope';
+  (topics[topic] ??= []).push({
+    id: testCase.id,
+    category: testCase.category ?? 'uncategorised',
+    question: testCase.message.trim() || '(empty message)',
+    checks: describeExpectations(testCase.expect ?? {}),
+  });
+}
+
+const coverage = {
+  generatedBy: 'npm run test:chatbot',
+  dataset: 'tests/chatbot/golden.json',
+  report: 'reports/chatbot-eval.html',
+  total: cases.length,
+  topics,
+};
+const coverageText = `${JSON.stringify(coverage, null, 2)}\n`;
+
+let coverageInSync = true;
+if (WRITE_COVERAGE) {
+  await writeFile(coverageUrl, coverageText);
+} else {
+  const committed = await readFile(coverageUrl, 'utf8').catch(() => null);
+  coverageInSync = committed === coverageText;
+}
+
 const passed = cases.filter((testCase) => testCase.passed).length;
 const failed = cases.length - passed;
 const passRate = Number((passed / cases.length).toFixed(3));
@@ -101,6 +157,12 @@ const result = {
   passRate,
   gatePassed,
   categories,
+  coverage: {
+    file: 'site/chat/coverage.json',
+    topics: Object.keys(topics).length,
+    cases: cases.length,
+    inSync: coverageInSync,
+  },
   failures: cases.filter((testCase) => !testCase.passed).map(({ id, problems }) => ({ id, problems })),
   cases,
 };
@@ -147,6 +209,18 @@ ${cases.map(row).join('\n')}
 - **Refusal flag** — the machine-readable \`refused\` field must agree with the prose.
 - **Length budget** — an answer that cites everything but says nothing in 300 words fails.
 
+## How these cases appear on the page
+
+Every answer on \`site/chat.html\` lists the cases above that assert its topic, with the
+assertion each case makes, read from \`site/chat/coverage.json\`. That file is generated from
+this dataset, and this run ${coverageInSync ? 'found the committed copy in sync' : 'found the committed copy **out of date**'}.
+
+| Topic | Cases |
+| --- | ---: |
+${Object.entries(topics)
+  .map(([topic, list]) => `| \`${topic}\` | ${list.length} |`)
+  .join('\n')}
+
 ## What this does not prove
 
 - Matching is keyword-based, not semantic. A paraphrase the dataset does not contain can
@@ -169,8 +243,20 @@ console.log(
 for (const failure of result.failures) {
   console.log(`    - ${failure.id}: ${failure.problems.join('; ')}`);
 }
+console.log(
+  `  per-answer coverage: ${Object.keys(topics).length} topics from ${cases.length} cases, ${
+    coverageInSync ? 'site/chat/coverage.json in sync' : 'site/chat/coverage.json OUT OF DATE'
+  }`,
+);
 
 if (!gatePassed) {
   console.error('\nGolden-dataset gate failed. See artifacts/chatbot-eval.md.');
+  process.exit(1);
+}
+
+if (!coverageInSync) {
+  console.error(
+    '\nsite/chat/coverage.json does not match tests/chatbot/golden.json. Run `npm run test:chatbot -- --write-coverage` and commit the file.',
+  );
   process.exit(1);
 }

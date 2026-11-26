@@ -262,6 +262,11 @@ jobs:
           path: artifacts
           merge-multiple: true
       - run: npm run report
+
+      # A pull request regenerates the same summary and report, so it runs the same strict
+      # check: stale figures fail review instead of merging and only failing at publish.
+      - name: Check the assistant's figures against the evidence
+        run: node scripts/check-chatbot-figures.mjs artifacts/summary.json artifacts/quality-report.md --strict
       - uses: actions/upload-artifact@v6
         with:
           name: quality-report

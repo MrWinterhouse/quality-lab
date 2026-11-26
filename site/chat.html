@@ -31,7 +31,8 @@
       <h1 id="chat-title">Ask why I should be hired</h1>
       <p class="lede">
         Ask about the defects, the test strategy, or what the evidence does not cover.
-        Every answer is drawn from this portfolio, and every answer names its sources.
+        Every answer is drawn from this portfolio, names its sources, and lists the golden
+        cases that assert it — so the answer and the test for it sit in the same message.
       </p>
 
       <div class="chat">
@@ -98,6 +99,14 @@
         <b data-figure="chatbot.passed">38</b> passed,
         <b data-figure="chatbot.failed">0</b> failed.
         <a href="reports/chatbot-eval.html">Read the per-case report →</a>
+      </p>
+
+      <p>
+        Each answer in the conversation above carries a “How this answer is tested” panel:
+        the cases in the dataset that assert that answer's topic, and the assertion each case
+        makes. The panel reads <code>site/chat/coverage.json</code>, which
+        <code>npm run test:chatbot</code> generates from the dataset — a committed copy that
+        no longer matches the dataset fails that run.
       </p>
 
       <div class="cols-2">

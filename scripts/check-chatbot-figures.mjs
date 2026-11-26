@@ -16,8 +16,8 @@
  *   node scripts/check-chatbot-figures.mjs [summaryPath] [reportPath] [--strict]
  *
  * Without `--strict` a missing artifact is a warning, because a fresh checkout has not run
- * the report yet. The publish job passes `--strict`, so the page cannot ship figures the
- * evidence does not back.
+ * the report yet. The report job and the publish job pass `--strict`, so a pull request or a
+ * published page cannot ship figures the evidence does not back.
  */
 import { readFile } from 'node:fs/promises';
 

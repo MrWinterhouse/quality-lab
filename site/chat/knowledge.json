@@ -248,7 +248,7 @@
   {
     "id": "golden-dataset",
     "title": "This assistant's golden dataset",
-    "answer": "This assistant has its own golden dataset: every question on this page plus the boundary cases, each with expected substrings, forbidden strings, required citations and a refusal flag. One command runs the exact engine file the browser loads against that dataset and fails on any case, naming the case and the assertion that broke. The per-case result is published beside the rest of the evidence.",
+    "answer": "This assistant has its own golden dataset: every question on this page plus the boundary cases, each with expected substrings, forbidden strings, required citations and a refusal flag. One command runs the exact engine file the browser loads against that dataset and fails on any case, naming the case and the assertion that broke. The per-case result is published beside the rest of the evidence, and every answer on this page lists the cases that assert it.",
     "keywords": [
       "this chatbot",
       "this assistant",

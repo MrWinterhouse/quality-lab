@@ -4,7 +4,8 @@
  *
  * The golden dataset covers the engine; this covers the wiring the dataset cannot see —
  * the knowledge base loading over HTTP, controls staying disabled until it is ready, an
- * answer rendering with its source links, and a refusal being reachable by typing.
+ * answer rendering with its source links and its golden-case panel, and a refusal being
+ * reachable by typing.
  *
  * Usage: node scripts/check-chat-page.mjs
  */
@@ -62,6 +63,22 @@ try {
   const sources = page.locator('.chat-msg--assistant .chat-sources a');
   if ((await sources.count()) === 0) problems.push('the answer rendered without source links');
 
+  // The page claims each answer shows how it is tested, so the panel has to be there, name
+  // the case that covers the question, and actually open.
+  const pitchPanel = page.locator('.chat-msg--assistant').last().locator('.chat-tests');
+  if ((await pitchPanel.count()) === 0) {
+    problems.push('the pitch rendered without its golden-case panel');
+  } else {
+    const panelText = (await pitchPanel.textContent()) ?? '';
+    if (!panelText.includes('why-hire')) {
+      problems.push(`the pitch panel does not name its case: ${panelText.slice(0, 120)}`);
+    }
+    await pitchPanel.locator('summary').click();
+    if (!(await pitchPanel.evaluate((element) => element.open))) {
+      problems.push('the golden-case panel did not expand when its summary was clicked');
+    }
+  }
+
   await page.getByLabel('Your question').fill('Where are you based?');
   await page.getByRole('button', { name: 'Ask' }).click();
   const refusal = page.locator('.chat-msg--assistant .chat-text').last();
@@ -69,6 +86,11 @@ try {
   const refusalText = (await refusal.textContent()) ?? '';
   if (!refusalText.includes('not published here')) {
     problems.push(`the boundary case did not refuse: ${refusalText.slice(0, 120)}`);
+  }
+  const refusalPanel =
+    (await page.locator('.chat-msg--assistant').last().locator('.chat-tests').textContent()) ?? '';
+  if (!refusalPanel.includes('where-based')) {
+    problems.push(`the boundary refusal did not show its case: ${refusalPanel.slice(0, 120)}`);
   }
 } catch (error) {
   problems.push(`interaction failed: ${error.message.split('\n')[0]}`);
@@ -86,5 +108,7 @@ if (problems.length > 0) {
   }
   process.exitCode = 1;
 } else {
-  console.log('[check-chat-page] PASS — suggestion answered with sources, typed question refused.');
+  console.log(
+    '[check-chat-page] PASS — suggestion answered with sources and its golden-case panel, typed question refused.',
+  );
 }

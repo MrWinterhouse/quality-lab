@@ -33,7 +33,7 @@ npm run test:e2e             # 12 checks across Chromium, Firefox, WebKit
 npm run evals -- --gate      # hardened prompt 13/13
 npm run load                 # p95 smoke against two endpoints
 npm run test:python          # 7 Python oracle checks
-npm run test:chatbot         # hiring assistant golden dataset, 28/28
+npm run test:chatbot         # hiring assistant golden dataset, 38/38
 ```
 
 See the defects:
@@ -104,7 +104,7 @@ testing practice, not authoritative program rules.
 | Web across browsers/devices, accessibility, configurable behavior | `playwright.config.ts` (3 browsers), `tests/probes/e2e/`, tenant config |
 | APIs, events, external systems, contract testing, bad dependencies | `tests/contract/`, `tests/integration/workflow.test.ts`, vendor simulator |
 | AI evals, golden data, prompt regression, guardrails | `tests/evals/`, `scripts/run-evals.mjs`, `product/server/lib/assistant.mjs` |
-| Portfolio hiring assistant, golden dataset, page test, figure drift check, published report | `site/chat/`, `tests/chatbot/golden.json`, `scripts/chatbot-evals.mjs`, `scripts/check-chat-page.mjs`, `scripts/check-chatbot-figures.mjs` — page at `site/chat.html` |
+| Portfolio hiring assistant, golden dataset, page test, figure drift check, published report | `site/chat/`, `tests/chatbot/golden.json`, `scripts/chatbot-evals.mjs`, `scripts/check-chat-page.mjs`, `scripts/check-chatbot-figures.mjs`, `site/chat/coverage.json` — page at `site/chat.html`, with a per-answer test panel |
 | Acceptance testing with implementation teams | `docs/quality-strategy.md` + exercises 2 and 14 |
 | Reporting for non-engineers | `scripts/report.mjs`, `docs/readiness-report.md` |
 | Raising the bar on engineer-owned tests | exercises 4–9, `docs/answer-key.md` |
@@ -215,7 +215,8 @@ in memory and deliberately contains security defects for practice.
 | `npm run load` | Dependency-free load smoke with p95/error thresholds |
 | `npm run test:flaky` | The deliberately flaky test |
 | `npm run report` | `artifacts/quality-report.md` + `summary.json` |
-| `npm run check:chatbot-figures` | Fails when a figure in `site/chat/knowledge.json` disagrees with the generated summary or report (needs `npm run report` first; CI runs it `--strict` before publishing) |
+| `npm run test:chatbot` | Hiring assistant golden dataset against `site/chat/engine.js`; `--write-coverage` regenerates `site/chat/coverage.json`, and a stale copy fails the run |
+| `npm run check:chatbot-figures` | Fails when a figure in `site/chat/knowledge.json` disagrees with the generated summary or report (needs `npm run report` first; CI runs it `--strict` on every pull request and again before publishing) |
 | `npm run check:site` | Accessibility (axe WCAG 2.1 A/AA) and HTML structure checks for `site/` |
 | `npm run verify:baseline` | Typecheck + baseline + Chromium E2E + hardened evals |
 | `npm run verify:release` | The full gate; green only when every defect is fixed |
@@ -223,7 +224,7 @@ in memory and deliberately contains security defects for practice.
 CI (`.github/workflows/quality.yml`) runs the baseline, all three browsers in a matrix, the
 Python oracle, evals, load, the site's own accessibility and HTML checks, and a
 release-readiness job that records the open defects in its job summary instead of failing the
-build. On `main` it also publishes the portfolio and these reports to GitHub Pages.
+build. The `quality-report` job also runs the assistant's figure check strictly on every pull request, so stale numbers fail review instead of merging and only failing at publish. On `main` it also publishes the portfolio and these reports to GitHub Pages.
 
 ---
 
