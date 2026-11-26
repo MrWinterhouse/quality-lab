@@ -1,0 +1,56 @@
+{
+  "yearsExperience": 9,
+  "contact": {
+    "email": "Jwinterhouse3@gmail.com",
+    "city": "Johnstown",
+    "state": "Colorado",
+    "github": "https://github.com/MrWinterhouse/quality-lab"
+  },
+  "roles": [
+    {
+      "employer": "GoFundMe",
+      "title": "AI-Quality Engineer II",
+      "location": "San Diego, California",
+      "startYear": 2023,
+      "endYear": 2026,
+      "repositories": 5,
+      "engineersMentored": 4
+    },
+    {
+      "employer": "Connect for Health Colorado",
+      "title": "Technical Quality Analyst Supervisor",
+      "location": "Denver, Colorado",
+      "startYear": 2021,
+      "endYear": 2023,
+      "analystsSupervised": 3,
+      "applicationAreas": 4,
+      "runtimeReductionPercent": 33
+    },
+    {
+      "employer": "Catalyst Healthcare",
+      "title": "Test Engineer",
+      "location": "Lafayette, Colorado",
+      "startYear": 2017,
+      "endYear": 2021
+    },
+    {
+      "employer": "Dire Wolf Digital",
+      "title": "Senior Tester",
+      "location": "Denver, Colorado",
+      "startYear": 2016,
+      "endYear": 2017
+    }
+  ],
+  "aiAssisted": {
+    "automatedTests": 100,
+    "checklyChecks": 15
+  },
+  "education": {
+    "degree": "Bachelor of Science",
+    "field": "Applied Physics",
+    "school": "California State University San Marcos",
+    "graduated": 2015,
+    "minor": "Mathematics"
+  },
+  "resumeFile": "site/resume.pdf"
+}

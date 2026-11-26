@@ -1,4 +1,4 @@
-import { createAssistant } from './engine.js';
+import { loadEngine } from './load-engine.js';
 
 const log = document.getElementById('chat-log');
 const form = document.getElementById('chat-form');
@@ -132,9 +132,12 @@ function ask(question) {
 
 async function start() {
   try {
-    const response = await fetch('chat/knowledge.json', { cache: 'no-store' });
+    const [engine, response] = await Promise.all([
+      loadEngine(),
+      fetch('chat/knowledge.json', { cache: 'no-store' }),
+    ]);
     if (!response.ok) throw new Error(`knowledge base returned ${response.status}`);
-    assistant = createAssistant(await response.json());
+    assistant = engine.createAssistant(await response.json());
   } catch (error) {
     addMessage(
       'assistant',

@@ -1237,6 +1237,10 @@ td.pass {
   margin: 0.25rem 0 0;
 }
 
+.resume-link {
+  margin-top: 1.5rem;
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 860px) {

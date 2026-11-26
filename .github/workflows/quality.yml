@@ -320,6 +320,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Build the resume PDF from quality/resume.json
+        run: npm run build:resume
+
       - name: Assemble the site
         run: |
           mkdir -p _site

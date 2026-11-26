@@ -107,6 +107,25 @@ const playwrightConfig =
   (await readTextOr(new URL('../playwright.config.ts', import.meta.url))) ?? '';
 const siteCheckSource = (await readTextOr(new URL('./check-site.mjs', import.meta.url))) ?? '';
 
+// Resume facts are not generated evidence: they are the fixture the resume PDF, the front
+// page's experience section and the assistant's resume answers are all written from. A
+// changed career fact therefore fails here instead of drifting in three places.
+const resumeFixture = JSON.parse(
+  await readFile(new URL('../quality/resume.json', import.meta.url), 'utf8'),
+);
+const resumeRole = (employer) => {
+  const role = resumeFixture.roles.find((candidate) => candidate.employer === employer);
+  if (!role) throw new Error(`quality/resume.json has no role for ${employer}`);
+  return role;
+};
+const gofundme = resumeRole('GoFundMe');
+const connectHealth = resumeRole('Connect for Health Colorado');
+const catalyst = resumeRole('Catalyst Healthcare');
+const direwolf = resumeRole('Dire Wolf Digital');
+const resumePdf = await readFile(new URL('../site/resume.pdf', import.meta.url)).catch(() => null);
+const roleDatePattern = (role) =>
+  new RegExp(`\\b(${role.startYear})[\u2013-](${role.endYear})\\b`, 'g');
+
 let caseStudyPages = [];
 try {
   caseStudyPages = (
@@ -256,6 +275,11 @@ if (viewportWidths.length < 2) {
 if (caseStudyCount === null) {
   problems.push('site/case-studies: no pages found, so "four case studies" cannot be checked.');
 }
+if (!resumePdf || resumePdf.length < 2000) {
+  problems.push(
+    'site/resume.pdf: missing or too small, so the resume link and the pages that state resume facts cannot be checked. Run `npm run build:resume`.',
+  );
+}
 
 if (projectNames.length === 0) {
   problems.push(
@@ -364,6 +388,83 @@ const claims = [
     expected: viewportWidths.slice(0, 2).length === 2 ? viewportWidths.slice(0, 2) : [null, null],
     evidence: 'the VIEWPORTS widths in scripts/check-site.mjs',
     entries: ['a11y'],
+  },
+  {
+    label: 'years of experience',
+    pattern: /([\w]+)\+ years in quality engineering/gi,
+    expected: [resumeFixture.yearsExperience],
+    evidence: 'quality/resume.json yearsExperience',
+    entries: ['experience'],
+  },
+  {
+    label: 'years at the most recent role',
+    pattern: /([\w]+) years at GoFundMe/gi,
+    expected: [gofundme.endYear - gofundme.startYear],
+    evidence: 'the GoFundMe start and end years in quality/resume.json',
+    entries: ['experience'],
+  },
+  {
+    label: 'repositories owned',
+    pattern: /([\w]+) repositories/gi,
+    expected: [gofundme.repositories],
+    evidence: 'quality/resume.json GoFundMe.repositories',
+    entries: ['experience'],
+  },
+  {
+    label: 'engineers mentored',
+    pattern: /([\w]+) engineers/gi,
+    expected: [gofundme.engineersMentored],
+    evidence: 'quality/resume.json GoFundMe.engineersMentored',
+    entries: ['experience'],
+  },
+  {
+    label: 'AI-drafted automated tests',
+    pattern: /([\w]+)\+ automated tests/gi,
+    expected: [resumeFixture.aiAssisted.automatedTests],
+    evidence: 'quality/resume.json aiAssisted.automatedTests',
+    entries: ['ai-work'],
+  },
+  {
+    label: 'Checkly synthetic checks',
+    pattern: /([\w]+)\+ Checkly/gi,
+    expected: [resumeFixture.aiAssisted.checklyChecks],
+    evidence: 'quality/resume.json aiAssisted.checklyChecks',
+    entries: ['ai-work'],
+  },
+  {
+    label: 'graduation year',
+    pattern: /minor in Mathematics, ([\w]+)/gi,
+    expected: [resumeFixture.education.graduated],
+    evidence: 'quality/resume.json education.graduated',
+    entries: ['education'],
+  },
+  {
+    label: 'GoFundMe dates',
+    pattern: roleDatePattern(gofundme),
+    expected: [gofundme.startYear, gofundme.endYear],
+    evidence: 'quality/resume.json roles[] for GoFundMe',
+    entries: ['employers'],
+  },
+  {
+    label: 'Connect for Health Colorado dates',
+    pattern: roleDatePattern(connectHealth),
+    expected: [connectHealth.startYear, connectHealth.endYear],
+    evidence: 'quality/resume.json roles[] for Connect for Health Colorado',
+    entries: ['employers'],
+  },
+  {
+    label: 'Catalyst Healthcare dates',
+    pattern: roleDatePattern(catalyst),
+    expected: [catalyst.startYear, catalyst.endYear],
+    evidence: 'quality/resume.json roles[] for Catalyst Healthcare',
+    entries: ['employers'],
+  },
+  {
+    label: 'Dire Wolf Digital dates',
+    pattern: roleDatePattern(direwolf),
+    expected: [direwolf.startYear, direwolf.endYear],
+    evidence: 'quality/resume.json roles[] for Dire Wolf Digital',
+    entries: ['employers'],
   },
 ];
 
@@ -534,6 +635,90 @@ const indexClaims = [
     ),
     expected: [summary.load?.requests ?? null, summary.load?.concurrency ?? null],
     evidence: 'summary.load.requests and summary.load.concurrency',
+  },
+  {
+    label: 'resume years',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN})\\+ years\\b`, 'gi'),
+    expected: [resumeFixture.yearsExperience],
+    evidence: 'quality/resume.json yearsExperience',
+  },
+  {
+    label: 'resume years in the experience heading',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) years of it\\b`, 'gi'),
+    expected: [resumeFixture.yearsExperience],
+    evidence: 'quality/resume.json yearsExperience',
+  },
+  {
+    label: 'repositories',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) repositories\\b`, 'gi'),
+    expected: [gofundme.repositories],
+    evidence: 'quality/resume.json GoFundMe.repositories',
+  },
+  {
+    label: 'engineers mentored',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) engineers\\b`, 'gi'),
+    expected: [gofundme.engineersMentored],
+    evidence: 'quality/resume.json GoFundMe.engineersMentored',
+  },
+  {
+    label: 'analysts supervised',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) analysts\\b`, 'gi'),
+    expected: [connectHealth.analystsSupervised],
+    evidence: 'quality/resume.json Connect for Health Colorado.analystsSupervised',
+  },
+  {
+    label: 'application areas',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) application areas\\b`, 'gi'),
+    expected: [connectHealth.applicationAreas],
+    evidence: 'quality/resume.json Connect for Health Colorado.applicationAreas',
+  },
+  {
+    label: 'suite runtime reduction',
+    pattern: new RegExp(`\\bsuite runtime by (${NUMBER_TOKEN})%`, 'gi'),
+    expected: [connectHealth.runtimeReductionPercent],
+    evidence: 'quality/resume.json Connect for Health Colorado.runtimeReductionPercent',
+  },
+  {
+    label: 'AI-drafted automated tests',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN})\\+ automated tests\\b`, 'gi'),
+    expected: [resumeFixture.aiAssisted.automatedTests],
+    evidence: 'quality/resume.json aiAssisted.automatedTests',
+  },
+  {
+    label: 'Checkly synthetic checks',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN})\\+ Checkly\\b`, 'gi'),
+    expected: [resumeFixture.aiAssisted.checklyChecks],
+    evidence: 'quality/resume.json aiAssisted.checklyChecks',
+  },
+  {
+    label: 'graduation year',
+    pattern: new RegExp(`\\bSan Marcos, (${NUMBER_TOKEN}), with a minor\\b`, 'gi'),
+    expected: [resumeFixture.education.graduated],
+    evidence: 'quality/resume.json education.graduated',
+  },
+  {
+    label: 'GoFundMe dates',
+    pattern: roleDatePattern(gofundme),
+    expected: [gofundme.startYear, gofundme.endYear],
+    evidence: 'quality/resume.json roles[] for GoFundMe',
+  },
+  {
+    label: 'Connect for Health Colorado dates',
+    pattern: roleDatePattern(connectHealth),
+    expected: [connectHealth.startYear, connectHealth.endYear],
+    evidence: 'quality/resume.json roles[] for Connect for Health Colorado',
+  },
+  {
+    label: 'Catalyst Healthcare dates',
+    pattern: roleDatePattern(catalyst),
+    expected: [catalyst.startYear, catalyst.endYear],
+    evidence: 'quality/resume.json roles[] for Catalyst Healthcare',
+  },
+  {
+    label: 'Dire Wolf Digital dates',
+    pattern: roleDatePattern(direwolf),
+    expected: [direwolf.startYear, direwolf.endYear],
+    evidence: 'quality/resume.json roles[] for Dire Wolf Digital',
   },
 ];
 
@@ -846,6 +1031,11 @@ const derived = [
     'vendor retry',
     `${VENDOR_RETRY.attempts} max, ${VENDOR_RETRY.delayMs} ms; ${vendorRun.verifications} records over ${vendorRun.attempts} calls`,
   ],
+  [
+    'resume facts',
+    `${resumeFixture.yearsExperience}+ years, ${resumeFixture.roles.length} roles, ${resumeFixture.aiAssisted.automatedTests}+ tests, ${resumeFixture.aiAssisted.checklyChecks}+ checks`,
+  ],
+  ['resume pdf', resumePdf ? `${Math.round(resumePdf.length / 1024)} KB` : 'missing'],
 ];
 
 console.log('\nHiring assistant — knowledge base vs generated evidence and fixtures');

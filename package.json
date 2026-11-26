@@ -8,6 +8,7 @@
     "node": ">=22.6"
   },
   "scripts": {
+    "build:resume": "node scripts/build-resume.mjs",
     "dev": "node --watch product/server/server.mjs",
     "start": "node product/server/server.mjs",
     "typecheck": "tsc --noEmit",

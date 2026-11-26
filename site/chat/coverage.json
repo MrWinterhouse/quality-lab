@@ -2,7 +2,7 @@
   "generatedBy": "npm run test:chatbot",
   "dataset": "tests/chatbot/golden.json",
   "report": "reports/chatbot-eval.html",
-  "total": 43,
+  "total": 47,
   "topics": {
     "pitch": [
       {
@@ -344,6 +344,19 @@
           "contains “GitHub Actions”",
           "cites repo"
         ]
+      },
+      {
+        "id": "testing-tools",
+        "category": "resume",
+        "question": "What automated testing tools is he familiar with?",
+        "checks": [
+          "answers",
+          "comes from “Tools and stack”",
+          "contains “Playwright”",
+          "contains “Selenium”",
+          "cites repo",
+          "stays within 110 words"
+        ]
       }
     ],
     "employers": [
@@ -356,6 +369,18 @@
           "comes from “Where I have worked”",
           "contains “GoFundMe”",
           "contains “Connect for Health Colorado”",
+          "cites portfolio-experience",
+          "stays within 100 words"
+        ]
+      },
+      {
+        "id": "recent-employer",
+        "category": "resume",
+        "question": "Who is his most recent employer?",
+        "checks": [
+          "answers",
+          "comes from “Where I have worked”",
+          "contains “GoFundMe”",
           "cites portfolio-experience",
           "stays within 100 words"
         ]
@@ -388,6 +413,47 @@
           "contains “Checkly”",
           "cites portfolio-experience",
           "stays within 110 words"
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "id": "most-recent-role",
+        "category": "resume",
+        "question": "How long was he at his most recent role?",
+        "checks": [
+          "answers",
+          "comes from “Years of experience”",
+          "contains “GoFundMe”",
+          "contains “three years”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      },
+      {
+        "id": "years-experience",
+        "category": "resume",
+        "question": "How many years of experience do you have?",
+        "checks": [
+          "answers",
+          "comes from “Years of experience”",
+          "contains “9+ years”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      }
+    ],
+    "resume": [
+      {
+        "id": "resume-link",
+        "category": "resume",
+        "question": "Can I see your resume?",
+        "checks": [
+          "answers",
+          "comes from “The resume”",
+          "contains “resume.pdf”",
+          "cites resume-pdf",
+          "stays within 70 words"
         ]
       }
     ],
@@ -432,20 +498,6 @@
           "never contains “time zone”",
           "cites portfolio-experience",
           "stays within 60 words"
-        ]
-      }
-    ],
-    "experience": [
-      {
-        "id": "years-experience",
-        "category": "resume",
-        "question": "How many years of experience do you have?",
-        "checks": [
-          "answers",
-          "comes from “Years of experience”",
-          "contains “9+ years”",
-          "cites portfolio-experience",
-          "stays within 90 words"
         ]
       }
     ],

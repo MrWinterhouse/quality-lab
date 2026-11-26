@@ -258,6 +258,58 @@
     "note": "John's own AI tooling, kept distinct from the lab's guardrail eval."
   },
   {
+    "id": "most-recent-role",
+    "category": "resume",
+    "message": "How long was he at his most recent role?",
+    "expect": {
+      "topic": "experience",
+      "refused": false,
+      "must_include": ["GoFundMe", "three years"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "The tenure comes from that role's start and end years in quality/resume.json."
+  },
+  {
+    "id": "recent-employer",
+    "category": "resume",
+    "message": "Who is his most recent employer?",
+    "expect": {
+      "topic": "employers",
+      "refused": false,
+      "must_include": ["GoFundMe"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 100
+    },
+    "note": "Third-person phrasing a recruiter would use, answered from the same entry as the first-person question."
+  },
+  {
+    "id": "testing-tools",
+    "category": "resume",
+    "message": "What automated testing tools is he familiar with?",
+    "expect": {
+      "topic": "tools",
+      "refused": false,
+      "must_include": ["Playwright", "Selenium"],
+      "must_cite": ["repo"],
+      "max_words": 110
+    },
+    "note": "The familiar-tools phrasing has to land on the stack answer, not on the AI-work answer."
+  },
+  {
+    "id": "resume-link",
+    "category": "resume",
+    "message": "Can I see your resume?",
+    "expect": {
+      "topic": "resume",
+      "refused": false,
+      "must_include": ["resume.pdf"],
+      "must_cite": ["resume-pdf"],
+      "max_words": 70
+    },
+    "note": "The link replaces what used to be an email-only answer."
+  },
+  {
     "id": "pushback",
     "category": "method",
     "message": "Tell me about a time you disagreed with a release decision.",

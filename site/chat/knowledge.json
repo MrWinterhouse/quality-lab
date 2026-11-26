@@ -88,7 +88,7 @@
   {
     "id": "experience",
     "title": "Years of experience",
-    "answer": "9+ years in quality engineering, from automated UI and API testing through automation architecture and AI-assisted engineering: Playwright and TypeScript, C# and Selenium, SQL validation and CI/CD. Most recently an AI-Quality Engineer II at GoFundMe, where I owned suites across five repositories and mentored four engineers.",
+    "answer": "9+ years in quality engineering, from automated UI and API testing through automation architecture and AI-assisted engineering: Playwright and TypeScript, C# and Selenium, SQL validation and CI/CD. Most recently three years at GoFundMe as an AI-Quality Engineer II (2023-2026), where I owned suites across five repositories and mentored four engineers.",
     "keywords": [
       "years of experience",
       "how long",
@@ -96,7 +96,12 @@
       "worked",
       "career",
       "background",
-      "seniority"
+      "seniority",
+      "most recent role",
+      "most recent job",
+      "tenure",
+      "how long was he",
+      "years at"
     ],
     "citations": [
       {
@@ -125,7 +130,14 @@
       "gofundme",
       "where have you worked",
       "which companies",
-      "roles"
+      "roles",
+      "most recent employer",
+      "recent employer",
+      "current employer",
+      "last employer",
+      "most recent hire",
+      "recent hire",
+      "where does he work"
     ],
     "citations": [
       {
@@ -526,7 +538,11 @@
       "sql",
       "postgres",
       "docker",
-      "lighthouse"
+      "lighthouse",
+      "familiar",
+      "testing tools",
+      "automated testing tools",
+      "qa tools"
     ],
     "citations": [
       {
@@ -537,17 +553,39 @@
     ]
   },
   {
+    "id": "resume",
+    "title": "The resume",
+    "answer": "Yes: a one-page PDF at resume.pdf, written from the same facts as the experience section. It covers the roles, the toolkit, the AI-assisted work and the degree; the four case studies here are the part a resume cannot show.",
+    "keywords": [
+      "resume",
+      "cv",
+      "pdf",
+      "download",
+      "one-page"
+    ],
+    "citations": [
+      {
+        "id": "resume-pdf",
+        "label": "Resume (PDF)",
+        "href": "resume.pdf"
+      },
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      }
+    ]
+  },
+  {
     "id": "contact",
     "title": "Contact",
-    "answer": "Email Jwinterhouse3@gmail.com for the PDF resume or a conversation, or read the source at github.com/MrWinterhouse/quality-lab. Based in Johnstown, Colorado. The release report, the eval JSON and the failing probes are all linked from the portfolio.",
+    "answer": "Email Jwinterhouse3@gmail.com, or read the source at github.com/MrWinterhouse/quality-lab. Based in Johnstown, Colorado. The release report, the eval JSON and the failing probes are all linked from the portfolio.",
     "keywords": [
       "contact",
       "email",
       "reach",
       "github",
       "linkedin",
-      "resume",
-      "cv",
       "portfolio link"
     ],
     "citations": [

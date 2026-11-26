@@ -5,7 +5,7 @@
  * the answer the golden dataset tests: same retrieval, same citations, same refusals. This
  * file only renders — every sentence it shows comes from knowledge.json and coverage.json.
  */
-import { createAssistant } from './engine.js';
+import { loadEngine } from './load-engine.js';
 
 const form = document.getElementById('hero-chat-form');
 const input = document.getElementById('hero-chat-input');
@@ -61,9 +61,12 @@ function ask(question) {
 
 async function start() {
   try {
-    const response = await fetch('chat/knowledge.json', { cache: 'no-store' });
+    const [engine, response] = await Promise.all([
+      loadEngine(),
+      fetch('chat/knowledge.json', { cache: 'no-store' }),
+    ]);
     if (!response.ok) throw new Error(`knowledge base returned ${response.status}`);
-    assistant = createAssistant(await response.json());
+    assistant = engine.createAssistant(await response.json());
     coverage = await fetch('chat/coverage.json', { cache: 'no-store' })
       .then((value) => (value.ok ? value.json() : null))
       .catch(() => null);
