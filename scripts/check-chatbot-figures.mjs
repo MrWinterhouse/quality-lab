@@ -15,11 +15,16 @@
  * answers describe, so a fixed defect or a changed fixture fails this same gate instead of
  * leaving the answer quietly wrong.
  *
+ * The page repeats five of those figures in the copy a reader sees before asking anything
+ * (`site/chat.html`): 26 pay periods, 15 probes, five open risks, four case studies and the
+ * golden-case count. They are checked against the same sources, so the visible copy cannot
+ * drift on its own while the answers stay right.
+ *
  * A claim that disappears is a failure too: a figure quietly deleted from an answer is the
  * same drift as one left stale.
  *
  * Usage:
- *   node scripts/check-chatbot-figures.mjs [summaryPath] [reportPath] [--strict]
+ *   node scripts/check-chatbot-figures.mjs [summaryPath] [reportPath] [sitePath] [--strict]
  *
  * Without `--strict` a missing artifact is a warning, because a fresh checkout has not run
  * the report yet. The report job and the publish job pass `--strict`, so a pull request or a
@@ -34,6 +39,7 @@ const strict = argv.includes('--strict');
 const paths = argv.filter((argument) => !argument.startsWith('--'));
 const summaryPath = paths[0] ?? 'artifacts/summary.json';
 const reportPath = paths[1] ?? 'artifacts/quality-report.md';
+const sitePath = paths[2] ?? 'site/chat.html';
 
 const NUMBER_WORDS = new Map(
   Object.entries({
@@ -80,6 +86,10 @@ async function readTextOr(file) {
 const knowledge = JSON.parse(
   await readFile(new URL('../site/chat/knowledge.json', import.meta.url), 'utf8'),
 );
+const goldenDataset = JSON.parse(
+  await readFile(new URL('../tests/chatbot/golden.json', import.meta.url), 'utf8'),
+);
+const goldenDatasetSize = Array.isArray(goldenDataset) ? goldenDataset.length : null;
 const playwrightConfig =
   (await readTextOr(new URL('../playwright.config.ts', import.meta.url))) ?? '';
 const siteCheckSource = (await readTextOr(new URL('./check-site.mjs', import.meta.url))) ?? '';
@@ -114,6 +124,18 @@ if (!reportText) {
   }
   console.warn(`${message} Skipping the report cross-check.`);
 }
+
+// The page copy is prose, so check the text a reader sees rather than the markup around it.
+const siteHtml = await readTextOr(sitePath);
+const siteText = siteHtml
+  ? siteHtml
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&[a-z#0-9]+;/gi, ' ')
+      .replace(/\s+/g, ' ')
+  : null;
 
 const problems = [];
 const E2E_SUITE = 'End-to-end (Chromium)';
@@ -319,6 +341,83 @@ for (const claim of claims) {
   }
 }
 
+// Only a number can be the figure. A bare `[\w]+` capture would read "me Case studies" in
+// the navigation or "the golden cases" in a sentence as a claim, and fail on a sentence that
+// states no figure at all.
+const NUMBER_TOKEN =
+  '(?:\\d+|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)';
+const siteClaims = [
+  {
+    label: 'pay periods',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) pay periods\\b`, 'gi'),
+    expected: [biweeklyCorrect],
+    evidence: 'weekly pay at 52 in product/server/lib/policy.mjs, so 26 biweekly periods',
+  },
+  {
+    label: 'failing defect probes',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) probes\\b`, 'gi'),
+    expected: [failingProbes],
+    evidence: 'summary.probes.failed — the probes that fail by design',
+  },
+  {
+    label: 'open risks',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) open risks\\b`, 'gi'),
+    expected: [summary.openBlockingRisks],
+    evidence: 'summary.openBlockingRisks, from quality/risk-register.json',
+  },
+  {
+    label: 'case studies',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) case studies\\b`, 'gi'),
+    expected: [caseStudyCount],
+    evidence: 'the pages in site/case-studies/',
+  },
+  {
+    label: 'golden cases',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) golden cases\\b`, 'gi'),
+    expected: [goldenDatasetSize],
+    evidence: 'the cases in tests/chatbot/golden.json',
+  },
+];
+
+if (!siteText) {
+  problems.push(
+    `site copy: ${sitePath} was not found, so the numbers written into the page cannot be checked.`,
+  );
+} else {
+  for (const claim of siteClaims) {
+    if (claim.expected.some((value) => value === null || value === undefined)) {
+      problems.push(
+        `site copy (${claim.label}): the source does not contain this figure (${claim.evidence}).`,
+      );
+      continue;
+    }
+
+    const hits = [...siteText.matchAll(claim.pattern)];
+    if (hits.length === 0) {
+      problems.push(
+        `site copy (${claim.label}): ${sitePath} no longer states this figure (expected ${claim.expected.join(
+          '/',
+        )}; ${claim.evidence}).`,
+      );
+      continue;
+    }
+
+    for (const hit of hits) {
+      const values = hit.slice(1).map(numberOf);
+      const same =
+        values.length === claim.expected.length &&
+        values.every((value, index) => value === claim.expected[index]);
+      if (!same) {
+        problems.push(
+          `site copy (${claim.label}): "${hit[0].trim()}" reads ${values.join(
+            '/',
+          )}, but the evidence says ${claim.expected.join('/')} (${claim.evidence}).`,
+        );
+      }
+    }
+  }
+}
+
 // The report is what the site links to, so it has to state the same numbers as the summary.
 const reportChecks = [
   {
@@ -420,6 +519,10 @@ const derived = [
   ['tenant deadlines', `A ${deadlineA} / B ${deadlineB} days`],
   ['case-study pages', String(caseStudyCount ?? 'missing')],
   ['axe viewports', viewportWidths.slice(0, 2).join(' / ') || 'missing'],
+  [
+    'page copy',
+    siteText ? `${siteClaims.length} figures in ${sitePath}` : `${sitePath} not found`,
+  ],
 ];
 
 console.log('\nHiring assistant — knowledge base vs generated evidence and fixtures');
@@ -430,10 +533,12 @@ for (const [label, value] of derived) {
 }
 
 if (problems.length > 0) {
-  console.error(`\nFAIL — ${problems.length} figure problem(s) in site/chat/knowledge.json:`);
+  console.error(
+    `\nFAIL — ${problems.length} figure problem(s) in the answers, the page copy or the evidence:`,
+  );
   for (const problem of problems) console.error(`  - ${problem}`);
   console.error(
-    '\nThe assistant answers from published evidence and the code it describes, so the answer, the report and the fixtures have to move together.',
+    '\nThe assistant answers from published evidence and the code it describes, so the answer, the page copy, the report and the fixtures have to move together.',
   );
   process.exit(1);
 }
