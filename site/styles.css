@@ -1084,6 +1084,47 @@ td.pass {
   color: var(--ink);
 }
 
+/* ---------- closing hire band ---------- */
+
+.hire-band {
+  background: var(--ink);
+  color: #f2ede4;
+}
+
+.hire-band .kicker {
+  color: #b3a898;
+}
+
+.hire-band h2 {
+  color: #fff;
+  margin-bottom: 0.6rem;
+}
+
+.hire-band p {
+  color: #cfc6b6;
+  max-width: 44rem;
+}
+
+.hire-band .button {
+  background: var(--rust);
+  color: var(--paper);
+}
+
+.hire-band .button:hover {
+  background: #b84a22;
+}
+
+.hire-band .button--ghost {
+  background: transparent;
+  color: #f0b49a;
+  border-color: #f0b49a;
+}
+
+.hire-band .button--ghost:hover {
+  background: #2a251f;
+  color: #fff;
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 860px) {

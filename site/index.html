@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>John Winterhouse — quality engineer: release gates and evidence</title>
-<meta name="description" content="John Winterhouse, quality engineer. Test strategy, release gates and AI evaluation, shown through four case studies with reproducible evidence and a release decision that says not ready.">
+<title>Hire John Winterhouse — quality engineering portfolio</title>
+<meta name="description" content="You should hire John Winterhouse: a quality engineer who finds the failures a green suite hides. Four case studies, a release gate that says not ready, and evidence that names what it has not verified.">
 <link rel="stylesheet" href="styles.css">
 
 </head>
@@ -30,13 +30,13 @@
   <section class="hero" aria-labelledby="hero-title">
     <div class="wrap hero-grid">
       <div>
-        <p class="kicker">Quality engineer · open to quality engineering roles</p>
-        <h1 id="hero-title">Hire the engineer who says <em>not to ship</em> — then shows you why.</h1>
+        <p class="kicker">John Winterhouse · quality engineer · for hire</p>
+        <h1 id="hero-title">You should hire <em>John Winterhouse</em>.</h1>
         <p class="lede">
-          I’m John Winterhouse, a quality engineer. I build the test infrastructure a release
-          owner can act on: independent oracles, gates that can say no, and evidence that names
-          what it has not verified. This page is the work sample — four case studies with the
-          risk, the fix, and the regression that keeps it fixed.
+          I find the failures a green suite hides — cross-tenant reads, duplicate vendor
+          charges, an assistant that ships its own guardrail violations, eligibility math that
+          denies the wrong people — and I leave behind the test that stops each one returning.
+          Four case studies, every claim reproducible from this repository.
         </p>
         <p class="byline">
           <span>John Winterhouse</span>
@@ -45,9 +45,9 @@
           <span><a href="https://github.com/MrWinterhouse/quality-lab">github.com/MrWinterhouse/quality-lab</a></span>
         </p>
         <p class="hero-cta">
-          <a class="button" href="chat.html">Ask why you should hire me →</a>
-          <a class="button button--ghost" href="#case-studies">Read the case studies</a>
-          <span>Answers come from a closed knowledge base, and each one shows the tests behind it.</span>
+          <a class="button" href="mailto:Jwinterhouse3@gmail.com">Email John →</a>
+          <a class="button button--ghost" href="#case-studies">See the proof</a>
+          <span>Or ask the assistant why you should hire him — every answer lists the tests behind it.</span>
         </p>
       </div>
 
@@ -75,22 +75,23 @@
       <div class="section-head">
         <div>
           <p class="kicker">For hiring managers</p>
-          <h2 id="hiring-title">What I bring, and how to check it</h2>
+          <h2 id="hiring-title">Why hire me</h2>
         </div>
         <p>
-          I’m looking for a quality engineering role where the work is judgment: what to test,
-          what a passing suite is worth, and whether a release is safe. This page is arranged so
-          you can verify that instead of taking my word for it.
+          I’m a quality engineer who owns the release signal: test strategy, automation, AI
+          evaluation, and the decision to block. I’m looking for a role where that judgment is
+          the job, not a side task.
         </p>
       </div>
 
       <div class="cols-2">
         <div>
-          <h3>What I do</h3>
+          <h3>What you get</h3>
           <ul class="hiring-list">
-            <li><strong>Test strategy from risk.</strong> Who gets hurt and how quietly, before any tool or page object is chosen.</li>
-            <li><strong>Gates that can say no.</strong> The generated report returns NOT READY and names the five things that would change it.</li>
-            <li><strong>Evidence over adjectives.</strong> Every claim links to a command, a file and a failing assertion.</li>
+            <li><strong>Failures found, not just tests written.</strong> Tenancy, async duplication, AI guardrails and income math — four case studies, each with the smallest reproduction and the fix.</li>
+            <li><strong>A release decision you can defend.</strong> The generated report says NOT READY and names the five things that would change it.</li>
+            <li><strong>Infrastructure the team keeps.</strong> Baseline suites, browser journeys, an independent Python oracle, AI evals, and a gate that fails the build on stale evidence.</li>
+            <li><strong>Honesty about the edges.</strong> Known gaps are printed in every report, so a green suite never stands in for a ready product.</li>
           </ul>
         </div>
         <div>
@@ -105,55 +106,72 @@
 
       <p class="hiring-cta">
         <a class="button" href="mailto:Jwinterhouse3@gmail.com">Email me</a>
-        <span>Or start with the <a href="#case-studies">four case studies</a>.</span>
+        <span>Or read the <a href="#case-studies">four case studies</a> first.</span>
       </p>
     </div>
   </section>
 
-  <section aria-labelledby="what-title">
+  <section id="case-studies" aria-labelledby="cases-title">
     <div class="wrap">
       <div class="section-head">
         <div>
-          <p class="kicker">01 · The system</p>
-          <h2 id="what-title">A product worth testing, not a to-do list worth automating</h2>
+          <p class="kicker">01 · Four defects</p>
+          <h2 id="cases-title">Triage, root cause, fix, regression</h2>
         </div>
         <p>
-          Most QA portfolios automate a demo shop. This one starts with the thing that makes
-          quality engineering hard: rules that decide whether someone gets healthcare, a
-          vendor that fails after doing the work, two agencies that must never see each
-          other’s applicants, and a model whose output nobody can fully predict.
+          Each case study follows the same arc: the risk, the smallest reproduction, the line
+          of code that caused it, the test that now fails if it returns, and what the evidence
+          still does not cover. All four are seeded defects in the product — the probes that
+          catch them ship red on purpose.
         </p>
       </div>
 
-      <div class="cols-2">
-        <div>
+      <div class="case-grid">
+        <a class="case" href="case-studies/tenant-isolation.html">
+          <span class="tag">Case 01 · Authorization</span>
+          <h3>Every agency sees the first agency’s configuration</h3>
           <p>
-            The product is a benefits-eligibility service for two tenant agencies. Applicants
-            screen a household against Medicaid, SNAP, WIC and CHIP, submit an application,
-            upload documents, and wait for an asynchronously verified income check. A
-            caseworker reviews and decides. An in-house assistant answers policy questions.
+            A module-level cache keys tenant config by nothing at all, and the screening
+            endpoint skips the ownership check that every other read enforces. Agency B reads
+            agency A’s applicants — and its programs, branding and 30-day deadline are
+            replaced by agency A’s 10-day one.
           </p>
+          <span class="foot"><span>DEFECT-04 · DEFECT-05</span><span>Read →</span></span>
+        </a>
+
+        <a class="case" href="case-studies/vendor-idempotency.html">
+          <span class="tag">Case 02 · Async integration</span>
+          <h3>One application, two income verifications</h3>
           <p>
-            It runs offline on Node’s standard library with an in-memory store, so every claim
-            on this site reproduces from a clean checkout with <code>npm install</code> and one
-            command. No accounts, no API keys, no cloud spend.
+            The retry loop builds its idempotency key from the attempt number. A vendor that
+            processes the request and then times out produces a second, undeduplicated record
+            on retry — while the timeline shows a single, clean success.
           </p>
-        </div>
-        <div>
-          <table>
-            <caption>What exists alongside the product</caption>
-            <tbody>
-              <tr><td>API, security, contract, integration</td><td class="num"><span data-figure="baseline.total">44</span> checks</td></tr>
-              <tr><td>End-to-end journeys, 3 browsers</td><td class="num"><span data-figure="e2e.passed">12</span> × 3</td></tr>
-              <tr><td>Accessibility scans (axe)</td><td class="num">1 suite</td></tr>
-              <tr><td>Assistant evals, 2 prompt versions</td><td class="num"><span data-figure="eval.cases">13</span> cases</td></tr>
-              <tr><td>Hiring assistant, golden dataset</td><td class="num"><span data-figure="chatbot.cases">40</span> cases</td></tr>
-              <tr><td>Independent Python rules oracle</td><td class="num">1 impl.</td></tr>
-              <tr><td>Load smoke with p95 budget</td><td class="num"><span data-figure="load.requests">120</span> req</td></tr>
-              <tr><td>Defect probes (red by design)</td><td class="num"><span data-figure="probes.failed">15</span></td></tr>
-            </tbody>
-          </table>
-        </div>
+          <span class="foot"><span>DEFECT-07</span><span>Read →</span></span>
+        </a>
+
+        <a class="case" href="case-studies/assistant-guardrails.html">
+          <span class="tag">Case 03 · AI behavior</span>
+          <h3>The guardrail ran, found three violations, and shipped them</h3>
+          <p>
+            The vulnerable prompt discloses its own instructions, guarantees Medicaid
+            eligibility and invents $973 a month. The guardrail evaluator flagged all three —
+            the response path only enforces it on the newer prompt version, which agency A
+            does not use.
+          </p>
+          <span class="foot"><span>DEFECT-11</span><span>Read →</span></span>
+        </a>
+
+        <a class="case" href="case-studies/income-annualization.html">
+          <span class="tag">Case 04 · Rules and differential testing</span>
+          <h3>A family of four is told it qualifies. It doesn’t.</h3>
+          <p>
+            Biweekly pay is annualized over 24 periods instead of 26, and the Alaska/Hawaii
+            poverty multipliers are declared and then ignored. Two silent wrong answers in
+            opposite directions, found by comparing the API to an independently written oracle.
+          </p>
+          <span class="foot"><span>DEFECT-01 · -02 · -13</span><span>Read →</span></span>
+        </a>
       </div>
     </div>
   </section>
@@ -215,67 +233,50 @@
     </div>
   </section>
 
-  <section id="case-studies" aria-labelledby="cases-title">
+  <section aria-labelledby="what-title">
     <div class="wrap">
       <div class="section-head">
         <div>
-          <p class="kicker">03 · Four defects</p>
-          <h2 id="cases-title">Triage, root cause, fix, regression</h2>
+          <p class="kicker">03 · The system</p>
+          <h2 id="what-title">A product worth testing, not a to-do list worth automating</h2>
         </div>
         <p>
-          Each case study follows the same arc: the risk, the smallest reproduction, the line
-          of code that caused it, the test that now fails if it returns, and what the evidence
-          still does not cover. All four are seeded defects in the product — the probes that
-          catch them ship red on purpose.
+          Most QA portfolios automate a demo shop. This one starts with the thing that makes
+          quality engineering hard: rules that decide whether someone gets healthcare, a
+          vendor that fails after doing the work, two agencies that must never see each
+          other’s applicants, and a model whose output nobody can fully predict.
         </p>
       </div>
 
-      <div class="case-grid">
-        <a class="case" href="case-studies/tenant-isolation.html">
-          <span class="tag">Case 01 · Authorization</span>
-          <h3>Every agency sees the first agency’s configuration</h3>
+      <div class="cols-2">
+        <div>
           <p>
-            A module-level cache keys tenant config by nothing at all, and the screening
-            endpoint skips the ownership check that every other read enforces. Agency B reads
-            agency A’s applicants — and its programs, branding and 30-day deadline are
-            replaced by agency A’s 10-day one.
+            The product is a benefits-eligibility service for two tenant agencies. Applicants
+            screen a household against Medicaid, SNAP, WIC and CHIP, submit an application,
+            upload documents, and wait for an asynchronously verified income check. A
+            caseworker reviews and decides. An in-house assistant answers policy questions.
           </p>
-          <span class="foot"><span>DEFECT-04 · DEFECT-05</span><span>Read →</span></span>
-        </a>
-
-        <a class="case" href="case-studies/vendor-idempotency.html">
-          <span class="tag">Case 02 · Async integration</span>
-          <h3>One application, two income verifications</h3>
           <p>
-            The retry loop builds its idempotency key from the attempt number. A vendor that
-            processes the request and then times out produces a second, undeduplicated record
-            on retry — while the timeline shows a single, clean success.
+            It runs offline on Node’s standard library with an in-memory store, so every claim
+            on this site reproduces from a clean checkout with <code>npm install</code> and one
+            command. No accounts, no API keys, no cloud spend.
           </p>
-          <span class="foot"><span>DEFECT-07</span><span>Read →</span></span>
-        </a>
-
-        <a class="case" href="case-studies/assistant-guardrails.html">
-          <span class="tag">Case 03 · AI behavior</span>
-          <h3>The guardrail ran, found three violations, and shipped them</h3>
-          <p>
-            The vulnerable prompt discloses its own instructions, guarantees Medicaid
-            eligibility and invents $973 a month. The guardrail evaluator flagged all three —
-            the response path only enforces it on the newer prompt version, which agency A
-            does not use.
-          </p>
-          <span class="foot"><span>DEFECT-11</span><span>Read →</span></span>
-        </a>
-
-        <a class="case" href="case-studies/income-annualization.html">
-          <span class="tag">Case 04 · Rules and differential testing</span>
-          <h3>A family of four is told it qualifies. It doesn’t.</h3>
-          <p>
-            Biweekly pay is annualized over 24 periods instead of 26, and the Alaska/Hawaii
-            poverty multipliers are declared and then ignored. Two silent wrong answers in
-            opposite directions, found by comparing the API to an independently written oracle.
-          </p>
-          <span class="foot"><span>DEFECT-01 · -02 · -13</span><span>Read →</span></span>
-        </a>
+        </div>
+        <div>
+          <table>
+            <caption>What exists alongside the product</caption>
+            <tbody>
+              <tr><td>API, security, contract, integration</td><td class="num"><span data-figure="baseline.total">44</span> checks</td></tr>
+              <tr><td>End-to-end journeys, 3 browsers</td><td class="num"><span data-figure="e2e.passed">12</span> × 3</td></tr>
+              <tr><td>Accessibility scans (axe)</td><td class="num">1 suite</td></tr>
+              <tr><td>Assistant evals, 2 prompt versions</td><td class="num"><span data-figure="eval.cases">13</span> cases</td></tr>
+              <tr><td>Hiring assistant, golden dataset</td><td class="num"><span data-figure="chatbot.cases">40</span> cases</td></tr>
+              <tr><td>Independent Python rules oracle</td><td class="num">1 impl.</td></tr>
+              <tr><td>Load smoke with p95 budget</td><td class="num"><span data-figure="load.requests">120</span> req</td></tr>
+              <tr><td>Defect probes (red by design)</td><td class="num"><span data-figure="probes.failed">15</span></td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -412,6 +413,22 @@
           </dd>
         </div>
       </dl>
+    </div>
+  </section>
+
+  <section class="hire-band" id="hire" aria-labelledby="hire-title">
+    <div class="wrap">
+      <p class="kicker">Hiring?</p>
+      <h2 id="hire-title">Hire John Winterhouse.</h2>
+      <p>
+        If you are filling a quality engineering role where being wrong is quiet, this is the
+        work you would be buying: defects found, decisions defended, and evidence that says
+        what it does not know.
+      </p>
+      <p class="hero-cta">
+        <a class="button" href="mailto:Jwinterhouse3@gmail.com">Email Jwinterhouse3@gmail.com</a>
+        <a class="button button--ghost" href="chat.html">Ask why you should hire me</a>
+      </p>
     </div>
   </section>
 
