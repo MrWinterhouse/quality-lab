@@ -47,25 +47,36 @@
         <p class="hero-cta">
           <a class="button" href="mailto:Jwinterhouse3@gmail.com">Email John →</a>
           <a class="button button--ghost" href="#case-studies">See the proof</a>
-          <span>Or ask the assistant why you should hire him — every answer lists the tests behind it.</span>
+          <span>The assistant beside this answers from the same evidence, and lists the tests behind each answer.</span>
         </p>
       </div>
 
-      <aside class="verdict" aria-labelledby="verdict-title">
-        <span class="label" id="verdict-title">Release decision · <span data-figure="date">2026-11-16</span></span>
-        <p class="decision" data-figure="decision">NOT READY</p>
-        <p class="sub">Blocked on five items, each with a concrete failure attached.</p>
-        <ul>
-          <li><span>Open critical / high risks</span> <b data-figure="risk.open">5</b></li>
-          <li><span>Shipping prompt eval</span> <b data-figure="eval.shipping">10 / 13</b></li>
-          <li><span>Required behaviors unverified</span> <b data-figure="probes.failed">15</b></li>
-          <li><span>Baseline checks</span> <b><span data-figure="baseline.total">44</span> pass</b></li>
-          <li><span>Browser journeys</span> <b><span data-figure="e2e.passed">12</span> pass × 3</b></li>
-        </ul>
-        <p class="note">
-          A green suite would not have caught any of these. That is the point of the report.
-          <a href="reports/quality-report.html">Read the generated report →</a>
+      <aside class="hero-chat" aria-labelledby="hero-chat-title">
+        <p class="kicker">Hiring assistant</p>
+        <h2 id="hero-chat-title">Ask why you should hire John</h2>
+        <p class="hero-chat-lede">
+          It answers from this portfolio only, cites the page it used, and names the golden
+          cases that test the answer.
         </p>
+        <form class="hero-chat-form" id="hero-chat-form">
+          <label class="chat-label" for="hero-chat-input">Your question</label>
+          <div class="chat-row">
+            <input class="chat-input" id="hero-chat-input" name="question" type="text" autocomplete="off" required disabled>
+            <button class="chat-ask" type="submit" disabled>Ask</button>
+          </div>
+        </form>
+        <ul class="hero-chat-chips" aria-label="Suggested questions">
+          <li><button class="chat-suggestion" type="button" disabled>Why should we hire you?</button></li>
+          <li><button class="chat-suggestion" type="button" disabled>What is not verified?</button></li>
+          <li><button class="chat-suggestion" type="button" disabled>What would you do in your first 90 days?</button></li>
+        </ul>
+        <div class="hero-chat-log" id="hero-chat-log" role="log" aria-live="polite" aria-label="Assistant answers">
+          <p class="hero-chat-a">Ask about the case studies, the release decision, or what is still unverified.</p>
+        </div>
+        <noscript>
+          <p class="hero-chat-foot"><a href="chat.html">Open the hiring assistant</a> to ask these questions.</p>
+        </noscript>
+        <p class="hero-chat-foot"><a href="chat.html">Full conversation, sources and every test →</a></p>
       </aside>
     </div>
   </section>
@@ -229,6 +240,25 @@
             quality signal.
           </p>
         </div>
+      </div>
+
+      <div class="verdict-row">
+        <aside class="verdict" aria-labelledby="verdict-title">
+          <span class="label" id="verdict-title">Release decision · <span data-figure="date">2026-11-16</span></span>
+          <p class="decision" data-figure="decision">NOT READY</p>
+          <p class="sub">Blocked on five items, each with a concrete failure attached.</p>
+          <ul>
+            <li><span>Open critical / high risks</span> <b data-figure="risk.open">5</b></li>
+            <li><span>Shipping prompt eval</span> <b data-figure="eval.shipping">10 / 13</b></li>
+            <li><span>Required behaviors unverified</span> <b data-figure="probes.failed">15</b></li>
+            <li><span>Baseline checks</span> <b><span data-figure="baseline.total">44</span> pass</b></li>
+            <li><span>Browser journeys</span> <b><span data-figure="e2e.passed">12</span> pass × 3</b></li>
+          </ul>
+          <p class="note">
+            A green suite would not have caught any of these. That is the point of the report.
+            <a href="reports/quality-report.html">Read the generated report →</a>
+          </p>
+        </aside>
       </div>
     </div>
   </section>
@@ -468,5 +498,6 @@
   </div>
 </footer>
 
+<script type="module" src="chat/embed.js"></script>
 </body>
 </html>
