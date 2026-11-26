@@ -9,6 +9,12 @@
  * (`summary.json` and the markdown report built from it) and fails when the prose and the
  * evidence disagree.
  *
+ * The case-study answers also state facts the report never sees: the 24/26 biweekly pay
+ * periods, the 30- and 10-day tenant deadlines, the number of case-study pages and the two
+ * widths the site's accessibility check scans. Those are read from the code and files the
+ * answers describe, so a fixed defect or a changed fixture fails this same gate instead of
+ * leaving the answer quietly wrong.
+ *
  * A claim that disappears is a failure too: a figure quietly deleted from an answer is the
  * same drift as one left stale.
  *
@@ -19,7 +25,9 @@
  * the report yet. The report job and the publish job pass `--strict`, so a pull request or a
  * published page cannot ship figures the evidence does not back.
  */
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
+import { annualizeIncome } from '../product/server/lib/policy.mjs';
+import { TENANTS } from '../product/server/lib/store.mjs';
 
 const argv = process.argv.slice(2);
 const strict = argv.includes('--strict');
@@ -74,6 +82,16 @@ const knowledge = JSON.parse(
 );
 const playwrightConfig =
   (await readTextOr(new URL('../playwright.config.ts', import.meta.url))) ?? '';
+const siteCheckSource = (await readTextOr(new URL('./check-site.mjs', import.meta.url))) ?? '';
+
+let caseStudyPages = [];
+try {
+  caseStudyPages = (
+    await readdir(new URL('../site/case-studies', import.meta.url))
+  ).filter((name) => name.endsWith('.html'));
+} catch {
+  caseStudyPages = [];
+}
 
 const summaryText = await readTextOr(summaryPath);
 if (!summaryText) {
@@ -111,6 +129,38 @@ const shipping = versions.find((version) => /shipping/i.test(version.label ?? ''
 const belowThreshold = versions.filter((version) => (version.passRate ?? 0) < threshold);
 const evalTotals = [...new Set(versions.map((version) => version.total))];
 const probes = summary.probes ?? {};
+
+// Case-study facts come from what the answers describe, not from the report: the annualizer
+// with DEFECT-01 still in it, the two tenants' deadlines behind the isolation bug, the pages
+// themselves, and the widths the site's own accessibility check scans.
+const biweeklyAnnualized = annualizeIncome({ amount: 1, frequency: 'biweekly' });
+const weeklyAnnualized = annualizeIncome({ amount: 1, frequency: 'weekly' });
+const biweeklyCorrect = weeklyAnnualized / 2;
+const deadlineA = TENANTS['agency-a']?.deadlineDays ?? null;
+const deadlineB = TENANTS['agency-b']?.deadlineDays ?? null;
+const caseStudyCount = caseStudyPages.length || null;
+const viewportWidths = [...siteCheckSource.matchAll(/width:\s*(\d+)/g)].map((match) =>
+  Number(match[1]),
+);
+
+if (!Number.isFinite(biweeklyAnnualized) || !Number.isFinite(biweeklyCorrect)) {
+  problems.push(
+    'product/server/lib/policy.mjs: could not derive the weekly and biweekly period counts, so "24 periods instead of 26" cannot be checked.',
+  );
+}
+if (typeof deadlineA !== 'number' || typeof deadlineB !== 'number') {
+  problems.push(
+    'product/server/lib/store.mjs: agency-a and agency-b deadlineDays are not both numbers, so the tenant deadlines cannot be checked.',
+  );
+}
+if (viewportWidths.length < 2) {
+  problems.push(
+    'scripts/check-site.mjs: could not read two VIEWPORTS widths, so "1280 and 360 pixels" cannot be checked.',
+  );
+}
+if (caseStudyCount === null) {
+  problems.push('site/case-studies: no pages found, so "four case studies" cannot be checked.');
+}
 
 if (projectNames.length === 0) {
   problems.push(
@@ -190,6 +240,35 @@ const claims = [
     expected: shipping ? [shipping.passed, shipping.total] : [null, null],
     evidence: 'the shipping entry in summary.evals',
     entries: ['ai-testing'],
+  },
+  {
+    label: 'biweekly pay periods',
+    pattern: /over ([\w]+) periods instead of ([\w]+)/gi,
+    expected: [biweeklyAnnualized, biweeklyCorrect],
+    evidence:
+      'annualizeIncome() in product/server/lib/policy.mjs: a $1 biweekly pay annualizes to the defective factor, and weekly pay at 52 means 26 correct periods',
+    entries: ['case-income-annualization'],
+  },
+  {
+    label: 'tenant deadlines',
+    pattern: /its ([\w]+)-day deadline with agency A's ([\w]+)-day one/gi,
+    expected: [deadlineB, deadlineA],
+    evidence: 'deadlineDays in product/server/lib/store.mjs (agency-b then agency-a)',
+    entries: ['case-tenant-isolation'],
+  },
+  {
+    label: 'case-study pages',
+    pattern: /([\w]+) case studies/gi,
+    expected: [caseStudyCount],
+    evidence: 'the pages in site/case-studies/',
+    entries: ['role'],
+  },
+  {
+    label: 'accessibility viewports',
+    pattern: /at ([\w]+) and ([\w]+) pixels/gi,
+    expected: viewportWidths.slice(0, 2).length === 2 ? viewportWidths.slice(0, 2) : [null, null],
+    evidence: 'the VIEWPORTS widths in scripts/check-site.mjs',
+    entries: ['a11y'],
   },
 ];
 
@@ -334,9 +413,16 @@ const derived = [
   ],
   ['golden cases', goldenCases === null ? 'inconsistent totals' : String(goldenCases)],
   ['shipping prompt', shipping ? `${shipping.passed}/${shipping.total}` : 'missing'],
+  [
+    'biweekly periods',
+    `${biweeklyAnnualized} in policy.mjs, ${biweeklyCorrect} correct`,
+  ],
+  ['tenant deadlines', `A ${deadlineA} / B ${deadlineB} days`],
+  ['case-study pages', String(caseStudyCount ?? 'missing')],
+  ['axe viewports', viewportWidths.slice(0, 2).join(' / ') || 'missing'],
 ];
 
-console.log('\nHiring assistant — knowledge base vs generated evidence');
+console.log('\nHiring assistant — knowledge base vs generated evidence and fixtures');
 console.log(`  summary: ${summaryPath}`);
 console.log(`  report:  ${reportText ? reportPath : 'not found (cross-check skipped)'}`);
 for (const [label, value] of derived) {
@@ -347,9 +433,11 @@ if (problems.length > 0) {
   console.error(`\nFAIL — ${problems.length} figure problem(s) in site/chat/knowledge.json:`);
   for (const problem of problems) console.error(`  - ${problem}`);
   console.error(
-    '\nThe assistant answers from published evidence, so the answer and the report have to move together.',
+    '\nThe assistant answers from published evidence and the code it describes, so the answer, the report and the fixtures have to move together.',
   );
   process.exit(1);
 }
 
-console.log('\nPASS — every figure in site/chat/knowledge.json matches the generated evidence.');
+console.log(
+  '\nPASS — every figure in site/chat/knowledge.json matches the generated evidence and the fixtures it describes.',
+);

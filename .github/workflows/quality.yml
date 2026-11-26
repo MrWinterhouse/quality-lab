@@ -358,7 +358,8 @@ jobs:
         run: node scripts/stamp-site.mjs _site _site/reports/summary.json
 
       # The hiring assistant answers with these figures, so its knowledge base has to agree
-      # with the summary and report being published. Strict: no report, no deploy.
+      # with the summary, the report and the fixtures behind its case-study answers.
+      # Strict: no report, no deploy.
       - name: Check the assistant's figures against the evidence
         run: node scripts/check-chatbot-figures.mjs _site/reports/summary.json _site/reports/quality-report.md --strict
 
