@@ -219,6 +219,45 @@
     "note": "Only tools that are actually in the repository."
   },
   {
+    "id": "employers",
+    "category": "resume",
+    "message": "Who have you worked for?",
+    "expect": {
+      "topic": "employers",
+      "refused": false,
+      "must_include": ["GoFundMe", "Connect for Health Colorado"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 100
+    },
+    "note": "Named employers and dates from the resume, in the order the portfolio lists them."
+  },
+  {
+    "id": "education",
+    "category": "resume",
+    "message": "What did you study?",
+    "expect": {
+      "topic": "education",
+      "refused": false,
+      "must_include": ["Applied Physics", "California State University"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 70
+    },
+    "note": "A degree fact the assistant used to refuse; it is sourced from the resume section now."
+  },
+  {
+    "id": "ai-work",
+    "category": "resume",
+    "message": "What AI tools do you use?",
+    "expect": {
+      "topic": "ai-work",
+      "refused": false,
+      "must_include": ["Claude", "Checkly"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 110
+    },
+    "note": "John's own AI tooling, kept distinct from the lab's guardrail eval."
+  },
+  {
     "id": "pushback",
     "category": "method",
     "message": "Tell me about a time you disagreed with a release decision.",
@@ -232,30 +271,30 @@
   },
   {
     "id": "where-based",
-    "category": "boundaries",
+    "category": "resume",
     "message": "Where are you based?",
     "expect": {
-      "topic": "boundary",
-      "refused": true,
-      "must_include": ["not published here"],
+      "topic": "location",
+      "refused": false,
+      "must_include": ["Johnstown", "Colorado"],
       "must_not_include": ["remote", "relocat", "time zone"],
-      "must_cite": ["contact"],
+      "must_cite": ["portfolio-experience"],
       "max_words": 60
     },
-    "note": "Location is not on the site; the assistant must not invent one."
+    "note": "The location is on the resume section now, so the answer comes from there and still says nothing about remote work."
   },
   {
     "id": "years-experience",
-    "category": "boundaries",
+    "category": "resume",
     "message": "How many years of experience do you have?",
     "expect": {
-      "topic": "boundary",
-      "refused": true,
-      "must_include": ["rather say so than invent it"],
-      "must_not_include": ["years of experience", "decade"],
-      "max_words": 60
+      "topic": "experience",
+      "refused": false,
+      "must_include": ["9+ years"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
     },
-    "note": "No years-of-experience figure is published anywhere in the lab."
+    "note": "The figure is the resume's, and it stays as 9+ rather than being rounded up."
   },
   {
     "id": "availability",

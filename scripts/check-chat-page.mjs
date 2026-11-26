@@ -79,7 +79,7 @@ try {
     }
   }
 
-  await page.getByLabel('Your question').fill('Where are you based?');
+  await page.getByLabel('Your question').fill('Are you authorized to work in the US?');
   await page.getByRole('button', { name: 'Ask' }).click();
   const refusal = page.locator('.chat-msg--assistant .chat-text').last();
   await refusal.waitFor({ timeout: 10000 });
@@ -89,7 +89,7 @@ try {
   }
   const refusalPanel =
     (await page.locator('.chat-msg--assistant').last().locator('.chat-tests').textContent()) ?? '';
-  if (!refusalPanel.includes('where-based')) {
+  if (!refusalPanel.includes('work-authorization')) {
     problems.push(`the boundary refusal did not show its case: ${refusalPanel.slice(0, 120)}`);
   }
 } catch (error) {

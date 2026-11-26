@@ -86,6 +86,140 @@
     ]
   },
   {
+    "id": "experience",
+    "title": "Years of experience",
+    "answer": "9+ years in quality engineering, from automated UI and API testing through automation architecture and AI-assisted engineering: Playwright and TypeScript, C# and Selenium, SQL validation and CI/CD. Most recently an AI-Quality Engineer II at GoFundMe, where I owned suites across five repositories and mentored four engineers.",
+    "keywords": [
+      "years of experience",
+      "how long",
+      "experience",
+      "worked",
+      "career",
+      "background",
+      "seniority"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "employers",
+    "title": "Where I have worked",
+    "answer": "GoFundMe (AI-Quality Engineer II, 2023-2026), Connect for Health Colorado (Technical Quality Analyst, then supervisor, 2021-2023), Catalyst Healthcare (Test Engineer, 2017-2021) and Dire Wolf Digital (Senior Tester, 2016-2017). The through-line is ownership: building the suites, wiring them into CI, and owning the release signal.",
+    "keywords": [
+      "employer",
+      "company",
+      "companies",
+      "worked for",
+      "job history",
+      "career history",
+      "gofundme",
+      "where have you worked",
+      "which companies",
+      "roles"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "location",
+    "title": "Location",
+    "answer": "Johnstown, Colorado, north of Denver. The lab runs offline from a clean checkout, so the evidence travels with the repository.",
+    "keywords": [
+      "where are you based",
+      "where do you live",
+      "location",
+      "located",
+      "live",
+      "based",
+      "local",
+      "colorado",
+      "denver",
+      "johnstown"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      }
+    ]
+  },
+  {
+    "id": "education",
+    "title": "Education",
+    "answer": "A Bachelor of Science in Applied Physics from California State University, San Marcos, with a minor in Mathematics, 2015. The differential oracle in case 04 is the part of that training this lab leans on hardest.",
+    "keywords": [
+      "education",
+      "degree",
+      "school",
+      "university",
+      "college",
+      "physics",
+      "graduate",
+      "study",
+      "studied",
+      "minor"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      }
+    ]
+  },
+  {
+    "id": "ai-work",
+    "title": "AI-assisted engineering",
+    "answer": "I use Claude and ChatGPT as engineering tools, not as a substitute for tests: a custom Claude skill that investigates a failing test, patches it and opens the pull request; AI-drafted Playwright and API cases across 100+ automated tests; and a quality dashboard with 15+ Checkly synthetic checks that alert on critical workflows. This lab's guardrail work is the other half of that habit: measuring what a model must not do.",
+    "keywords": [
+      "ai tools",
+      "ai work",
+      "ai experience",
+      "ai-assisted",
+      "ai",
+      "claude",
+      "chatgpt",
+      "augment",
+      "test healing",
+      "checkly",
+      "dashboard",
+      "synthetic"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "case-assistant-guardrails",
+        "label": "Case study 03 — assistant guardrails",
+        "href": "case-studies/assistant-guardrails.html"
+      }
+    ]
+  },
+  {
     "id": "case-tenant-isolation",
     "title": "Cross-tenant data exposure",
     "answer": "Agency B could read agency A's applicants because a module-level cache keyed tenant configuration by nothing at all, and the screening endpoint skipped the ownership check every other read enforced. The same bug replaced agency B's branding and its 30-day deadline with agency A's 10-day one. The fix was a per-tenant cache key plus the missing ownership check, with a regression test that fails if any tenant can read another's screening.",
@@ -158,7 +292,7 @@
   {
     "id": "case-income-annualization",
     "title": "Income annualization and the differential oracle",
-            "answer": "A family of four was told it qualified when it did not: biweekly pay was annualized over 24 periods instead of 26, and the Alaska and Hawaii poverty multipliers were declared and then ignored. Both are silent wrong answers in opposite directions. I found them with a differential oracle: a second implementation written from the specification, not copied from production.",
+    "answer": "A family of four was told it qualified when it did not: biweekly pay was annualized over 24 periods instead of 26, and the Alaska and Hawaii poverty multipliers were declared and then ignored. Both are silent wrong answers in opposite directions. I found them with a differential oracle: a second implementation written from the specification, not copied from production.",
     "keywords": [
       "income",
       "annualization",
@@ -374,7 +508,7 @@
   {
     "id": "tools",
     "title": "Tools and stack",
-    "answer": "Node's test runner and TypeScript for the API, security, contract and integration suites; Playwright and axe-core for the browser and accessibility work; GitHub Actions for the pipeline; a Python unittest oracle for differential testing. There are no cloud dependencies, so every claim reproduces from a clean checkout.",
+    "answer": "Node's test runner and TypeScript for the API, security, contract and integration suites; Playwright and axe-core for the browser and accessibility work; GitHub Actions for the pipeline; a Python unittest oracle for differential testing. Earlier roles added Selenium, TestComplete, SpecFlow and C#, with Postman, SQL and PostgreSQL for API and data validation. There are no cloud dependencies, so every claim reproduces from a clean checkout.",
     "keywords": [
       "tools",
       "stack",
@@ -384,7 +518,15 @@
       "framework",
       "languages",
       "node",
-      "pytest"
+      "pytest",
+      "selenium",
+      "testcomplete",
+      "specflow",
+      "postman",
+      "sql",
+      "postgres",
+      "docker",
+      "lighthouse"
     ],
     "citations": [
       {
@@ -397,7 +539,7 @@
   {
     "id": "contact",
     "title": "Contact",
-    "answer": "Email Jwinterhouse3@gmail.com, or read the source at github.com/MrWinterhouse/quality-lab. The release report, the eval JSON and the failing probes are all linked from the portfolio.",
+    "answer": "Email Jwinterhouse3@gmail.com for the PDF resume or a conversation, or read the source at github.com/MrWinterhouse/quality-lab. Based in Johnstown, Colorado. The release report, the eval JSON and the failing probes are all linked from the portfolio.",
     "keywords": [
       "contact",
       "email",

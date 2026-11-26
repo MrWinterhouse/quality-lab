@@ -1204,6 +1204,39 @@ td.pass {
   margin-top: 2rem;
 }
 
+/* ---------- experience ---------- */
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.timeline li {
+  padding-left: 1rem;
+  border-left: 2px solid var(--line);
+}
+
+.timeline strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.timeline span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.timeline p {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin: 0.25rem 0 0;
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 860px) {

@@ -26,7 +26,7 @@ export const EMPTY_REFUSAL =
 // portfolio does not publish. The page renders no test panel for it unless a golden case
 // covers it, which is why the dataset has one.
 export const HELP_REPLY =
-  'I answer from a closed knowledge base, so every reply is sourced: the pitch and role fit, the case studies, how the work is tested (evals, the Python oracle, CI), what is still unverified, and how to reach John. Ask in your own words — when nothing fits, I name the closest topics instead of guessing.';
+  'I answer from a closed knowledge base, so every reply is sourced: the pitch and role fit, the resume (experience, employers, location, education, AI work), the case studies, how the work is tested (evals, the Python oracle, CI), what is still unverified, and how to reach John. Ask in your own words — when nothing fits, I name the closest topics instead of guessing.';
 
 const HELP_CITATIONS = [
   { id: 'portfolio-index', label: 'Portfolio overview', href: './' },
@@ -50,10 +50,11 @@ const COMPENSATION_PATTERN =
 // $120k?" — would otherwise slip past the compensation rule. Test the raw message too.
 const MONEY_FIGURE_PATTERN = /\$\s?\d/;
 
-// Facts the portfolio does not state. The assistant refuses rather than inventing a
-// location, a years-of-experience figure or an availability date.
+// Facts the portfolio does not state. Location, years of experience and education are now
+// published on the resume section, so they are answered; availability, work authorization,
+// relocation and time zone are still refused rather than inferred.
 const UNPUBLISHED_PATTERN =
-  /\b(where are you|where do you|based|location|located|remote|relocat|time ?zone|years of experience|how long have you|degree|education|university|visa|sponsorship|authorized to work|work authorization|right to work|work permit|green card|availability|start date|notice period|clearance|citizen|how soon|when (could|can|would) you (start|begin))\b/i;
+  /\b(remote|relocat|time ?zone|visa|sponsorship|authorized to work|work authorization|right to work|work permit|green card|availability|start date|notice period|clearance|citizen|how soon|when (could|can|would) you (start|begin))\b/i;
 
 const STOPWORDS = new Set([
   'the', 'and', 'for', 'you', 'your', 'yours', 'are', 'was', 'were', 'what', 'which', 'who',

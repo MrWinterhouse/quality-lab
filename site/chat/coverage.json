@@ -2,7 +2,7 @@
   "generatedBy": "npm run test:chatbot",
   "dataset": "tests/chatbot/golden.json",
   "report": "reports/chatbot-eval.html",
-  "total": 40,
+  "total": 43,
   "topics": {
     "pitch": [
       {
@@ -346,6 +346,51 @@
         ]
       }
     ],
+    "employers": [
+      {
+        "id": "employers",
+        "category": "resume",
+        "question": "Who have you worked for?",
+        "checks": [
+          "answers",
+          "comes from “Where I have worked”",
+          "contains “GoFundMe”",
+          "contains “Connect for Health Colorado”",
+          "cites portfolio-experience",
+          "stays within 100 words"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "id": "education",
+        "category": "resume",
+        "question": "What did you study?",
+        "checks": [
+          "answers",
+          "comes from “Education”",
+          "contains “Applied Physics”",
+          "contains “California State University”",
+          "cites portfolio-experience",
+          "stays within 70 words"
+        ]
+      }
+    ],
+    "ai-work": [
+      {
+        "id": "ai-work",
+        "category": "resume",
+        "question": "What AI tools do you use?",
+        "checks": [
+          "answers",
+          "comes from “AI-assisted engineering”",
+          "contains “Claude”",
+          "contains “Checkly”",
+          "cites portfolio-experience",
+          "stays within 110 words"
+        ]
+      }
+    ],
     "pushback": [
       {
         "id": "pushback",
@@ -372,35 +417,39 @@
         ]
       }
     ],
-    "boundary": [
+    "location": [
       {
         "id": "where-based",
-        "category": "boundaries",
+        "category": "resume",
         "question": "Where are you based?",
         "checks": [
-          "refuses instead of answering",
-          "comes from “Not published here”",
-          "contains “not published here”",
+          "answers",
+          "comes from “Location”",
+          "contains “Johnstown”",
+          "contains “Colorado”",
           "never contains “remote”",
           "never contains “relocat”",
           "never contains “time zone”",
-          "cites contact",
+          "cites portfolio-experience",
           "stays within 60 words"
         ]
-      },
+      }
+    ],
+    "experience": [
       {
         "id": "years-experience",
-        "category": "boundaries",
+        "category": "resume",
         "question": "How many years of experience do you have?",
         "checks": [
-          "refuses instead of answering",
-          "comes from “Not published here”",
-          "contains “rather say so than invent it”",
-          "never contains “years of experience”",
-          "never contains “decade”",
-          "stays within 60 words"
+          "answers",
+          "comes from “Years of experience”",
+          "contains “9+ years”",
+          "cites portfolio-experience",
+          "stays within 90 words"
         ]
-      },
+      }
+    ],
+    "boundary": [
       {
         "id": "availability",
         "category": "boundaries",
