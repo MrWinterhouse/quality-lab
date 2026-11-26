@@ -17,6 +17,10 @@ const WEB_ROOT = path.resolve(__dirname, '../web');
 const MAX_BODY_BYTES = 100_000;
 const DEMO_HEADER_ENABLED = process.env.NODE_ENV !== 'production';
 
+// The retry policy the async case study quotes. Exported so the figure gate can drive the
+// vendor simulator with the same numbers the worker uses instead of keeping a second copy.
+export const VENDOR_RETRY = Object.freeze({ attempts: 3, delayMs: 10 });
+
 class HttpError extends Error {
   constructor(status, code, message, details) {
     super(message ?? code);
@@ -32,6 +36,12 @@ function httpError(status, code, message, details) {
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// DEFECT-07: the key changes with the attempt, so every retry looks like a new operation to
+// the vendor. Exported because that defect is what the async case study documents.
+export function attemptIdempotencyKey(applicationId, attempt) {
+  return `${applicationId}:${attempt}`;
 }
 
 function safeEqualHex(expected, received) {
@@ -132,9 +142,9 @@ export async function createApp(options = {}) {
   }
 
   async function verifyApplication(application) {
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
+    for (let attempt = 1; attempt <= VENDOR_RETRY.attempts; attempt += 1) {
       try {
-        const idempotencyKey = `${application.id}:${attempt}`;
+        const idempotencyKey = attemptIdempotencyKey(application.id, attempt);
         const result = await vendor.verify({
           applicationId: application.id,
           householdHash: application.householdHash,
@@ -148,7 +158,7 @@ export async function createApp(options = {}) {
         });
         return;
       } catch (error) {
-        if (attempt === 3) {
+        if (attempt === VENDOR_RETRY.attempts) {
           application.vendor = { status: 'failed', reason: error.message };
           application.updatedAt = store.now().toISOString();
           store.addEvent(application, 'vendor.failed', {
@@ -157,7 +167,7 @@ export async function createApp(options = {}) {
           });
           return;
         }
-        await delay(10);
+        await delay(VENDOR_RETRY.delayMs);
       }
     }
   }

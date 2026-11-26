@@ -25,8 +25,10 @@
  *
  * The four case studies repeat the figures in prose too — "All 44 baseline checks pass", the
  * 24/26 pay periods, the 30- and 10-day deadlines, thirteen golden cases — so each page gets
- * its own claim list, read from the same summary and fixtures. Numbers with no machine-readable
- * source ("three violations", "two verifications") are left alone rather than approximated.
+ * its own claim list, read from the same summary and fixtures. The async case study's retry and
+ * record counts come from driving `VendorSimulator` with `VENDOR_RETRY` and the defective key
+ * builder the worker uses, so fixing the key fails the page that describes the defect. Numbers
+ * with no machine-readable source ("three violations" on the guardrails page) are left alone.
  *
  * A claim that disappears is a failure too: a figure quietly deleted from an answer is the
  * same drift as one left stale.
@@ -39,8 +41,10 @@
  * published page cannot ship figures the evidence does not back.
  */
 import { readdir, readFile } from 'node:fs/promises';
+import { VENDOR_RETRY, attemptIdempotencyKey } from '../product/server/app.mjs';
 import { annualizeIncome } from '../product/server/lib/policy.mjs';
 import { TENANTS } from '../product/server/lib/store.mjs';
+import { VendorSimulator } from '../product/server/lib/vendor.mjs';
 
 const argv = process.argv.slice(2);
 const strict = argv.includes('--strict');
@@ -195,6 +199,40 @@ const caseStudyCount = caseStudyPages.length || null;
 const viewportWidths = [...siteCheckSource.matchAll(/width:\s*(\d+)/g)].map((match) =>
   Number(match[1]),
 );
+
+// DEFECT-07's observable outcome, computed by driving the same simulator the worker drives,
+// with the same policy and the same key builder: the first call records then times out, the
+// retry records again under a new key. If the key is ever made stable this drops to one
+// record, and the case study that describes the defect fails instead of going quietly stale.
+async function simulateTimeoutAfterRecord() {
+  const vendor = new VendorSimulator();
+  vendor.configure({ failAfterRecord: 1 });
+  const applicationId = 'app_00001';
+  let attempts = 0;
+
+  for (let attempt = 1; attempt <= VENDOR_RETRY.attempts; attempt += 1) {
+    attempts = attempt;
+    try {
+      await vendor.verify({
+        applicationId,
+        householdHash: 'gate',
+        idempotencyKey: attemptIdempotencyKey(applicationId, attempt),
+      });
+      break;
+    } catch {
+      /* retry, as the worker does */
+    }
+  }
+
+  return { attempts, verifications: vendor.listForApplication(applicationId).length };
+}
+
+const vendorRun = await simulateTimeoutAfterRecord();
+if (!vendorRun.verifications || !vendorRun.attempts) {
+  problems.push(
+    'product/server/lib/vendor.mjs: the timeout-after-record simulation produced no records, so "two income verifications" cannot be checked.',
+  );
+}
 
 if (
   !Number.isFinite(biweeklyAnnualized) ||
@@ -546,8 +584,8 @@ function checkPageClaims(pagePath, text, pageClaims) {
 checkPageClaims(chatPath, chatText, chatClaims);
 checkPageClaims(indexPath, indexText, indexClaims);
 
-// One claim list per case study. "Three violations" and "two verifications" are deliberately
-// absent: no fixture exposes either as a count, and a gate that guesses is worse than none.
+// One claim list per case study. "Three violations" on the guardrails page is deliberately
+// absent: no fixture exposes it as a count, and a gate that guesses is worse than none.
 const caseStudyClaims = [
   {
     page: 'income-annualization.html',
@@ -600,6 +638,45 @@ const caseStudyClaims = [
     pattern: /“([\w]+)\/([\w]+)”/g,
     expected: shipping ? [shipping.passed, shipping.total] : [null, null],
     evidence: 'the shipping entry in summary.evals',
+  },
+  {
+    page: 'vendor-idempotency.html',
+    label: 'income verifications',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) income verifications\\b`, 'gi'),
+    expected: [vendorRun.verifications],
+    evidence:
+      'driving VendorSimulator with one call that records then times out, under VENDOR_RETRY and attemptIdempotencyKey',
+  },
+  {
+    page: 'vendor-idempotency.html',
+    label: 'records for one application',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) records for one application\\b`, 'gi'),
+    expected: [vendorRun.verifications],
+    evidence: 'the same simulation: one record per accepted retry key',
+  },
+  {
+    page: 'vendor-idempotency.html',
+    label: 'attempts the vendor saw',
+    pattern: /"attempts": (\d+)/g,
+    expected: [vendorRun.attempts],
+    evidence: 'the calls the simulation needs before the vendor answers',
+  },
+  {
+    page: 'vendor-idempotency.html',
+    label: 'retry attempts and delay',
+    pattern: new RegExp(
+      `\\b(${NUMBER_TOKEN}) attempts (${NUMBER_TOKEN}) ms apart\\b`,
+      'gi',
+    ),
+    expected: [VENDOR_RETRY.attempts, VENDOR_RETRY.delayMs],
+    evidence: 'VENDOR_RETRY in product/server/app.mjs',
+  },
+  {
+    page: 'vendor-idempotency.html',
+    label: 'retry delay',
+    pattern: new RegExp(`\\bfixed (${NUMBER_TOKEN}) ms\\b`, 'gi'),
+    expected: [VENDOR_RETRY.delayMs],
+    evidence: 'VENDOR_RETRY.delayMs in product/server/app.mjs',
   },
   {
     page: 'tenant-isolation.html',
@@ -764,6 +841,10 @@ const derived = [
   [
     'case-study copy',
     `${caseStudyClaims.length} figures in ${caseStudyText.size} pages`,
+  ],
+  [
+    'vendor retry',
+    `${VENDOR_RETRY.attempts} max, ${VENDOR_RETRY.delayMs} ms; ${vendorRun.verifications} records over ${vendorRun.attempts} calls`,
   ],
 ];
 
