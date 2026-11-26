@@ -361,7 +361,7 @@ jobs:
       # with the summary, the report, the page copy and the fixtures behind its case-study answers.
       # Strict: no report, no deploy.
       - name: Check the assistant's figures against the evidence
-        run: node scripts/check-chatbot-figures.mjs _site/reports/summary.json _site/reports/quality-report.md --strict
+        run: node scripts/check-chatbot-figures.mjs _site/reports/summary.json _site/reports/quality-report.md _site/chat.html _site/index.html --strict
 
       - name: Render the markdown reports as HTML
         run: |

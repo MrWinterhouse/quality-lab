@@ -15,16 +15,19 @@
  * answers describe, so a fixed defect or a changed fixture fails this same gate instead of
  * leaving the answer quietly wrong.
  *
- * The page repeats five of those figures in the copy a reader sees before asking anything
- * (`site/chat.html`): 26 pay periods, 15 probes, five open risks, four case studies and the
- * golden-case count. They are checked against the same sources, so the visible copy cannot
- * drift on its own while the answers stay right.
+ * The two pages repeat those figures in the copy a reader sees before asking anything. The
+ * chat page (`site/chat.html`) states 26 pay periods, 15 probes, five open risks, four case
+ * studies and the golden-case count. The front page (`site/index.html`) states them in prose
+ * as well — "Blocked on five items", "the five things that would change it", three browsers,
+ * two prompt versions, and the numbers in the four case cards. Numbers inside a `data-figure`
+ * element are stamped from the summary at publish; the prose around them is not, so the front
+ * page is checked here against the same sources as the answers.
  *
  * A claim that disappears is a failure too: a figure quietly deleted from an answer is the
  * same drift as one left stale.
  *
  * Usage:
- *   node scripts/check-chatbot-figures.mjs [summaryPath] [reportPath] [sitePath] [--strict]
+ *   node scripts/check-chatbot-figures.mjs [summaryPath] [reportPath] [chatPath] [indexPath] [--strict]
  *
  * Without `--strict` a missing artifact is a warning, because a fresh checkout has not run
  * the report yet. The report job and the publish job pass `--strict`, so a pull request or a
@@ -39,7 +42,8 @@ const strict = argv.includes('--strict');
 const paths = argv.filter((argument) => !argument.startsWith('--'));
 const summaryPath = paths[0] ?? 'artifacts/summary.json';
 const reportPath = paths[1] ?? 'artifacts/quality-report.md';
-const sitePath = paths[2] ?? 'site/chat.html';
+const chatPath = paths[2] ?? 'site/chat.html';
+const indexPath = paths[3] ?? 'site/index.html';
 
 const NUMBER_WORDS = new Map(
   Object.entries({
@@ -125,17 +129,21 @@ if (!reportText) {
   console.warn(`${message} Skipping the report cross-check.`);
 }
 
-// The page copy is prose, so check the text a reader sees rather than the markup around it.
-const siteHtml = await readTextOr(sitePath);
-const siteText = siteHtml
-  ? siteHtml
-      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-      .replace(/<!--[\s\S]*?-->/g, ' ')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/&[a-z#0-9]+;/gi, ' ')
-      .replace(/\s+/g, ' ')
-  : null;
+// Page copy is prose, so check the text a reader sees rather than the markup around it.
+async function visibleTextOf(file) {
+  const html = await readTextOr(file);
+  if (!html) return null;
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&[a-z#0-9]+;/gi, ' ')
+    .replace(/\s+/g, ' ');
+}
+
+const chatText = await visibleTextOf(chatPath);
+const indexText = await visibleTextOf(indexPath);
 
 const problems = [];
 const E2E_SUITE = 'End-to-end (Chromium)';
@@ -346,7 +354,7 @@ for (const claim of claims) {
 // states no figure at all.
 const NUMBER_TOKEN =
   '(?:\\d+|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)';
-const siteClaims = [
+const chatClaims = [
   {
     label: 'pay periods',
     pattern: new RegExp(`\\b(${NUMBER_TOKEN}) pay periods\\b`, 'gi'),
@@ -379,23 +387,107 @@ const siteClaims = [
   },
 ];
 
-if (!siteText) {
-  problems.push(
-    `site copy: ${sitePath} was not found, so the numbers written into the page cannot be checked.`,
-  );
-} else {
-  for (const claim of siteClaims) {
+// The front page states the same figures in prose of its own, and none of that prose is
+// stamped at publish. "Blocked on five items" is the clearest: the card below it is rewritten
+// from summary.openBlockingRisks, the sentence above it is not.
+const indexClaims = [
+  {
+    label: 'blocked items',
+    pattern: new RegExp(`\\bBlocked on (${NUMBER_TOKEN}) items\\b`, 'gi'),
+    expected: [summary.openBlockingRisks],
+    evidence: 'summary.openBlockingRisks, from quality/risk-register.json',
+  },
+  {
+    label: 'items that would change the decision',
+    pattern: new RegExp(`\\bthe (${NUMBER_TOKEN}) things that would change it\\b`, 'gi'),
+    expected: [summary.openBlockingRisks],
+    evidence: 'summary.openBlockingRisks, from quality/risk-register.json',
+  },
+  {
+    label: 'case studies',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) case studies\\b`, 'gi'),
+    expected: [caseStudyCount],
+    evidence: 'the pages in site/case-studies/',
+  },
+  {
+    label: 'seeded defects',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) defects\\b`, 'gi'),
+    expected: [caseStudyCount],
+    evidence: 'one case study per seeded defect: the pages in site/case-studies/',
+  },
+  {
+    label: 'browsers',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) browsers\\b`, 'gi'),
+    expected: [browserCount],
+    evidence: 'the browser projects in playwright.config.ts',
+  },
+  {
+    label: 'prompt versions',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) prompt versions\\b`, 'gi'),
+    expected: [versions.length || null],
+    evidence: 'the number of versions in summary.evals',
+  },
+  {
+    label: 'failing defect probes',
+    pattern: new RegExp(`\\b(${NUMBER_TOKEN}) defect probes\\b`, 'gi'),
+    expected: [failingProbes],
+    evidence: 'summary.probes.failed — the probes that fail by design',
+  },
+  {
+    label: 'pay periods',
+    pattern: new RegExp(`\\bover (${NUMBER_TOKEN}) periods instead of (${NUMBER_TOKEN})\\b`, 'gi'),
+    expected: [biweeklyAnnualized, biweeklyCorrect],
+    evidence:
+      'annualizeIncome() in product/server/lib/policy.mjs: the defective biweekly factor, and weekly pay at 52 giving the correct 26',
+  },
+  {
+    label: 'tenant deadlines',
+    pattern: new RegExp(
+      `\\b(${NUMBER_TOKEN})-day deadline are replaced by agency A’s (${NUMBER_TOKEN})-day one\\b`,
+      'gi',
+    ),
+    expected: [deadlineB, deadlineA],
+    evidence: 'deadlineDays in product/server/lib/store.mjs (agency-b then agency-a)',
+  },
+  {
+    label: 'axe viewports',
+    pattern: new RegExp(`\\bat (${NUMBER_TOKEN}) px and (${NUMBER_TOKEN}) px wide\\b`, 'gi'),
+    expected: viewportWidths.slice(0, 2).length === 2 ? viewportWidths.slice(0, 2) : [null, null],
+    evidence: 'the VIEWPORTS widths in scripts/check-site.mjs',
+  },
+  {
+    label: 'load requests and concurrency',
+    pattern: new RegExp(
+      `\\b(${NUMBER_TOKEN}) requests at concurrency (${NUMBER_TOKEN})\\b`,
+      'gi',
+    ),
+    expected: [summary.load?.requests ?? null, summary.load?.concurrency ?? null],
+    evidence: 'summary.load.requests and summary.load.concurrency',
+  },
+];
+
+// Shared by both pages: every occurrence has to state the derived figure, and a page that
+// stops stating one fails too, because a quietly deleted number is the same drift as a stale one.
+function checkPageClaims(pagePath, text, pageClaims) {
+  if (!text) {
+    problems.push(
+      `site copy: ${pagePath} was not found, so the numbers written into the page cannot be checked.`,
+    );
+    return;
+  }
+
+  for (const claim of pageClaims) {
     if (claim.expected.some((value) => value === null || value === undefined)) {
       problems.push(
-        `site copy (${claim.label}): the source does not contain this figure (${claim.evidence}).`,
+        `site copy (${pagePath}, ${claim.label}): the source does not contain this figure (${claim.evidence}).`,
       );
       continue;
     }
 
-    const hits = [...siteText.matchAll(claim.pattern)];
+    const hits = [...text.matchAll(claim.pattern)];
     if (hits.length === 0) {
       problems.push(
-        `site copy (${claim.label}): ${sitePath} no longer states this figure (expected ${claim.expected.join(
+        `site copy (${pagePath}, ${claim.label}): the page no longer states this figure (expected ${claim.expected.join(
           '/',
         )}; ${claim.evidence}).`,
       );
@@ -409,7 +501,7 @@ if (!siteText) {
         values.every((value, index) => value === claim.expected[index]);
       if (!same) {
         problems.push(
-          `site copy (${claim.label}): "${hit[0].trim()}" reads ${values.join(
+          `site copy (${pagePath}, ${claim.label}): "${hit[0].trim()}" reads ${values.join(
             '/',
           )}, but the evidence says ${claim.expected.join('/')} (${claim.evidence}).`,
         );
@@ -417,6 +509,9 @@ if (!siteText) {
     }
   }
 }
+
+checkPageClaims(chatPath, chatText, chatClaims);
+checkPageClaims(indexPath, indexText, indexClaims);
 
 // The report is what the site links to, so it has to state the same numbers as the summary.
 const reportChecks = [
@@ -521,7 +616,7 @@ const derived = [
   ['axe viewports', viewportWidths.slice(0, 2).join(' / ') || 'missing'],
   [
     'page copy',
-    siteText ? `${siteClaims.length} figures in ${sitePath}` : `${sitePath} not found`,
+    `${chatClaims.length} figures in ${chatPath}, ${indexClaims.length} in ${indexPath}`,
   ],
 ];
 
@@ -544,5 +639,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  '\nPASS — every figure in site/chat/knowledge.json matches the generated evidence and the fixtures it describes.',
+  '\nPASS — every figure in the answers and the page copy matches the generated evidence and the fixtures it describes.',
 );

@@ -216,7 +216,7 @@ in memory and deliberately contains security defects for practice.
 | `npm run test:flaky` | The deliberately flaky test |
 | `npm run report` | `artifacts/quality-report.md` + `summary.json` |
 | `npm run test:chatbot` | Hiring assistant golden dataset against `site/chat/engine.js`; `--write-coverage` regenerates `site/chat/coverage.json`, and a stale copy fails the run |
-| `npm run check:chatbot-figures` | Fails when a figure in `site/chat/knowledge.json` or in the `site/chat.html` copy disagrees with the generated summary, the report, or the fixtures behind the case-study answers: `policy.mjs` pay periods, tenant deadlines, the case-study pages, the axe viewports (needs `npm run report` first; CI runs it `--strict` on every pull request and again before publishing) |
+| `npm run check:chatbot-figures` | Fails when a figure in `site/chat/knowledge.json` or in the `site/chat.html` and `site/index.html` copy disagrees with the generated summary, the report, or the fixtures behind the case-study answers: `policy.mjs` pay periods, tenant deadlines, the case-study pages, the axe viewports (needs `npm run report` first; CI runs it `--strict` on every pull request and again before publishing) |
 | `npm run check:site` | Accessibility (axe WCAG 2.1 A/AA) and HTML structure checks for `site/` |
 | `npm run verify:baseline` | Typecheck + baseline + Chromium E2E + hardened evals |
 | `npm run verify:release` | The full gate; green only when every defect is fixed |

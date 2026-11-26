@@ -1038,6 +1038,52 @@ td.pass {
   color: var(--ink-faint);
 }
 
+/* ---------- hiring summary ---------- */
+
+.hiring {
+  background: var(--paper-2);
+}
+
+.hiring h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+}
+
+.hiring-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.hiring-list li {
+  margin-bottom: 0.55rem;
+}
+
+.hiring-list strong {
+  color: var(--ink);
+}
+
+.hiring-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin: 1.9rem 0 0;
+  color: var(--ink-soft);
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.button--ghost:hover {
+  background: var(--paper-3);
+  color: var(--ink);
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 860px) {

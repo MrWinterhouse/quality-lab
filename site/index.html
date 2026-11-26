@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quality engineering portfolio — benefits eligibility lab</title>
-<meta name="description" content="A deliberately imperfect benefits-eligibility product, its test infrastructure, and the release decision that says not ready. Four case studies with reproducible evidence.">
+<title>John Winterhouse — quality engineer: release gates and evidence</title>
+<meta name="description" content="John Winterhouse, quality engineer. Test strategy, release gates and AI evaluation, shown through four case studies with reproducible evidence and a release decision that says not ready.">
 <link rel="stylesheet" href="styles.css">
 
 </head>
@@ -13,9 +13,10 @@
 
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="./"><span>◇</span> Quality engineering portfolio</a>
+    <a class="brand" href="./"><span>◇</span> John Winterhouse · quality engineering</a>
     <nav class="site-nav" aria-label="Sections">
       <a href="chat.html">Ask me</a>
+      <a href="#hiring">Hiring</a>
       <a href="#case-studies">Case studies</a>
       <a href="#evidence">Evidence</a>
       <a href="#approach">Approach</a>
@@ -29,22 +30,24 @@
   <section class="hero" aria-labelledby="hero-title">
     <div class="wrap hero-grid">
       <div>
-        <p class="kicker">Benefits eligibility lab · quality engineering</p>
-        <h1 id="hero-title">I built the product, the test suite, and the release decision that says <em>don’t ship it</em>.</h1>
+        <p class="kicker">Quality engineer · open to quality engineering roles</p>
+        <h1 id="hero-title">Hire the engineer who says <em>not to ship</em> — then shows you why.</h1>
         <p class="lede">
-          Four case studies from a deliberately imperfect benefits-eligibility system:
-          cross-tenant data exposure, a duplicate vendor verification, an assistant that
-          follows injected instructions, and an income calculation that disagrees with an
-          independent oracle.
+          I’m John Winterhouse, a quality engineer. I build the test infrastructure a release
+          owner can act on: independent oracles, gates that can say no, and evidence that names
+          what it has not verified. This page is the work sample — four case studies with the
+          risk, the fix, and the regression that keeps it fixed.
         </p>
         <p class="byline">
           <span>John Winterhouse</span>
           <span>Quality Engineer</span>
+          <span><a href="mailto:Jwinterhouse3@gmail.com">Jwinterhouse3@gmail.com</a></span>
           <span><a href="https://github.com/MrWinterhouse/quality-lab">github.com/MrWinterhouse/quality-lab</a></span>
         </p>
         <p class="hero-cta">
-          <a class="button" href="chat.html">Ask why I should be hired →</a>
-          <span>Answers from a closed knowledge base, checked by a golden dataset.</span>
+          <a class="button" href="chat.html">Ask why you should hire me →</a>
+          <a class="button button--ghost" href="#case-studies">Read the case studies</a>
+          <span>Answers come from a closed knowledge base, and each one shows the tests behind it.</span>
         </p>
       </div>
 
@@ -64,6 +67,46 @@
           <a href="reports/quality-report.html">Read the generated report →</a>
         </p>
       </aside>
+    </div>
+  </section>
+
+  <section id="hiring" class="hiring" aria-labelledby="hiring-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">For hiring managers</p>
+          <h2 id="hiring-title">What I bring, and how to check it</h2>
+        </div>
+        <p>
+          I’m looking for a quality engineering role where the work is judgment: what to test,
+          what a passing suite is worth, and whether a release is safe. This page is arranged so
+          you can verify that instead of taking my word for it.
+        </p>
+      </div>
+
+      <div class="cols-2">
+        <div>
+          <h3>What I do</h3>
+          <ul class="hiring-list">
+            <li><strong>Test strategy from risk.</strong> Who gets hurt and how quietly, before any tool or page object is chosen.</li>
+            <li><strong>Gates that can say no.</strong> The generated report returns NOT READY and names the five things that would change it.</li>
+            <li><strong>Evidence over adjectives.</strong> Every claim links to a command, a file and a failing assertion.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>How to check me</h3>
+          <ol class="hiring-list">
+            <li><a href="case-studies/tenant-isolation.html">Read one case study</a> — risk, smallest reproduction, root cause, fix and regression.</li>
+            <li><a href="chat.html">Ask the assistant</a> about my background, and how each answer is tested.</li>
+            <li><a href="reports/quality-report.html">Open the generated report</a> — the release decision, open risks and what is still unverified.</li>
+          </ol>
+        </div>
+      </div>
+
+      <p class="hiring-cta">
+        <a class="button" href="mailto:Jwinterhouse3@gmail.com">Email me</a>
+        <span>Or start with the <a href="#case-studies">four case studies</a>.</span>
+      </p>
     </div>
   </section>
 
