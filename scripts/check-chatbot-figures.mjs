@@ -622,6 +622,39 @@ for (const claim of claims) {
 // Only a number can be the figure. A bare `[\w]+` capture would read "me Case studies" in
 // the navigation or "the golden cases" in a sentence as a claim, and fail on a sentence that
 // states no figure at all.
+// The tenure is a derived figure, not a stated one: the months between the fixture's start and
+// end. Both answers have to say it the same way, so the number cannot drift from the dates
+// printed beside it.
+// The word for a number, read back out of the word-to-number map the claims already use.
+const numberWord = (value) => {
+  for (const [word, number] of NUMBER_WORDS) {
+    if (number === value) return word;
+  }
+  return String(value);
+};
+const tenureMonths =
+  (gofundme.endYear - gofundme.startYear) * 12 + (gofundme.endMonth - gofundme.startMonth);
+const tenureYears = Math.floor(tenureMonths / 12);
+const tenureExtraMonths = tenureMonths % 12;
+const tenurePhrase =
+  tenureExtraMonths === 0
+    ? `${numberWord(tenureYears)} years`
+    : `${numberWord(tenureYears)} years and ${numberWord(tenureExtraMonths)} months`;
+for (const tenureEntryId of ['experience', 'current-role']) {
+  const entry = knowledge.find((candidate) => candidate.id === tenureEntryId);
+  if (!entry) {
+    problems.push(
+      `knowledge.json: no "${tenureEntryId}" answer, so the tenure at GoFundMe cannot be checked.`,
+    );
+    continue;
+  }
+  if (!entry.answer.toLowerCase().includes(tenurePhrase)) {
+    problems.push(
+      `knowledge.json ("${tenureEntryId}"): does not state "${tenurePhrase}", the tenure derived from the GoFundMe months in quality/resume.json (${tenureMonths} months).`,
+    );
+  }
+}
+
 const NUMBER_TOKEN =
   '(?:\\d+|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)';
 const chatClaims = [

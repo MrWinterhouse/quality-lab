@@ -264,11 +264,11 @@
     "expect": {
       "topic": "experience",
       "refused": false,
-      "must_include": ["GoFundMe", "January 2023"],
+      "must_include": ["GoFundMe", "three years and nine months"],
       "must_cite": ["portfolio-experience"],
       "max_words": 90
     },
-    "note": "The tenure is stated as the same dates the current-role answer gives, from quality/resume.json."
+    "note": "The tenure is worked out from quality/resume.json's months, not stated by hand."
   },
   {
     "id": "current-role",
@@ -282,6 +282,19 @@
       "max_words": 90
     },
     "note": "The role itself — title, employer and dates — not the tenure figure the years answer gives."
+  },
+  {
+    "id": "tenure-gofundme",
+    "category": "resume",
+    "message": "How long was he at GoFundMe?",
+    "expect": {
+      "topic": "experience",
+      "refused": false,
+      "must_include": ["three years and nine months", "January 2023"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "Employer-named tenure question: 45 months between January 2023 and October 2026."
   },
   {
     "id": "current-role-job",
