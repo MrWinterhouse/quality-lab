@@ -53,8 +53,13 @@ const MONEY_FIGURE_PATTERN = /\$\s?\d/;
 // Facts the portfolio does not state. Location, years of experience and education are now
 // published on the resume section, so they are answered; availability, work authorization,
 // relocation and time zone are still refused rather than inferred.
+// Availability, work authorization and other facts the portfolio deliberately does not state.
+// The pattern has to catch the question however it is phrased — "when could he start", "would
+// he relocate" — because a question this rule misses falls through to keyword scoring, where
+// a broad keyword can answer it with something unrelated. `relocat\w*` is deliberate: a bare
+// `relocat` with a trailing word boundary never matches "relocate" or "relocation".
 const UNPUBLISHED_PATTERN =
-  /\b(remote|relocat|time ?zone|visa|sponsorship|authorized to work|work authorization|right to work|work permit|green card|availability|start date|notice period|clearance|citizen|how soon|when (could|can|would) you (start|begin))\b/i;
+  /\b(remote|relocat\w*|time ?zone|visa|sponsorship|authorized to work|work authorization|right to work|work permit|green card|availability|start date|notice period|clearance|citizen|citizenship|how soon|when (could|can|would) (you|he|she|they|john) (start|begin)|interviewing (elsewhere|anywhere|somewhere else)|other (interviews|offers)|competing offers)\b/i;
 
 const STOPWORDS = new Set([
   'the', 'and', 'for', 'you', 'your', 'yours', 'are', 'was', 'were', 'what', 'which', 'who',

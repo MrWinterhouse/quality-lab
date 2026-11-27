@@ -3,21 +3,25 @@
  * Routes the backlog's questions through the assistant and fails when one lands elsewhere.
  *
  * `tests/chatbot/golden.json` pins one phrasing per behaviour: it proves an answer is right,
- * but not that the questions a recruiter actually types reach it. The backlog doc lists the
- * phrasings people asked for, and this file is that table as a test — 62 questions, each with
- * the entry that has to answer it. A keyword edit that quietly sends "how long was he at
- * Catalyst" back to the total-years answer fails here even if every golden case still passes.
+ * but not that the questions a recruiter actually types reach it. The backlog doc lists those
+ * phrasings, and this file is that table as a test. A keyword edit that quietly sends "how
+ * long was he at Catalyst" back to the total-years answer fails here even if every golden case
+ * still passes.
  *
- * The second table is the other half of the same risk. Some keywords have to be broad enough
- * to catch a paraphrase ("which job was in Colorado"), and a broad keyword can also catch a
- * question it has no business answering. The guards below are questions that mention those
- * words without asking about the entry: if "view" starts answering questions about the tech
- * stack, or "worked in" starts answering questions about work authorization, this fails.
+ * Three tables, one assertion each:
+ *   routes    — the question is answered, by this entry.
+ *   refusals  — the question is refused, by this entry. The backlog's salary, availability and
+ *               work-authorization rows live here: they are the answers that must never be
+ *               produced by a keyword match, so the test checks the refused flag as well as the
+ *               entry, and a keyword edit cannot start answering them.
+ *   guards    — the question uses a broad keyword without asking about the entry it routes to,
+ *               so that entry must not answer it. This is where "worked in", "which job" and
+ *               "view" are kept honest.
  *
- * The engine is imported directly, so this exercises the file the page loads. No golden-dataset
- * case is duplicated here: that file asserts reply content, this one asserts destination.
+ * The engine is imported directly, so this exercises the file the page loads. No golden case is
+ * duplicated here: that file asserts reply content, this one asserts destination and refusal.
  *
- * Usage: node scripts/check-chatbot-routing.mjs [--verbose]
+ * Usage: node scripts/check-chatbot-routing.mjs
  */
 import { readFile } from 'node:fs/promises';
 import { createAssistant, normalize, scoreEntry } from '../site/chat/engine.js';
@@ -26,9 +30,9 @@ const knowledge = JSON.parse(
   await readFile(new URL('../site/chat/knowledge.json', import.meta.url), 'utf8'),
 );
 const assistant = createAssistant(knowledge);
-const verbose = process.argv.includes('--verbose');
 
-// One row per phrasings in the backlog doc, in the doc's section order.
+// Question → the entry that has to answer it. In the backlog doc's section order; the last
+// two were added after the live check found them on the wrong answer.
 const routes = [
   // A. Roles and chronology
   ['What was his second job?', 'role-history'],
@@ -56,6 +60,9 @@ const routes = [
   ['What industries has he worked in?', 'role-history'],
   ['Has he worked in healthcare?', 'role-history'],
   ['Has he worked on games?', 'role-history'],
+  // Both found on the wrong answer by the live check after the first routing pass.
+  ['Which job was in Colorado?', 'role-history'],
+  ['What was his title at GoFundMe?', 'role-history'],
   // B. Tenure and dates
   ['When did he start at GoFundMe?', 'role-tenure'],
   ['When did he leave GoFundMe?', 'role-tenure'],
@@ -77,6 +84,9 @@ const routes = [
   // D. AI-assisted work
   ['Does he do prompt engineering?', 'ai-opinion'],
   ["What's his view on AI in testing?", 'ai-opinion'],
+  // E. Education — the two backlog rows whose honest answer exists without inventing a fact
+  ['Does he know Python?', 'python-oracle'],
+  ['How many years since he graduated?', 'education'],
   // F. This lab and its evidence
   ['How many case studies are there?', 'case-studies'],
   ['How many baseline checks are there?', 'lab-coverage'],
@@ -101,42 +111,65 @@ const routes = [
   ['Can you be talked out of your rules?', 'meta-topics'],
 ];
 
-// Phrasings added after the first routing pass, when the live check found them on the wrong
-// answer. They are the ones a rewrite is most likely to break again.
-const regressions = [
-  ['Which job was in Colorado?', 'role-history'],
-  ['What was his title at GoFundMe?', 'role-history'],
+// The backlog's ⛔ rows and the one 🟠 row that must refuse: what the portfolio deliberately
+// does not state. Salary and availability are the dangerous ones — a single broad keyword in a
+// knowledge entry would answer them with something plausible, so these assert the refusal, the
+// rule that produces it, and not just a keyword match that happens to lose today.
+const refusals = [
+  ["What's his salary expectation?", 'compensation'],
+  ['What are his salary requirements?', 'compensation'],
+  ['What is his notice period?', 'boundary'],
+  ['When could he start?', 'boundary'],
+  ['When can he begin?', 'boundary'],
+  ['Would he relocate?', 'boundary'],
+  ['Is he open to remote work?', 'boundary'],
+  ['What time zone is he in?', 'boundary'],
+  ['Is he authorized to work in the US?', 'boundary'],
+  ['Does he need sponsorship?', 'boundary'],
+  ['Is he a US citizen?', 'boundary'],
+  ['Does he have a security clearance?', 'boundary'],
+  ['Is he interviewing elsewhere?', 'boundary'],
+  ["What's his phone number?", 'out-of-scope'],
+  ['Can I have references?', 'out-of-scope'],
+  ['How old is he?', 'out-of-scope'],
+  ['Where is CSU San Marcos?', 'out-of-scope'],
 ];
 
 // Questions that use a broad keyword without asking about the entry it now routes to.
-// `not` lists the entries that must not answer; `expect` pins the entry that should.
 const guards = [
-  { message: 'What is his view on the tech stack?', not: ['ai-opinion'] },
-  { message: 'What is his view on testing philosophy?', not: ['ai-opinion'] },
-  { message: 'Can he work in the United States?', not: ['role-history'] },
-  { message: 'Does he work in an office?', not: ['role-history'] },
-  { message: 'Should we go back to the old design?', not: ['role-history'] },
-  { message: "What's the weather in Denver today?", not: ['role-history'] },
-  { message: 'Is there a job board he recommends?', not: ['role-history'] },
-  { message: 'Which job board does he use?', not: ['role-history'] },
-  { message: 'What has he worked on outside of work?', not: ['role-history'] },
-  { message: 'What did the audit log show before that fix?', not: ['role-history'] },
-  { message: 'When did the page title change?', not: ['role-history'] },
-  { message: "What's the weather in Colorado?", not: ['role-history'] },
-  { message: "What's the weather in California?", not: ['role-history'] },
-  { message: 'Does the app have a supervisor process?', not: ['role-tenure'] },
-  { message: 'Is Dire Wolf Digital hiring?', not: ['role-tenure'] },
-  { message: 'Is Catalyst Healthcare a customer?', not: ['role-tenure'] },
-  { message: 'What jobs are open on your team?', expect: 'role' },
-  { message: 'Which job is he looking for?', expect: 'role' },
-  { message: 'Does he know Postman?', expect: 'tools' },
-  { message: "What's his view on remote work?", expect: 'boundary' },
-  { message: 'What salary does he want?', expect: 'compensation' },
+  { message: 'What is his view on the tech stack?', forbidden: ['ai-opinion'] },
+  { message: 'What is his view on testing philosophy?', forbidden: ['ai-opinion'] },
+  { message: 'Can he work in the United States?', forbidden: ['role-history'] },
+  { message: 'Does he work in an office?', forbidden: ['role-history'] },
+  { message: 'Should we go back to the old design?', forbidden: ['role-history'] },
+  { message: "What's the weather in Denver today?", forbidden: ['role-history'] },
+  { message: "What's the weather in Colorado?", forbidden: ['role-history'] },
+  { message: "What's the weather in California?", forbidden: ['role-history'] },
+  { message: 'Is there a job board he recommends?', forbidden: ['role-history'] },
+  { message: 'Which job board does he use?', forbidden: ['role-history'] },
+  { message: 'What has he worked on outside of work?', forbidden: ['role-history'] },
+  { message: 'What did the audit log show before that fix?', forbidden: ['role-history'] },
+  { message: 'When did the page title change?', forbidden: ['role-history'] },
+  { message: 'Does the app have a supervisor process?', forbidden: ['role-tenure'] },
+  { message: 'Is Dire Wolf Digital hiring?', forbidden: ['role-tenure'] },
+  { message: 'Is Catalyst Healthcare a customer?', forbidden: ['role-tenure'] },
+  { message: 'What jobs are open on your team?', topic: 'role' },
+  { message: 'Which job is he looking for?', topic: 'role' },
+  { message: 'Does he know Postman?', topic: 'tools' },
 ];
 
-const problems = [];
-const known = new Set(knowledge.map((entry) => entry.id));
+// Rule answers the engine synthesises, which are not entries in the knowledge base.
+const ruleTopics = new Set(['out-of-scope', 'injection', 'help', 'empty']);
+const known = new Set([...knowledge.map((entry) => entry.id), ...ruleTopics]);
 
+const checks = [
+  ...routes.map(([message, topic]) => ({ message, topic, refused: false })),
+  ...refusals.map(([message, topic]) => ({ message, topic, refused: true })),
+  ...guards,
+];
+
+// Only built for a failure: the top three scores show which keyword won, which is the whole
+// question when a routing row regresses.
 function explain(message) {
   const normalized = normalize(message);
   return knowledge
@@ -148,47 +181,35 @@ function explain(message) {
     .join(', ');
 }
 
-for (const [message, expected] of [...routes, ...regressions]) {
-  if (!known.has(expected)) {
-    problems.push(`"${message}" expects "${expected}", which is not an entry in knowledge.json.`);
+const problems = [];
+for (const check of checks) {
+  const answer = assistant.ask(check.message);
+  const where = `(scores: ${explain(check.message)})`;
+
+  if (check.topic && !known.has(check.topic)) {
+    problems.push(`"${check.message}" expects "${check.topic}", which is not an entry.`);
     continue;
   }
-  const answer = assistant.ask(message);
-  if (answer.topic !== expected) {
+  if (check.topic && answer.topic !== check.topic) {
     problems.push(
-      `"${message}" answered from "${answer.topic}", expected "${expected}" (scores: ${explain(message)})`,
+      `"${check.message}" answered from "${answer.topic}", expected "${check.topic}" ${where}`,
     );
-  } else if (verbose) {
-    console.log(`  ok  ${message} → ${answer.topic}`);
+  }
+  if (check.refused !== undefined && answer.refused !== check.refused) {
+    problems.push(
+      `"${check.message}" ${answer.refused ? 'refused' : 'answered'} from "${answer.topic}", expected ${check.refused ? 'a refusal' : 'an answer'} ${where}`,
+    );
+  }
+  if (check.forbidden?.includes(answer.topic)) {
+    problems.push(`"${check.message}" was answered by "${answer.topic}" ${where}`);
   }
 }
 
-for (const guard of guards) {
-  const answer = assistant.ask(guard.message);
-  if (guard.expect && !known.has(guard.expect)) {
-    problems.push(`"${guard.message}" expects "${guard.expect}", which is not an entry.`);
-    continue;
-  }
-  if (guard.expect && answer.topic !== guard.expect) {
-    problems.push(
-      `"${guard.message}" answered from "${answer.topic}", expected "${guard.expect}" (scores: ${explain(guard.message)})`,
-    );
-  }
-  if (guard.not?.includes(answer.topic)) {
-    problems.push(
-      `"${guard.message}" was answered by "${answer.topic}", which must not match it (scores: ${explain(guard.message)})`,
-    );
-  }
-}
-
-const total = routes.length + regressions.length + guards.length;
 console.log('\nHiring assistant — question routing');
-console.log(`  backlog phrasings: ${routes.length}`);
-console.log(`  regressions:       ${regressions.length}`);
-console.log(`  false-match guards:${guards.length}`);
+console.log(`  answered: ${routes.length}   refused: ${refusals.length}   guards: ${guards.length}`);
 
 if (problems.length > 0) {
-  console.error(`\nFAIL — ${problems.length} of ${total} questions did not route as intended:`);
+  console.error(`\nFAIL — ${problems.length} of ${checks.length} questions did not route as intended:`);
   for (const problem of problems) console.error(`  - ${problem}`);
   console.error(
     '\nFix the keywords or add a narrower phrase. Do not loosen a guard: a broad keyword that answers a question it was not written for is the same defect as a wrong answer.',
@@ -196,4 +217,4 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-console.log(`\nPASS — ${total}/${total} questions routed as intended.`);
+console.log(`\nPASS — ${checks.length}/${checks.length} questions routed as intended.`);
