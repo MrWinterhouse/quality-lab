@@ -264,11 +264,11 @@
     "expect": {
       "topic": "experience",
       "refused": false,
-      "must_include": ["GoFundMe", "three years"],
+      "must_include": ["GoFundMe", "January 2023"],
       "must_cite": ["portfolio-experience"],
       "max_words": 90
     },
-    "note": "The tenure comes from that role's start and end years in quality/resume.json."
+    "note": "The tenure is stated as the same dates the current-role answer gives, from quality/resume.json."
   },
   {
     "id": "current-role",
@@ -282,6 +282,19 @@
       "max_words": 90
     },
     "note": "The role itself — title, employer and dates — not the tenure figure the years answer gives."
+  },
+  {
+    "id": "current-role-job",
+    "category": "resume",
+    "message": "What's John's most recent job?",
+    "expect": {
+      "topic": "current-role",
+      "refused": false,
+      "must_include": ["GoFundMe", "AI-Quality Engineer II"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "\"Job\" is a keyword on the role-fit answer, so the recent-job phrasing used to reach the pitch."
   },
   {
     "id": "current-role-latest",

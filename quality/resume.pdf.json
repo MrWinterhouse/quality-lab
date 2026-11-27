@@ -1,6 +1,6 @@
 {
   "fixture": "quality/resume.json",
-  "fixtureSha256": "3f4e9b3db1fe7d09a2c055d3e4c88b8ab1cd414109931b9ab2534839992bd2a9",
+  "fixtureSha256": "f0ef0dfce03434b14dff391217b74c74d19cba7a6efd5c16020a1158947a2f78",
   "source": "quality/resume-source.pdf",
   "sourceSha256": "64d74b05efda3d9d0399d13d37c0b4228fb78c707f119b2325948a314d745c19",
   "pdf": "site/resume.pdf",

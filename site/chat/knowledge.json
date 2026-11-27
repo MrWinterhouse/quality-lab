@@ -88,7 +88,7 @@
   {
     "id": "experience",
     "title": "Years of experience",
-    "answer": "9+ years in quality engineering, from automated UI and API testing through automation architecture and AI-assisted engineering: Playwright and TypeScript, C# and Selenium, SQL validation and CI/CD. Most recently three years at GoFundMe as an AI-Quality Engineer II (2023-2026), where I owned suites across five repositories and mentored four engineers.",
+    "answer": "9+ years in quality engineering, from automated UI and API testing through automation architecture and AI-assisted engineering: Playwright and TypeScript, C# and Selenium, SQL validation and CI/CD. Most recently at GoFundMe as an AI-Quality Engineer II, January 2023 to October 2026, where I owned suites across five repositories and mentored four engineers.",
     "keywords": [
       "years of experience",
       "how long",
@@ -158,6 +158,9 @@
       "most recent role",
       "recent role",
       "latest role",
+      "most recent job",
+      "recent job",
+      "latest job",
       "current role",
       "current job",
       "current position",

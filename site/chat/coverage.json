@@ -2,7 +2,7 @@
   "generatedBy": "npm run test:chatbot",
   "dataset": "tests/chatbot/golden.json",
   "report": "reports/chatbot-eval.html",
-  "total": 50,
+  "total": 51,
   "topics": {
     "pitch": [
       {
@@ -425,7 +425,7 @@
           "answers",
           "comes from “Years of experience”",
           "contains “GoFundMe”",
-          "contains “three years”",
+          "contains “January 2023”",
           "cites portfolio-experience",
           "stays within 90 words"
         ]
@@ -453,6 +453,19 @@
           "comes from “Current role”",
           "contains “AI-Quality Engineer II”",
           "contains “GoFundMe”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      },
+      {
+        "id": "current-role-job",
+        "category": "resume",
+        "question": "What's John's most recent job?",
+        "checks": [
+          "answers",
+          "comes from “Current role”",
+          "contains “GoFundMe”",
+          "contains “AI-Quality Engineer II”",
           "cites portfolio-experience",
           "stays within 90 words"
         ]

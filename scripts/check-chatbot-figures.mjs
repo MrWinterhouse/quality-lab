@@ -149,6 +149,20 @@ const resumePdfHash = resumePdf ? createHash('sha256').update(resumePdf).digest(
 const resumeSourceHash = resumeSource
   ? createHash('sha256').update(resumeSource).digest('hex')
   : null;
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 const MONTH_ABBREVIATIONS = [
   'Jan',
   'Feb',
@@ -166,7 +180,7 @@ const MONTH_ABBREVIATIONS = [
 // A role that starts and ends inside one year states months: "Jan–Sep 2021" cannot be confused
 // with the year spans of the roles around it, so it is checked by month rather than by year.
 const roleDatePattern = (role) =>
-  role.startMonth && role.endMonth
+  role.startYear === role.endYear && role.startMonth && role.endMonth
     ? new RegExp(
         `\\b${MONTH_ABBREVIATIONS[role.startMonth - 1]}[\u2013-]${MONTH_ABBREVIATIONS[role.endMonth - 1]} (${role.endYear})\\b`,
         'g',
@@ -474,11 +488,17 @@ const claims = [
     entries: ['experience'],
   },
   {
-    label: 'years at the most recent role',
-    pattern: /([\w]+) years at GoFundMe/gi,
-    expected: [gofundme.endYear - gofundme.startYear],
-    evidence: 'the GoFundMe start and end years in quality/resume.json',
-    entries: ['experience'],
+    // The years-of-experience answer and the current-role answer describe the same job, so both
+    // have to state the same dates: a tenure stated one way in one answer and another way in the
+    // next is the drift this gate exists to catch.
+    label: 'most recent role dates',
+    pattern: new RegExp(
+      `\\b${MONTH_NAMES[gofundme.startMonth - 1]} (${gofundme.startYear}) to ${MONTH_NAMES[gofundme.endMonth - 1]} (${gofundme.endYear})\\b`,
+      'gi',
+    ),
+    expected: [gofundme.startYear, gofundme.endYear],
+    evidence: 'quality/resume.json GoFundMe start/end month and year',
+    entries: ['experience', 'current-role'],
   },
   {
     label: 'repositories owned',
