@@ -131,6 +131,15 @@ const resumeFixtureHash = createHash('sha256').update(resumeFixtureText).digest(
 const resumeManifest = await readTextOr(new URL('../quality/resume.pdf.json', import.meta.url))
   .then((text) => (text ? JSON.parse(text) : null))
   .catch(() => null);
+// The published resume is the file John wrote, so the gate checks the bytes a visitor gets
+// against the source and the manifest rather than only that some PDF exists at the link.
+const resumeSource = await readFile(new URL('../quality/resume-source.pdf', import.meta.url)).catch(
+  () => null,
+);
+const resumePdfHash = resumePdf ? createHash('sha256').update(resumePdf).digest('hex') : null;
+const resumeSourceHash = resumeSource
+  ? createHash('sha256').update(resumeSource).digest('hex')
+  : null;
 const roleDatePattern = (role) =>
   new RegExp(`\\b(${role.startYear})[\u2013-](${role.endYear})\\b`, 'g');
 
@@ -288,9 +297,34 @@ if (!resumePdf || resumePdf.length < 2000) {
     'site/resume.pdf: missing or too small, so the resume link and the pages that state resume facts cannot be checked. Run `npm run build:resume`.',
   );
 }
+if (!resumeSource) {
+  problems.push(
+    'quality/resume-source.pdf: missing, so the published resume cannot be traced back to the file John sent. Restore it and run `npm run build:resume`.',
+  );
+}
+if (resumePdf && resumePdf.subarray(0, 5).toString('latin1') !== '%PDF-') {
+  problems.push(
+    'site/resume.pdf: does not start with %PDF-, so the resume link serves something other than a PDF.',
+  );
+}
 if (!resumeManifest || resumeManifest.fixtureSha256 !== resumeFixtureHash) {
   problems.push(
-    'quality/resume.pdf.json: site/resume.pdf was not built from the current quality/resume.json, so the published resume can describe a different career than the page. Run `npm run build:resume`.',
+    'quality/resume.pdf.json: site/resume.pdf was not published from the current quality/resume.json, so the published resume can describe a different career than the page. Run `npm run build:resume`.',
+  );
+}
+if (resumeManifest && resumePdf && resumeManifest.pdfSha256 !== resumePdfHash) {
+  problems.push(
+    'site/resume.pdf: its bytes do not match quality/resume.pdf.json, so the file changed after it was published. Run `npm run build:resume`.',
+  );
+}
+if (resumeManifest && resumePdf && resumeManifest.bytes !== resumePdf.length) {
+  problems.push(
+    `site/resume.pdf: is ${resumePdf.length} bytes but quality/resume.pdf.json records ${resumeManifest.bytes}. Run \`npm run build:resume\`.`,
+  );
+}
+if (resumeManifest && resumeSource && resumeManifest.sourceSha256 !== resumeSourceHash) {
+  problems.push(
+    'quality/resume-source.pdf: changed since the resume was published, so the download is not the current source. Run `npm run build:resume`.',
   );
 }
 

@@ -179,7 +179,7 @@
   {
     "id": "education",
     "title": "Education",
-    "answer": "A Bachelor of Science in Applied Physics from California State University, San Marcos, with a minor in Mathematics, 2015. The differential oracle in case 04 is the part of that training this lab leans on hardest.",
+    "answer": "A Bachelor's in Applied Physics from California State University, San Marcos, with a minor in Mathematics, 2015. The differential oracle in case 04 is the part of that training this lab leans on hardest.",
     "keywords": [
       "education",
       "degree",
@@ -555,13 +555,13 @@
   {
     "id": "resume",
     "title": "The resume",
-    "answer": "Yes: a one-page PDF at resume.pdf, written from the same facts as the experience section. It covers the roles, the toolkit, the AI-assisted work and the degree; the four case studies here are the part a resume cannot show.",
+    "answer": "Yes: a PDF at resume.pdf, the same career the experience section summarizes. It covers the roles, the toolkit, the AI-assisted work and the degree; the four case studies here are the part a resume cannot show.",
     "keywords": [
       "resume",
       "cv",
       "pdf",
       "download",
-      "one-page"
+      "one page"
     ],
     "citations": [
       {

@@ -1,7 +1,10 @@
 {
   "fixture": "quality/resume.json",
-  "fixtureSha256": "4a9b097332272fa994521912d1032b05bf9f99ec32ddf76a33acf6dfddad775d",
+  "fixtureSha256": "a9b06235b160ec27671d2382d9318c8ce6665822d68e6405f5b26f9eb170410c",
+  "source": "quality/resume-source.pdf",
+  "sourceSha256": "c86ab32cff38a0aae77f56649c1a18293937690d2ccb1820d9a4f598e802d151",
   "pdf": "site/resume.pdf",
-  "bytes": 90713,
+  "pdfSha256": "c86ab32cff38a0aae77f56649c1a18293937690d2ccb1820d9a4f598e802d151",
+  "bytes": 76897,
   "generatedBy": "npm run build:resume"
 }
