@@ -114,13 +114,22 @@ const siteCheckSource = (await readTextOr(new URL('./check-site.mjs', import.met
 const resumeFixture = JSON.parse(
   await readFile(new URL('../quality/resume.json', import.meta.url), 'utf8'),
 );
-const resumeRole = (employer) => {
-  const role = resumeFixture.roles.find((candidate) => candidate.employer === employer);
-  if (!role) throw new Error(`quality/resume.json has no role for ${employer}`);
+// Two roles at one employer: the title is what tells the supervisor role from the analyst role.
+const resumeRole = (employer, title) => {
+  const role = resumeFixture.roles.find(
+    (candidate) => candidate.employer === employer && (!title || candidate.title === title),
+  );
+  if (!role) {
+    throw new Error(`quality/resume.json has no ${title ? `${title} ` : ''}role for ${employer}`);
+  }
   return role;
 };
 const gofundme = resumeRole('GoFundMe');
-const connectHealth = resumeRole('Connect for Health Colorado');
+const connectHealth = resumeRole(
+  'Connect for Health Colorado',
+  'Technical Quality Analyst Supervisor',
+);
+const connectAnalyst = resumeRole('Connect for Health Colorado', 'Technical Quality Analyst');
 const catalyst = resumeRole('Catalyst Healthcare');
 const direwolf = resumeRole('Dire Wolf Digital');
 const resumePdf = await readFile(new URL('../site/resume.pdf', import.meta.url)).catch(() => null);
@@ -140,8 +149,29 @@ const resumePdfHash = resumePdf ? createHash('sha256').update(resumePdf).digest(
 const resumeSourceHash = resumeSource
   ? createHash('sha256').update(resumeSource).digest('hex')
   : null;
+const MONTH_ABBREVIATIONS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+// A role that starts and ends inside one year states months: "Jan–Sep 2021" cannot be confused
+// with the year spans of the roles around it, so it is checked by month rather than by year.
 const roleDatePattern = (role) =>
-  new RegExp(`\\b(${role.startYear})[\u2013-](${role.endYear})\\b`, 'g');
+  role.startMonth && role.endMonth
+    ? new RegExp(
+        `\\b${MONTH_ABBREVIATIONS[role.startMonth - 1]}[\u2013-]${MONTH_ABBREVIATIONS[role.endMonth - 1]} (${role.endYear})\\b`,
+        'g',
+      )
+    : new RegExp(`\\b(${role.startYear})[\u2013-](${role.endYear})\\b`, 'g');
 
 let caseStudyPages = [];
 try {
@@ -500,6 +530,13 @@ const claims = [
     entries: ['employers'],
   },
   {
+    label: 'Connect for Health Colorado analyst dates',
+    pattern: roleDatePattern(connectAnalyst),
+    expected: [connectAnalyst.endYear],
+    evidence: 'quality/resume.json roles[] for the analyst role at Connect for Health Colorado',
+    entries: ['employers'],
+  },
+  {
     label: 'Catalyst Healthcare dates',
     pattern: roleDatePattern(catalyst),
     expected: [catalyst.startYear, catalyst.endYear],
@@ -754,6 +791,12 @@ const indexClaims = [
     pattern: roleDatePattern(connectHealth),
     expected: [connectHealth.startYear, connectHealth.endYear],
     evidence: 'quality/resume.json roles[] for Connect for Health Colorado',
+  },
+  {
+    label: 'Connect for Health Colorado analyst dates',
+    pattern: roleDatePattern(connectAnalyst),
+    expected: [connectAnalyst.endYear],
+    evidence: 'quality/resume.json roles[] for the analyst role at Connect for Health Colorado',
   },
   {
     label: 'Catalyst Healthcare dates',
