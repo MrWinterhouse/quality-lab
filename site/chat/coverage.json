@@ -2,7 +2,7 @@
   "generatedBy": "npm run test:chatbot",
   "dataset": "tests/chatbot/golden.json",
   "report": "reports/chatbot-eval.html",
-  "total": 47,
+  "total": 50,
   "topics": {
     "pitch": [
       {
@@ -438,6 +438,45 @@
           "answers",
           "comes from “Years of experience”",
           "contains “9+ years”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      }
+    ],
+    "current-role": [
+      {
+        "id": "current-role",
+        "category": "resume",
+        "question": "What is John's most recent role?",
+        "checks": [
+          "answers",
+          "comes from “Current role”",
+          "contains “AI-Quality Engineer II”",
+          "contains “GoFundMe”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      },
+      {
+        "id": "current-role-latest",
+        "category": "resume",
+        "question": "What's his latest role?",
+        "checks": [
+          "answers",
+          "comes from “Current role”",
+          "contains “GoFundMe”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      },
+      {
+        "id": "current-role-title",
+        "category": "resume",
+        "question": "What's his job title?",
+        "checks": [
+          "answers",
+          "comes from “Current role”",
+          "contains “AI-Quality Engineer II”",
           "cites portfolio-experience",
           "stays within 90 words"
         ]

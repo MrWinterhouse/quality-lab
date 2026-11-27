@@ -97,8 +97,6 @@
       "career",
       "background",
       "seniority",
-      "most recent role",
-      "most recent job",
       "tenure",
       "how long was he",
       "years at"
@@ -149,6 +147,38 @@
         "id": "repo",
         "label": "Source repository",
         "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "current-role",
+    "title": "Current role",
+    "answer": "Most recent: AI-Quality Engineer II at GoFundMe, January 2023 to October 2026 — Playwright and Postman suites across five repositories, overnight regression in CI/CD, and four engineers mentored. Before that, supervisor of quality analysts at Connect for Health Colorado (2021–2023), after an analyst role on the same team (Jan–Sep 2021).",
+    "keywords": [
+      "most recent role",
+      "recent role",
+      "latest role",
+      "current role",
+      "current job",
+      "current position",
+      "most recent position",
+      "gofundme role",
+      "job title",
+      "his title",
+      "title",
+      "job now",
+      "what does he do now"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "resume-pdf",
+        "label": "Resume (PDF)",
+        "href": "resume.pdf"
       }
     ]
   },

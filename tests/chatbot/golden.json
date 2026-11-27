@@ -271,6 +271,45 @@
     "note": "The tenure comes from that role's start and end years in quality/resume.json."
   },
   {
+    "id": "current-role",
+    "category": "resume",
+    "message": "What is John's most recent role?",
+    "expect": {
+      "topic": "current-role",
+      "refused": false,
+      "must_include": ["AI-Quality Engineer II", "GoFundMe"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "The role itself — title, employer and dates — not the tenure figure the years answer gives."
+  },
+  {
+    "id": "current-role-latest",
+    "category": "resume",
+    "message": "What's his latest role?",
+    "expect": {
+      "topic": "current-role",
+      "refused": false,
+      "must_include": ["GoFundMe"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "\"Latest\" is the same question as \"most recent\" and must not fall through to the role-fit pitch."
+  },
+  {
+    "id": "current-role-title",
+    "category": "resume",
+    "message": "What's his job title?",
+    "expect": {
+      "topic": "current-role",
+      "refused": false,
+      "must_include": ["AI-Quality Engineer II"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "A bare \"title\" question used to land on the role-fit answer, which names no job."
+  },
+  {
     "id": "recent-employer",
     "category": "resume",
     "message": "Who is his most recent employer?",
