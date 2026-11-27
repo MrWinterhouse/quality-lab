@@ -36,7 +36,7 @@ const html = `<!doctype html>
 <style>
   .report-shell { max-width: 62rem; margin: 0 auto; padding: 2.25rem 1.5rem 4rem; }
   .report-shell h1 { font-size: clamp(1.7rem, 3vw, 2.3rem); }
-  .report-body { background: #fffdf9; border: 1px solid var(--line); padding: 1.25rem; overflow-x: auto; }
+  .report-body { background: var(--paper-2); border: 3px solid var(--line); padding: 1.25rem; overflow-x: auto; }
   .report-body pre { background: none; color: var(--ink); padding: 0; margin: 0; font-size: 0.84rem; line-height: 1.6; }
 </style>
 </head>
