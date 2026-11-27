@@ -2,7 +2,7 @@
   "generatedBy": "npm run test:chatbot",
   "dataset": "tests/chatbot/golden.json",
   "report": "reports/chatbot-eval.html",
-  "total": 52,
+  "total": 71,
   "topics": {
     "pitch": [
       {
@@ -42,17 +42,6 @@
           "comes from “The pitch”",
           "contains “honest”",
           "stays within 90 words"
-        ]
-      },
-      {
-        "id": "defect-count",
-        "category": "evidence",
-        "question": "How many defect probes fail on purpose?",
-        "checks": [
-          "answers",
-          "comes from “The pitch”",
-          "contains “15”",
-          "cites release-report"
         ]
       },
       {
@@ -229,6 +218,31 @@
           "never contains “no weaknesses”",
           "cites known-gaps",
           "stays within 90 words"
+        ]
+      }
+    ],
+    "lab-coverage": [
+      {
+        "id": "defect-count",
+        "category": "evidence",
+        "question": "How many defect probes fail on purpose?",
+        "checks": [
+          "answers",
+          "comes from “What the pipeline covers”",
+          "contains “15”",
+          "cites release-report"
+        ]
+      },
+      {
+        "id": "lab-baseline",
+        "category": "resume",
+        "question": "How many baseline checks does the suite run?",
+        "checks": [
+          "answers",
+          "comes from “What the pipeline covers”",
+          "contains “44 baseline checks”",
+          "cites release-report",
+          "stays within 110 words"
         ]
       }
     ],
@@ -508,6 +522,242 @@
         ]
       }
     ],
+    "role-history": [
+      {
+        "id": "role-history-second",
+        "category": "resume",
+        "question": "What was John's second job?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “Connect for Health Colorado”",
+          "contains “Supervisor”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      },
+      {
+        "id": "role-history-first",
+        "category": "resume",
+        "question": "What was his first job out of school?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “Dire Wolf Digital”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      },
+      {
+        "id": "role-history-before",
+        "category": "resume",
+        "question": "What job did he have before GoFundMe?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “Connect for Health Colorado”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      },
+      {
+        "id": "role-history-counts",
+        "category": "resume",
+        "question": "How many companies has he worked for?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “four employers”",
+          "contains “five roles”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      },
+      {
+        "id": "role-history-managed",
+        "category": "resume",
+        "question": "How many people did he manage?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “three analysts”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      },
+      {
+        "id": "role-history-san-diego",
+        "category": "resume",
+        "question": "Which job was in San Diego?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “GoFundMe”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      }
+    ],
+    "role-tenure": [
+      {
+        "id": "tenure-catalyst",
+        "category": "resume",
+        "question": "How long was he at Catalyst?",
+        "checks": [
+          "answers",
+          "comes from “Tenure in each role”",
+          "contains “three years and one month”",
+          "contains “December 2017”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      },
+      {
+        "id": "tenure-supervisor",
+        "category": "resume",
+        "question": "How long was he a supervisor?",
+        "checks": [
+          "answers",
+          "comes from “Tenure in each role”",
+          "contains “one year and four months”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      },
+      {
+        "id": "tenure-start",
+        "category": "resume",
+        "question": "When did he start at GoFundMe?",
+        "checks": [
+          "answers",
+          "comes from “Tenure in each role”",
+          "contains “January 2023”",
+          "cites portfolio-experience",
+          "stays within 90 words"
+        ]
+      }
+    ],
+    "role-tools": [
+      {
+        "id": "role-tools-postman",
+        "category": "resume",
+        "question": "Which role used Postman?",
+        "checks": [
+          "answers",
+          "comes from “Which role used which tool”",
+          "contains “GoFundMe”",
+          "cites portfolio-experience",
+          "stays within 110 words"
+        ]
+      },
+      {
+        "id": "role-tools-mobile",
+        "category": "resume",
+        "question": "Has he done mobile testing?",
+        "checks": [
+          "answers",
+          "comes from “Which role used which tool”",
+          "contains “Dire Wolf”",
+          "cites portfolio-experience",
+          "stays within 110 words"
+        ]
+      },
+      {
+        "id": "role-tools-load",
+        "category": "resume",
+        "question": "Have you done load testing before?",
+        "checks": [
+          "answers",
+          "comes from “Which role used which tool”",
+          "contains “Load and performance testing”",
+          "contains “Connect for Health Colorado”",
+          "cites portfolio-experience",
+          "stays within 110 words"
+        ]
+      }
+    ],
+    "case-studies": [
+      {
+        "id": "case-study-count",
+        "category": "resume",
+        "question": "How many case studies are there?",
+        "checks": [
+          "answers",
+          "comes from “The four case studies”",
+          "contains “Four”",
+          "cites repo",
+          "stays within 70 words"
+        ]
+      }
+    ],
+    "process-detail": [
+      {
+        "id": "process-pull-requests",
+        "category": "resume",
+        "question": "Did he review pull requests?",
+        "checks": [
+          "answers",
+          "comes from “Reviews, planning and flaky tests”",
+          "contains “half of the QA pull requests”",
+          "cites portfolio-experience",
+          "stays within 110 words"
+        ]
+      },
+      {
+        "id": "process-flaky",
+        "category": "resume",
+        "question": "How does he handle flaky tests?",
+        "checks": [
+          "answers",
+          "comes from “Reviews, planning and flaky tests”",
+          "contains “quality dashboard”",
+          "cites release-report",
+          "stays within 110 words"
+        ]
+      }
+    ],
+    "python-oracle": [
+      {
+        "id": "python-oracle-reason",
+        "category": "resume",
+        "question": "Why is the oracle written in Python?",
+        "checks": [
+          "answers",
+          "comes from “Why the oracle is Python”",
+          "contains “independent”",
+          "cites repo",
+          "stays within 80 words"
+        ]
+      }
+    ],
+    "ai-opinion": [
+      {
+        "id": "ai-opinion",
+        "category": "resume",
+        "question": "What's his view on AI in testing?",
+        "checks": [
+          "answers",
+          "comes from “AI in testing”",
+          "contains “guardrail”",
+          "cites release-report",
+          "stays within 80 words"
+        ]
+      }
+    ],
+    "meta-topics": [
+      {
+        "id": "meta-topics",
+        "category": "resume",
+        "question": "How many topics do you cover?",
+        "checks": [
+          "answers",
+          "comes from “What this assistant covers”",
+          "contains “topics”",
+          "cites repo",
+          "stays within 80 words"
+        ]
+      }
+    ],
     "resume": [
       {
         "id": "resume-link",
@@ -655,7 +905,7 @@
       {
         "id": "closest-published-topics",
         "category": "paraphrase",
-        "question": "Have you done load testing before?",
+        "question": "Have you done penetration testing before?",
         "checks": [
           "refuses instead of answering",
           "contains “rather not guess”",

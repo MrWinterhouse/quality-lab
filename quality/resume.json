@@ -23,7 +23,9 @@
       "title": "Technical Quality Analyst Supervisor",
       "location": "Denver, Colorado",
       "startYear": 2021,
+      "startMonth": 9,
       "endYear": 2023,
+      "endMonth": 1,
       "analystsSupervised": 3,
       "applicationAreas": 4,
       "runtimeReductionPercent": 33
@@ -42,14 +44,18 @@
       "title": "Test Engineer",
       "location": "Lafayette, Colorado",
       "startYear": 2017,
-      "endYear": 2021
+      "startMonth": 12,
+      "endYear": 2021,
+      "endMonth": 1
     },
     {
       "employer": "Dire Wolf Digital",
       "title": "Senior Tester",
       "location": "Denver, Colorado",
       "startYear": 2016,
-      "endYear": 2017
+      "startMonth": 11,
+      "endYear": 2017,
+      "endMonth": 12
     }
   ],
   "aiAssisted": {

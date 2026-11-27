@@ -635,6 +635,322 @@
     ]
   },
   {
+    "id": "role-history",
+    "title": "Role history in order",
+    "answer": "Newest first: AI-Quality Engineer II at GoFundMe in San Diego (Jan 2023–Oct 2026), Technical Quality Analyst Supervisor at Connect for Health Colorado in Denver (Sep 2021–Jan 2023), Technical Quality Analyst at the same company (Jan–Sep 2021), Test Engineer at Catalyst Healthcare in Lafayette (2017–2021) and Senior Tester at Dire Wolf Digital in Denver (2016–2017). Five roles at four employers, with no gaps between them: healthcare, a state benefits marketplace, fundraising and games. I supervised three analysts and mentored four engineers, and I moved from analyst to supervisor at one company rather than changing employers.",
+    "keywords": [
+      "second job",
+      "first job",
+      "third job",
+      "fourth job",
+      "fifth job",
+      "job history",
+      "role history",
+      "role list",
+      "all his roles",
+      "career path",
+      "career history",
+      "previous job",
+      "job before",
+      "before that",
+      "before gofundme",
+      "title ever change",
+      "title change",
+      "his title at",
+      "previous employer",
+      "go back to",
+      "industries he has worked",
+      "worked in",
+      "worked on",
+      "how many jobs",
+      "how many companies",
+      "how many roles",
+      "how many employers",
+      "which companies",
+      "worked for",
+      "title at",
+      "longest role",
+      "shortest role",
+      "return to a previous employer",
+      "people did he manage",
+      "team size",
+      "direct reports",
+      "supervisor",
+      "manager",
+      "mentor",
+      "mentored",
+      "gap between jobs",
+      "industries",
+      "healthcare",
+      "games",
+      "jobs in colorado",
+      "colorado",
+      "california",
+      "san diego",
+      "job in california"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "resume-pdf",
+        "label": "Resume (PDF)",
+        "href": "resume.pdf"
+      }
+    ]
+  },
+  {
+    "id": "role-tenure",
+    "title": "Tenure in each role",
+    "answer": "GoFundMe, January 2023 to October 2026: three years and nine months. Connect for Health Colorado as supervisor, September 2021 to January 2023: one year and four months. The analyst role on the same team, January to September 2021: eight months. Catalyst Healthcare, December 2017 to January 2021: three years and one month. Dire Wolf Digital, November 2016 to December 2017: one year and one month.",
+    "keywords": [
+      "how long was he at connect for health colorado",
+      "connect for health colorado",
+      "connect for health",
+      "long connect for health",
+      "connect for health tenure",
+      "how long was he a supervisor",
+      "supervisor",
+      "long supervisor",
+      "supervisor tenure",
+      "how long was he at catalyst",
+      "catalyst",
+      "long catalyst",
+      "catalyst tenure",
+      "how long was he at dire wolf",
+      "dire wolf",
+      "long dire wolf",
+      "dire wolf tenure",
+      "when did he start",
+      "when did he leave",
+      "start date",
+      "end date",
+      "timeline",
+      "tenure",
+      "how many months",
+      "what was he doing in",
+      "in 2019",
+      "in 2022",
+      "when did he become a supervisor"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "resume-pdf",
+        "label": "Resume (PDF)",
+        "href": "resume.pdf"
+      }
+    ]
+  },
+  {
+    "id": "role-tools",
+    "title": "Which role used which tool",
+    "answer": "Postman and Playwright at GoFundMe, for UI and REST API suites across environments. TestComplete with JavaScript at Connect for Health Colorado as an analyst, where the suite moved to XPath selectors. SpecFlow, Selenium WebDriver and C# at Catalyst Healthcare, with SQL validation of the defects behind each fix. Load and performance testing while supervising at Connect for Health Colorado; mobile testing at Dire Wolf Digital for the Eternal Card Game. Accessibility checks are the lab's own, not a resume claim.",
+    "keywords": [
+      "which role used",
+      "which job used",
+      "postman at gofundme",
+      "testcomplete at",
+      "selenium at",
+      "sql validation",
+      "load and performance",
+      "load testing",
+      "performance testing",
+      "mobile testing",
+      "backend testing",
+      "database testing",
+      "accessibility testing",
+      "external workflows"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "resume-pdf",
+        "label": "Resume (PDF)",
+        "href": "resume.pdf"
+      }
+    ]
+  },
+  {
+    "id": "case-studies",
+    "title": "The four case studies",
+    "answer": "Four: cross-tenant data exposure, duplicate vendor verification, assistant guardrails that reported but did not block, and income annualization checked against a Python oracle. Each one starts with a risk and ends with the test that would catch it again.",
+    "keywords": [
+      "case studies",
+      "how many case studies",
+      "number of case studies",
+      "what cases",
+      "which cases"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-index",
+        "label": "The portfolio",
+        "href": "./"
+      },
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "lab-coverage",
+    "title": "What the pipeline covers",
+    "answer": "The gate runs 44 baseline checks across five suites, 12 browser journeys (four per browser on three browsers) and 15 defect probes that fail on purpose; five blocking risks stay open. Two prompt versions were scored against 13 cases and the shipping one passed 10 of 13. The site is six pages, checked with axe at 1280 and 360 pixels. The vendor retry is three attempts 10 ms apart, verifying two records; tenant deadlines are 10 and 30 days. It all runs offline from a clean checkout.",
+    "keywords": [
+      "baseline checks",
+      "browser journeys",
+      "defect probes",
+      "probes",
+      "how many defect probes",
+      "fail on purpose",
+      "open risks",
+      "blocking risks",
+      "prompt versions",
+      "how many prompt versions",
+      "prompt versions did he evaluate",
+      "site pages",
+      "how many pages",
+      "tenant deadlines",
+      "vendor retry",
+      "vendor retry policy",
+      "retry policy",
+      "run it locally",
+      "run this locally",
+      "offline"
+    ],
+    "citations": [
+      {
+        "id": "release-report",
+        "label": "Release report",
+        "href": "reports/release-readiness.html"
+      },
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "process-detail",
+    "title": "Reviews, planning and flaky tests",
+    "answer": "PR review is part of the job: about half of the QA pull requests at Connect for Health Colorado, plus mentoring through code review. I owned test planning at Catalyst Healthcare, where I set up the QA function. Flaky tests are tracked on the quality dashboard rather than retried until green, and a red suite is a release signal — the release gate blocks while the probes fail. Quality is measured by what gets past the suite, which is what those probes exist to show.",
+    "keywords": [
+      "review pull requests",
+      "pull requests",
+      "code review",
+      "test plans",
+      "test planning",
+      "flaky",
+      "flaky test",
+      "red suite",
+      "release signal",
+      "measure quality",
+      "work with developers"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "release-report",
+        "label": "Release report",
+        "href": "reports/release-readiness.html"
+      }
+    ]
+  },
+  {
+    "id": "python-oracle",
+    "title": "Why the oracle is Python",
+    "answer": "The oracle in case study 04 is a second, independent implementation of the income rules, written in Python so it shares no code with the TypeScript service it checks; that independence is the point. The resume's languages are TypeScript, JavaScript and C#.",
+    "keywords": [
+      "python oracle",
+      "why python",
+      "python"
+    ],
+    "citations": [
+      {
+        "id": "portfolio-experience",
+        "label": "Experience on the portfolio",
+        "href": "./#experience"
+      },
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "ai-opinion",
+    "title": "AI in testing",
+    "answer": "AI in testing, in practice: Claude and ChatGPT draft and repair tests, and the lab treats model output as untrusted — the guardrail case measures what the assistant must refuse. Two prompt versions were scored against the same cases. Prompt engineering here means measured prompt iteration, not a job title.",
+    "keywords": [
+      "view on ai",
+      "his view",
+      "view",
+      "ai in testing",
+      "prompt engineering",
+      "opinion on ai",
+      "will ai replace",
+      "ai replace testers"
+    ],
+    "citations": [
+      {
+        "id": "release-report",
+        "label": "Release report",
+        "href": "reports/release-readiness.html"
+      },
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      }
+    ]
+  },
+  {
+    "id": "meta-topics",
+    "title": "What this assistant covers",
+    "answer": "I answer from 34 topics, each covered by cases in the golden dataset, and every reply cites the page or file it came from. Ask about the roles, the tools, the four case studies, how the work is tested, or what is still unverified. Prompt injection and requests to change my role get refused rather than routed.",
+    "keywords": [
+      "how many topics",
+      "topics do you cover",
+      "what topics",
+      "how many answers",
+      "talked out of your rules",
+      "jailbreak",
+      "prompt injection"
+    ],
+    "citations": [
+      {
+        "id": "repo",
+        "label": "Source repository",
+        "href": "https://github.com/MrWinterhouse/quality-lab"
+      },
+      {
+        "id": "portfolio-index",
+        "label": "The portfolio",
+        "href": "./"
+      }
+    ]
+  },
+  {
     "id": "boundary",
     "title": "Not published here",
     "answer": "That is not published here, and I would rather say so than invent it. What is published is the work: the product, the defects, and the evidence behind each one. Ask John directly at Jwinterhouse3@gmail.com.",

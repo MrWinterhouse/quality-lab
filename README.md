@@ -33,7 +33,7 @@ npm run test:e2e             # 12 checks across Chromium, Firefox, WebKit
 npm run evals -- --gate      # hardened prompt 13/13
 npm run load                 # p95 smoke against two endpoints
 npm run test:python          # 7 Python oracle checks
-npm run test:chatbot         # hiring assistant golden dataset, 52/52
+npm run test:chatbot         # hiring assistant golden dataset, 71/71
 ```
 
 See the defects:

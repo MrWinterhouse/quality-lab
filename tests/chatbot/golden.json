@@ -139,7 +139,7 @@
     "category": "evidence",
     "message": "How many defect probes fail on purpose?",
     "expect": {
-      "topic": "pitch",
+      "topic": "lab-coverage",
       "refused": false,
       "must_include": ["15"],
       "must_cite": ["release-report"]
@@ -282,6 +282,253 @@
       "max_words": 90
     },
     "note": "The role itself — title, employer and dates — not the tenure figure the years answer gives."
+  },
+  {
+    "id": "role-history-second",
+    "category": "resume",
+    "message": "What was John's second job?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["Connect for Health Colorado", "Supervisor"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "Recruiters read a resume as a sequence; \"second job\" needs the ordered list."
+  },
+  {
+    "id": "role-history-first",
+    "category": "resume",
+    "message": "What was his first job out of school?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["Dire Wolf Digital"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "Oldest role last in the ordered list."
+  },
+  {
+    "id": "role-history-before",
+    "category": "resume",
+    "message": "What job did he have before GoFundMe?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["Connect for Health Colorado"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "\"Before X\" is an ordering question, not an employer-list question."
+  },
+  {
+    "id": "role-history-counts",
+    "category": "resume",
+    "message": "How many companies has he worked for?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["four employers", "five roles"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "Four employers, five roles — the resume's shape in one line."
+  },
+  {
+    "id": "role-history-managed",
+    "category": "resume",
+    "message": "How many people did he manage?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["three analysts"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "Supervision sat at Connect for Health Colorado, three analysts."
+  },
+  {
+    "id": "role-history-san-diego",
+    "category": "resume",
+    "message": "Which job was in San Diego?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["GoFundMe"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "Location per role comes from the fixture, not the answer text."
+  },
+  {
+    "id": "tenure-catalyst",
+    "category": "resume",
+    "message": "How long was he at Catalyst?",
+    "expect": {
+      "topic": "role-tenure",
+      "refused": false,
+      "must_include": ["three years and one month", "December 2017"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "December 2017 to January 2021 is 37 months, derived in the figure gate."
+  },
+  {
+    "id": "tenure-supervisor",
+    "category": "resume",
+    "message": "How long was he a supervisor?",
+    "expect": {
+      "topic": "role-tenure",
+      "refused": false,
+      "must_include": ["one year and four months"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "September 2021 to January 2023 is 16 months."
+  },
+  {
+    "id": "tenure-start",
+    "category": "resume",
+    "message": "When did he start at GoFundMe?",
+    "expect": {
+      "topic": "role-tenure",
+      "refused": false,
+      "must_include": ["January 2023"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 90
+    },
+    "note": "A start date, not an availability claim."
+  },
+  {
+    "id": "role-tools-postman",
+    "category": "resume",
+    "message": "Which role used Postman?",
+    "expect": {
+      "topic": "role-tools",
+      "refused": false,
+      "must_include": ["GoFundMe"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 110
+    },
+    "note": "Tool-to-role mapping is the credibility test of a tool list."
+  },
+  {
+    "id": "role-tools-mobile",
+    "category": "resume",
+    "message": "Has he done mobile testing?",
+    "expect": {
+      "topic": "role-tools",
+      "refused": false,
+      "must_include": ["Dire Wolf"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 110
+    },
+    "note": "Mobile work was the Eternal Card Game at Dire Wolf Digital."
+  },
+  {
+    "id": "role-tools-load",
+    "category": "resume",
+    "message": "Have you done load testing before?",
+    "expect": {
+      "topic": "role-tools",
+      "refused": false,
+      "must_include": ["Load and performance testing", "Connect for Health Colorado"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 110
+    },
+    "note": "The resume states load and performance work, so this no longer refuses."
+  },
+  {
+    "id": "case-study-count",
+    "category": "resume",
+    "message": "How many case studies are there?",
+    "expect": {
+      "topic": "case-studies",
+      "refused": false,
+      "must_include": ["Four"],
+      "must_cite": ["repo"],
+      "max_words": 70
+    },
+    "note": "The page states four; the assistant should say the same."
+  },
+  {
+    "id": "lab-baseline",
+    "category": "resume",
+    "message": "How many baseline checks does the suite run?",
+    "expect": {
+      "topic": "lab-coverage",
+      "refused": false,
+      "must_include": ["44 baseline checks"],
+      "must_cite": ["release-report"],
+      "max_words": 110
+    },
+    "note": "Generated evidence, not a resume fact."
+  },
+  {
+    "id": "process-pull-requests",
+    "category": "resume",
+    "message": "Did he review pull requests?",
+    "expect": {
+      "topic": "process-detail",
+      "refused": false,
+      "must_include": ["half of the QA pull requests"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 110
+    },
+    "note": "About half, at Connect for Health Colorado as an analyst."
+  },
+  {
+    "id": "process-flaky",
+    "category": "resume",
+    "message": "How does he handle flaky tests?",
+    "expect": {
+      "topic": "process-detail",
+      "refused": false,
+      "must_include": ["quality dashboard"],
+      "must_cite": ["release-report"],
+      "max_words": 110
+    },
+    "note": "Tracked on the dashboard rather than retried until green."
+  },
+  {
+    "id": "python-oracle-reason",
+    "category": "resume",
+    "message": "Why is the oracle written in Python?",
+    "expect": {
+      "topic": "python-oracle",
+      "refused": false,
+      "must_include": ["independent"],
+      "must_cite": ["repo"],
+      "max_words": 80
+    },
+    "note": "Independence from the TypeScript service is the reason, not a language preference."
+  },
+  {
+    "id": "ai-opinion",
+    "category": "resume",
+    "message": "What's his view on AI in testing?",
+    "expect": {
+      "topic": "ai-opinion",
+      "refused": false,
+      "must_include": ["guardrail"],
+      "must_cite": ["release-report"],
+      "max_words": 80
+    },
+    "note": "Grounded in the guardrail eval and the scored prompt versions."
+  },
+  {
+    "id": "meta-topics",
+    "category": "resume",
+    "message": "How many topics do you cover?",
+    "expect": {
+      "topic": "meta-topics",
+      "refused": false,
+      "must_include": ["topics"],
+      "must_cite": ["repo"],
+      "max_words": 80
+    },
+    "note": "The count is derived from knowledge.json by the figure gate."
   },
   {
     "id": "tenure-gofundme",
@@ -654,7 +901,7 @@
   {
     "id": "closest-published-topics",
     "category": "paraphrase",
-    "message": "Have you done load testing before?",
+    "message": "Have you done penetration testing before?",
     "expect": {
       "topic": "out-of-scope",
       "refused": true,

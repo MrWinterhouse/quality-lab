@@ -632,14 +632,18 @@ const numberWord = (value) => {
   }
   return String(value);
 };
+const tenurePhraseFor = (role) => {
+  const months = (role.endYear - role.startYear) * 12 + (role.endMonth - role.startMonth);
+  const years = Math.floor(months / 12);
+  const extraMonths = months % 12;
+  const yearWord = `${numberWord(years)} ${years === 1 ? 'year' : 'years'}`;
+  const monthWord = `${numberWord(extraMonths)} ${extraMonths === 1 ? 'month' : 'months'}`;
+  if (years === 0) return monthWord;
+  return extraMonths === 0 ? yearWord : `${yearWord} and ${monthWord}`;
+};
 const tenureMonths =
   (gofundme.endYear - gofundme.startYear) * 12 + (gofundme.endMonth - gofundme.startMonth);
-const tenureYears = Math.floor(tenureMonths / 12);
-const tenureExtraMonths = tenureMonths % 12;
-const tenurePhrase =
-  tenureExtraMonths === 0
-    ? `${numberWord(tenureYears)} years`
-    : `${numberWord(tenureYears)} years and ${numberWord(tenureExtraMonths)} months`;
+const tenurePhrase = tenurePhraseFor(gofundme);
 for (const tenureEntryId of ['experience', 'current-role']) {
   const entry = knowledge.find((candidate) => candidate.id === tenureEntryId);
   if (!entry) {
@@ -653,6 +657,38 @@ for (const tenureEntryId of ['experience', 'current-role']) {
       `knowledge.json ("${tenureEntryId}"): does not state "${tenurePhrase}", the tenure derived from the GoFundMe months in quality/resume.json (${tenureMonths} months).`,
     );
   }
+}
+
+// Every role's tenure is derived from its own months, and the role-tenure answer has to state
+// each one: that is where a "how long was he at X" question lands.
+const roleTenureEntry = knowledge.find((entry) => entry.id === 'role-tenure');
+if (!roleTenureEntry) {
+  problems.push(
+    'knowledge.json: no "role-tenure" answer, so per-role tenure cannot be checked.',
+  );
+} else {
+  for (const role of resumeFixture.roles) {
+    if (!role.startMonth || !role.endMonth) {
+      problems.push(
+        `quality/resume.json: ${role.title} at ${role.employer} has no months, so its tenure cannot be derived.`,
+      );
+      continue;
+    }
+    const phrase = tenurePhraseFor(role);
+    if (!roleTenureEntry.answer.toLowerCase().includes(phrase)) {
+      problems.push(
+        `knowledge.json ("role-tenure"): does not state "${phrase}" for ${role.title} at ${role.employer}, derived from that role's months in quality/resume.json.`,
+      );
+    }
+  }
+}
+
+// The assistant's own topic count is counted, not typed.
+const topicsEntry = knowledge.find((entry) => entry.id === 'meta-topics');
+if (!topicsEntry || !topicsEntry.answer.includes(`${knowledge.length} topics`)) {
+  problems.push(
+    `knowledge.json ("meta-topics"): does not state "${knowledge.length} topics", the number of entries the assistant answers from.`,
+  );
 }
 
 const NUMBER_TOKEN =
