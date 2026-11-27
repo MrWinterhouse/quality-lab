@@ -440,6 +440,32 @@
     "note": "The resume states load and performance work, so this no longer refuses."
   },
   {
+    "id": "which-job-colorado",
+    "category": "resume",
+    "message": "Which job was in Colorado?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["Connect for Health Colorado", "Denver"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "Two roles were in Denver; the ordered list answers it without a location entry guess."
+  },
+  {
+    "id": "industries-worked",
+    "category": "resume",
+    "message": "What industries has he worked in?",
+    "expect": {
+      "topic": "role-history",
+      "refused": false,
+      "must_include": ["healthcare", "games"],
+      "must_cite": ["portfolio-experience"],
+      "max_words": 130
+    },
+    "note": "One employer per industry, so the ordered list is the honest source."
+  },
+  {
     "id": "case-study-count",
     "category": "resume",
     "message": "How many case studies are there?",

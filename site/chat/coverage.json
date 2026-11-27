@@ -2,7 +2,7 @@
   "generatedBy": "npm run test:chatbot",
   "dataset": "tests/chatbot/golden.json",
   "report": "reports/chatbot-eval.html",
-  "total": 71,
+  "total": 73,
   "topics": {
     "pitch": [
       {
@@ -593,6 +593,32 @@
           "answers",
           "comes from “Role history in order”",
           "contains “GoFundMe”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      },
+      {
+        "id": "which-job-colorado",
+        "category": "resume",
+        "question": "Which job was in Colorado?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “Connect for Health Colorado”",
+          "contains “Denver”",
+          "cites portfolio-experience",
+          "stays within 130 words"
+        ]
+      },
+      {
+        "id": "industries-worked",
+        "category": "resume",
+        "question": "What industries has he worked in?",
+        "checks": [
+          "answers",
+          "comes from “Role history in order”",
+          "contains “healthcare”",
+          "contains “games”",
           "cites portfolio-experience",
           "stays within 130 words"
         ]
