@@ -65,6 +65,9 @@ function alignments(separator) {
   });
 }
 
+// Cell text without the inline markup, for labels that have to be plain strings.
+const plainText = (text) => text.replace(/`/g, '').replace(/[*_]/g, '');
+
 const isTableSeparator = (line) =>
   typeof line === 'string' && line.trimStart().startsWith('|') && /^[|\s:-]+$/.test(line) && line.includes('-');
 
@@ -117,7 +120,10 @@ function renderMarkdown(lines) {
       while (index < lines.length && !lines[index].match(FENCE)) code.push(lines[index++]);
       index += 1; // closing fence, or past the end of an unterminated block
       const language = fence[2] ? ` class="language-${fence[2]}"` : '';
-      html.push(`<pre><code${language}>${escapeHtml(code.join('\n'))}</code></pre>`);
+      // A code block that scrolls sideways has to be reachable without a pointer.
+      html.push(
+        `<pre tabindex="0"><code${language}>${escapeHtml(code.join('\n'))}</code></pre>`,
+      );
       continue;
     }
 
@@ -150,9 +156,13 @@ function renderMarkdown(lines) {
         rows.push(`<tr>${headers.map((_, column) => cell('td', cells[column] ?? '', column)).join('')}</tr>`);
         index += 1;
       }
+      // A wide table scrolls sideways on a phone, so the wrapper is a focusable region: axe's
+      // scrollable-region-focusable rule, and a keyboard user's only way to read the columns
+      // past the fold.
+      const label = escapeHtml(`Table: ${plainText(headers.join(', '))}`);
       html.push(
         [
-          '<div class="table-wrap">',
+          `<div class="table-wrap" tabindex="0" role="group" aria-label="${label}">`,
           '<table>',
           `<thead><tr>${headers.map((text, column) => cell('th', text, column)).join('')}</tr></thead>`,
           `<tbody>${rows.join('')}</tbody>`,
@@ -240,18 +250,19 @@ const html = `<!doctype html>
   .report-body { background: var(--paper-2); border: 3px solid var(--line); padding: 1.25rem 1.35rem 1.6rem; }
   .report-body > :first-child { margin-top: 0; }
   .report-body > :last-child { margin-bottom: 0; }
-  .report-body p, .report-body li { line-height: 1.7; max-width: 62ch; }
-  .report-body h2 { font-size: 1.25rem; margin: 2rem 0 0.7rem; }
-  .report-body h3 { font-size: 1.05rem; margin: 1.6rem 0 0.5rem; }
+  .report-body p, .report-body li { line-height: 1.75; max-width: 58ch; }
+  .report-body h2 { font-size: 1.4rem; margin: 2rem 0 0.7rem; }
+  .report-body h3 { font-size: 1.15rem; margin: 1.6rem 0 0.5rem; }
   .report-body ul, .report-body ol { padding-left: 1.3rem; margin: 0.85rem 0; }
   .report-body li { margin: 0.35rem 0; }
   .report-body li > strong { color: var(--ink); }
-  .report-body code { background: var(--paper-3); border: 1px solid var(--line); border-radius: 3px; padding: 0.08em 0.35em; font-size: 0.9em; }
+  .report-body code { background: var(--paper-3); border: 1px solid var(--line); border-radius: 3px; padding: 0.08em 0.35em; font-size: 0.95em; }
   .report-body pre { background: var(--paper); border: 1px solid var(--line); padding: 0.9rem 1rem; margin: 1rem 0; overflow-x: auto; }
-  .report-body pre code { background: none; border: 0; padding: 0; font-size: 0.86rem; line-height: 1.6; }
+  .report-body pre code { background: none; border: 0; padding: 0; font-size: 0.9rem; line-height: 1.65; }
   .report-body .table-wrap { margin: 1rem 0; overflow-x: auto; }
-  .report-body table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
-  .report-body th, .report-body td { border: 1px solid var(--line); padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+  .report-body .table-wrap:focus-visible, .report-body pre:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+  .report-body table { border-collapse: collapse; width: 100%; font-size: 1rem; }
+  .report-body th, .report-body td { border: 1px solid var(--line); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
   .report-body thead th { background: var(--paper-3); color: var(--ink); }
   .report-body tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
   .report-body th.num, .report-body td.num { text-align: right; font-variant-numeric: tabular-nums; }

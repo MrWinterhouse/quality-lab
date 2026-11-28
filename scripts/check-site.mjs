@@ -8,6 +8,9 @@
  *
  *   --strict      report links must resolve; run it against the assembled _site
  *   --links-only  skip axe and the report artifacts, so no browser is needed
+ *   --reports     scan the rendered report pages in reports/ instead of skipping the directory:
+ *                 scripts/render-report-html.mjs writes them, so they are this project's markup.
+ *                 The Playwright HTML report stays third-party output and is never scanned.
  *
  * In GitHub Actions every finding is also emitted as a ::error annotation, so a red run names
  * the page, line and problem on the run page instead of only in the raw step log.
@@ -20,6 +23,7 @@ import { pathToFileURL } from 'node:url';
 const args = process.argv.slice(2);
 const strict = args.includes('--strict');
 const linksOnly = args.includes('--links-only');
+const scanReports = args.includes('--reports');
 const siteDir = args.find((arg) => !arg.startsWith('--')) ?? 'site';
 const OUT_DIR = 'artifacts';
 const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
@@ -201,18 +205,28 @@ function checkLinks(html, file, strict) {
   return { problems, deferred };
 }
 
-// Generated report output (the Playwright HTML report, the rendered markdown) is someone
-// else's markup. It is not held to this site's rules, though links into it are resolved.
-const GENERATED_DIRS = new Set(['reports']);
+// reports/ is assembled at deploy time from CI artifacts. The markdown reports are rendered to
+// HTML by scripts/render-report-html.mjs, so that markup is this project's and --reports holds
+// it to the same rules; the Playwright HTML report in reports/playwright/ is third-party
+// output and is never scanned, only linked into.
+const REPORT_DIR = 'reports';
 
-async function htmlFiles(dir) {
+async function htmlFiles(dir, root, includeReports) {
   const entries = await readdir(dir, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (GENERATED_DIRS.has(entry.name)) continue;
-      files.push(...(await htmlFiles(full)));
+      if (path.resolve(dir) === root && entry.name === REPORT_DIR) {
+        if (!includeReports) continue;
+        for (const inner of await readdir(full, { withFileTypes: true })) {
+          if (inner.isFile() && inner.name.endsWith('.html')) {
+            files.push(path.join(full, inner.name));
+          }
+        }
+        continue;
+      }
+      files.push(...(await htmlFiles(full, root, includeReports)));
     } else if (entry.name.endsWith('.html')) {
       files.push(full);
     }
@@ -220,7 +234,7 @@ async function htmlFiles(dir) {
   return files.sort();
 }
 
-const pages = await htmlFiles(siteDir);
+const pages = await htmlFiles(siteDir, path.resolve(siteDir), scanReports);
 
 // Loaded here rather than at the top of the file: the publish job runs the strict link check
 // from a bare checkout with no node_modules, and only the axe pass needs these packages.
@@ -297,6 +311,7 @@ const viewportLabels = VIEWPORTS.map(viewportLabel);
 const summary = {
   checkedAt,
   pages: results.length,
+  includesReportPages: scanReports,
   axeViolations,
   axeNodes,
   htmlErrors,
@@ -331,6 +346,26 @@ const details = results
   })
   .join('\n\n');
 
+// The publish job re-runs this over the assembled site with --reports, so the sentences about
+// what is covered have to match the run that wrote this file.
+const axeScope = scanReports
+  ? `- axe-core WCAG 2.1 A/AA rules in Chromium at ${viewportLabels.join(' and ')}, on every page
+  in \`site/\` and on the rendered report pages in \`reports/\` (\`--reports\`). The narrow pass
+  is what catches tables and code blocks that scroll sideways on a phone and cannot be
+  reached with the keyboard.`
+  : `- axe-core WCAG 2.1 A/AA rules in Chromium at ${viewportLabels.join(' and ')}, on every page
+  in \`site/\`. The narrow pass is what catches tables and code blocks that scroll sideways on
+  a phone and cannot be reached with the keyboard.`;
+
+const reportCoverage = scanReports
+  ? `- The Playwright HTML report in \`reports/playwright/\`: third-party output, not this
+  site's markup. Only links into it are resolved.`
+  : `- The rendered report pages (\`reports/*.html\`) are not in this run: the publish job scans
+  them by re-running this check over the assembled site with \`--reports\`, so a failure there
+  stops the deploy instead of shipping.
+- The Playwright HTML report in \`reports/playwright/\`: third-party output, not this site's
+  markup. Only links into it are resolved.`;
+
 const report = `# Site accessibility and HTML checks
 
 _Generated ${checkedAt} by \`npm run check:site\`._
@@ -353,9 +388,7 @@ ${results
 ${passed ? '' : `## Findings\n\n${details}\n`}
 ## What this checks
 
-- axe-core WCAG 2.1 A/AA rules in Chromium at ${viewportLabels.join(' and ')}, on every page in
-  \`site/\`. The narrow pass is what catches tables and code blocks that scroll sideways on a
-  phone and cannot be reached with the keyboard.
+${axeScope}
 - Exactly one \`<h1>\`, no skipped heading levels, unique ids, \`lang\`, \`<title>\`, viewport meta.
 - Accessible names for links, \`alt\` on images, no inline event handlers.
 - Balanced tags, and every internal link and asset inside site/ resolving, in-page
@@ -366,8 +399,7 @@ ${passed ? '' : `## Findings\n\n${details}\n`}
 
 ## What this does not check
 
-- The generated report pages (Playwright HTML, rendered markdown): third-party output,
-  not this site's markup. Only links into them are resolved.
+${reportCoverage}
 - A real screen-reader or keyboard journey, focus order, or focus return after a dialog.
 - Contrast under forced-colors / high-contrast modes, zoom beyond 200%, or reflow at 320px.
 - Content quality: an accessible page can still be wrong or unclear.

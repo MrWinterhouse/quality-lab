@@ -1,5 +1,6 @@
 node_modules/
 artifacts/
+_site/
 .freebuff/
 playwright-report/
 test-results/

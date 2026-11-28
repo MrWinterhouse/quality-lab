@@ -54,6 +54,13 @@ npm run dev                  # http://127.0.0.1:4310
 The demo UI signs in as `applicant-a` by default. Use `?as=applicant-b` for the second
 agency, or call the API with a bearer token.
 
+Read the portfolio the way it is published. `site/` has no `reports/` directory — the publish
+job assembles those from CI artifacts — so this builds the same tree from `artifacts/` first:
+
+```bash
+npm run preview              # http://127.0.0.1:4322 — reports included, links resolve
+```
+
 ---
 
 ## How to work through it

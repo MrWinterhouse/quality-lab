@@ -11,8 +11,8 @@
   --paper-2: #141a26;
   --paper-3: #1d2637;
   --ink: #f2f6ff;
-  --ink-soft: #d5deef;
-  --ink-faint: #a3b2cf;
+  --ink-soft: #e2e9f6;
+  --ink-faint: #bcc9e2;
   --line: #33405a;
   --rust: #ff7a59;
   --teal: #4be3b0;
@@ -44,7 +44,7 @@ body {
   background-color: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 1.125rem;
+  font-size: 1.1875rem;
   line-height: 1.75;
 }
 
@@ -146,7 +146,7 @@ h2 {
 }
 
 h3 {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   letter-spacing: 0.04em;
   text-shadow: none;
 }
@@ -155,17 +155,17 @@ p {
   margin: 0 0 1.1em;
   text-wrap: pretty;
   /* Long light-on-dark lines are the other thing that tires the eye: cap the measure. */
-  max-width: 62ch;
+  max-width: 58ch;
 }
 
 /* A paragraph that ran to four lines is a list that did not admit it. */
 p,
 li {
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 p.lede {
-  font-size: 1.12rem;
+  font-size: 1.18rem;
   color: var(--ink-soft);
   max-width: 46ch;
 }
@@ -194,8 +194,8 @@ pre {
   color: #d9ffe9;
   padding: 1rem 1.15rem;
   overflow-x: auto;
-  font-size: 0.82rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.65;
   border: 2px solid var(--line);
   box-shadow: var(--shadow);
   margin: 0 0 1.4em;
@@ -211,9 +211,9 @@ pre code {
 
 .kicker {
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--yellow);
   margin: 0 0 1rem;
@@ -250,9 +250,9 @@ pre code {
 
 .brand {
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink);
   text-decoration: none;
@@ -267,8 +267,8 @@ pre code {
   flex-wrap: wrap;
   gap: 1.25rem;
   font-family: var(--mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -317,8 +317,8 @@ pre code {
 }
 
 .hero-paths li {
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 1.06rem;
+  line-height: 1.6;
   color: var(--ink-soft);
   border-left: 4px solid var(--line);
   padding: 0.15rem 0 0.15rem 0.85rem;
@@ -330,7 +330,7 @@ pre code {
 
 .hero-note {
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   color: var(--ink-faint);
   margin: 0 0 1.5rem;
@@ -338,8 +338,8 @@ pre code {
 
 .byline {
   font-family: var(--mono);
-  font-size: 0.84rem;
-  letter-spacing: 0.08em;
+  font-size: 0.89rem;
+  letter-spacing: 0.06em;
   color: var(--ink-faint);
   border-top: 2px dashed var(--line);
   padding-top: 1rem;
@@ -361,8 +361,8 @@ pre code {
 
 .verdict .label {
   font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--yellow);
   display: block;
@@ -381,7 +381,7 @@ pre code {
 }
 
 .verdict .sub {
-  font-size: 0.98rem;
+  font-size: 1.03rem;
   color: var(--ink-soft);
   margin: 0 0 1.1rem;
 }
@@ -394,7 +394,7 @@ pre code {
 }
 
 .verdict li {
-  font-size: 0.96rem;
+  font-size: 1.01rem;
   padding: 0.5rem 0;
   border-bottom: 2px dashed var(--line);
   color: var(--ink-soft);
@@ -406,13 +406,13 @@ pre code {
 .verdict li b {
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--teal);
   white-space: nowrap;
 }
 
 .verdict .note {
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   color: var(--ink-faint);
   margin: 0;
 }
@@ -445,8 +445,8 @@ section {
 .section-head p {
   margin: 0;
   max-width: 54ch;
-  font-size: 1.03rem;
-  line-height: 1.6;
+  font-size: 1.07rem;
+  line-height: 1.65;
   color: var(--ink-soft);
 }
 
@@ -475,15 +475,15 @@ section {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.92rem;
+  font-size: 1rem;
   margin: 0 0 1rem;
 }
 
 caption {
   text-align: left;
   font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--yellow);
   padding-bottom: 0.65rem;
@@ -499,8 +499,8 @@ td {
 
 thead th {
   font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--ink);
   background: var(--paper-3);
@@ -519,7 +519,7 @@ tbody td.num,
 td.pass {
   color: var(--teal);
   font-family: var(--mono);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
 }
 
 /* ---------- case cards ---------- */
@@ -550,8 +550,8 @@ td.pass {
 
 .case .tag {
   font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--yellow);
 }
@@ -564,7 +564,7 @@ td.pass {
 .case p {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
 .case .foot {
@@ -572,7 +572,7 @@ td.pass {
   padding-top: 0.85rem;
   border-top: 2px dashed var(--line);
   font-family: var(--mono);
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   color: var(--ink-faint);
   display: flex;
   justify-content: space-between;
@@ -612,19 +612,19 @@ td.pass {
 
 .reports .name {
   font-family: var(--mono);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--rust);
   overflow-wrap: anywhere;
 }
 
 .reports .desc {
-  font-size: 0.98rem;
+  font-size: 1.03rem;
   color: var(--ink-soft);
 }
 
 .reports .go {
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   color: var(--yellow);
 }
 
@@ -636,7 +636,7 @@ td.pass {
   border-left: 8px solid var(--teal);
   padding: 0.85rem 1rem;
   margin: 0 0 1.75rem;
-  font-size: 0.92rem;
+  font-size: 0.99rem;
   color: var(--ink-soft);
 }
 
@@ -662,7 +662,7 @@ td.pass {
 
 .principles dt {
   font-family: var(--mono);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -671,7 +671,7 @@ td.pass {
 
 .principles dd {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 1.03rem;
   color: var(--ink-soft);
 }
 
@@ -706,8 +706,8 @@ td.pass {
 
 .summary dt {
   font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--yellow);
   margin-bottom: 0.3rem;
@@ -715,7 +715,7 @@ td.pass {
 
 .summary dd {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
 }
 
@@ -733,7 +733,7 @@ td.pass {
 }
 
 .prose h3 {
-  font-size: 1.02rem;
+  font-size: 1.08rem;
   margin-top: 1.8rem;
 }
 
@@ -754,8 +754,8 @@ td.pass {
   padding: 0.9rem 1.15rem;
   margin: 1.6rem 0;
   font-family: var(--mono);
-  font-size: 0.98rem;
-  line-height: 1.6;
+  font-size: 1.03rem;
+  line-height: 1.65;
   color: var(--ink);
 }
 
@@ -786,7 +786,7 @@ td.pass {
   border-top: 8px solid var(--yellow);
   padding: 1.15rem 1.25rem;
   margin: 1.8rem 0;
-  font-size: 0.94rem;
+  font-size: 1rem;
 }
 
 .caveat p:last-child {
@@ -806,7 +806,7 @@ td.pass {
   margin-top: 3rem;
   padding: 1.5rem 0 1rem;
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.88rem;
 }
 
 /* ---------- footer ---------- */
@@ -828,8 +828,8 @@ td.pass {
 
 .site-footer h2 {
   font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--yellow);
   font-weight: 700;
@@ -844,18 +844,18 @@ td.pass {
 
 .site-footer li {
   margin-bottom: 0.4rem;
-  font-size: 0.98rem;
+  font-size: 1.02rem;
 }
 
 .site-footer p {
-  font-size: 0.98rem;
+  font-size: 1.02rem;
   color: var(--ink-soft);
   max-width: 38ch;
 }
 
 .colophon {
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   color: var(--ink-faint);
   border-top: 2px dashed var(--line);
   margin-top: 2.5rem;
@@ -873,7 +873,7 @@ td.pass {
 }
 
 .hero-cta span {
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   color: var(--ink-faint);
 }
 
@@ -885,8 +885,8 @@ td.pass {
   box-shadow: var(--shadow);
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
+  font-size: 0.86rem;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   text-decoration: none;
   padding: 0.7rem 1.1rem;
@@ -951,8 +951,8 @@ td.pass {
 .chat-who {
   display: block;
   font-family: var(--mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.16em;
+  font-size: 0.8rem;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--yellow);
   margin-bottom: 0.3rem;
@@ -960,12 +960,12 @@ td.pass {
 
 .chat-text {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
 .chat-sources {
   margin: 0.55rem 0 0;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--ink-faint);
 }
 
@@ -976,8 +976,8 @@ td.pass {
 .chat-label {
   display: block;
   font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-faint);
   margin-bottom: 0.4rem;
@@ -994,7 +994,7 @@ td.pass {
   min-width: 0;
   font: inherit;
   font-family: var(--mono);
-  font-size: 0.95rem;
+  font-size: 1rem;
   padding: 0.65rem 0.8rem;
   background: var(--paper);
   border: 3px solid var(--line);
@@ -1009,8 +1009,8 @@ td.pass {
   font: inherit;
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
+  font-size: 0.86rem;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 0.65rem 1.2rem;
   background: var(--yellow);
@@ -1041,7 +1041,7 @@ td.pass {
 .chat-suggestion {
   font: inherit;
   font-family: var(--mono);
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   padding: 0.35rem 0.7rem;
   background: var(--paper);
   color: var(--ink);
@@ -1061,15 +1061,15 @@ td.pass {
   align-items: baseline;
   gap: 0.5rem 1rem;
   margin: 1rem 0 0;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--ink-faint);
 }
 
 .chat-clear {
   font: inherit;
   font-family: var(--mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   background: none;
   border: 0;
@@ -1091,7 +1091,7 @@ td.pass {
 .chat-tests summary {
   cursor: pointer;
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--teal);
@@ -1104,7 +1104,7 @@ td.pass {
 .chat-tests-note,
 .chat-tests-run {
   margin: 0 0 0.55rem;
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   color: var(--ink-faint);
 }
 
@@ -1123,7 +1123,7 @@ td.pass {
 
 .chat-test-q {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   color: var(--ink);
 }
 
@@ -1134,12 +1134,12 @@ td.pass {
 
 .chat-test-checks {
   margin: 0.1rem 0 0;
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   color: var(--ink-faint);
 }
 
 .chat-tests-empty {
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   color: var(--ink-faint);
 }
 
@@ -1149,7 +1149,7 @@ td.pass {
 
 .chat-noscript,
 .chat-links {
-  font-size: 0.93rem;
+  font-size: 0.99rem;
 }
 
 .chat-links {
@@ -1187,14 +1187,14 @@ td.pass {
 }
 
 .hiring h3 {
-  font-size: 1rem;
+  font-size: 1.06rem;
   margin-bottom: 0.7rem;
 }
 
 .hiring-list {
   margin: 0;
   padding-left: 1.1rem;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--ink-soft);
 }
 
@@ -1211,7 +1211,7 @@ td.pass {
   display: grid;
   gap: 0.35rem;
   font-family: var(--mono);
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   color: var(--ink-soft);
 }
 
@@ -1314,12 +1314,12 @@ td.pass {
 }
 
 .hero-chat h2 {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
 
 .hero-chat-lede {
-  font-size: 0.98rem;
+  font-size: 1.03rem;
   color: var(--ink-soft);
   margin-bottom: 1rem;
 }
@@ -1353,25 +1353,25 @@ td.pass {
 
 .hero-chat-q {
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--yellow);
   margin: 0;
 }
 
 .hero-chat-a {
-  font-size: 1rem;
+  font-size: 1.05rem;
   margin: 0;
 }
 
 .hero-chat-src,
 .hero-chat-tests {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--ink-faint);
   margin: 0;
 }
 
 .hero-chat-foot {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--ink-faint);
   margin: 0.9rem 0 0;
 }
@@ -1404,18 +1404,18 @@ td.pass {
 
 .timeline strong {
   display: block;
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
 .timeline span {
   display: block;
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.87rem;
   color: var(--yellow);
 }
 
 .timeline p {
-  font-size: 0.98rem;
+  font-size: 1.03rem;
   color: var(--ink-soft);
   margin: 0.25rem 0 0;
 }
@@ -1460,12 +1460,12 @@ td.pass {
 
 @media (max-width: 520px) {
   body {
-    font-size: 1rem;
+    font-size: 1.0625rem;
   }
 
   .site-nav {
     gap: 0.9rem;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
   }
 
   .verdict {
