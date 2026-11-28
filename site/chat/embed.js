@@ -81,7 +81,7 @@ async function start() {
 
   for (const control of [input, form.querySelector('button'), ...chips]) control.disabled = false;
   log.replaceChildren(
-    el('p', 'hero-chat-a', 'Ask about the case studies, the release decision, or what is still unverified.'),
+    el('p', 'hero-chat-a', 'Ask about the work history, the case studies, or what is still unverified.'),
   );
 }
 

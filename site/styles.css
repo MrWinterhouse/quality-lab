@@ -155,7 +155,13 @@ p {
   margin: 0 0 1.1em;
   text-wrap: pretty;
   /* Long light-on-dark lines are the other thing that tires the eye: cap the measure. */
-  max-width: 70ch;
+  max-width: 62ch;
+}
+
+/* A paragraph that ran to four lines is a list that did not admit it. */
+p,
+li {
+  line-height: 1.7;
 }
 
 p.lede {
@@ -300,6 +306,36 @@ pre code {
   margin-bottom: 1.6rem;
 }
 
+/* Where a visitor starts: the assistant, then the work history. */
+.hero-paths {
+  list-style: none;
+  margin: 0 0 1.4rem;
+  padding: 0;
+  max-width: 46rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.hero-paths li {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-left: 4px solid var(--line);
+  padding: 0.15rem 0 0.15rem 0.85rem;
+}
+
+.hero-paths li strong {
+  color: var(--ink);
+}
+
+.hero-note {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  margin: 0 0 1.5rem;
+}
+
 .byline {
   font-family: var(--mono);
   font-size: 0.84rem;
@@ -394,25 +430,40 @@ section {
 
 .section-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: 1rem 3rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr);
+  gap: 1rem 3.5rem;
   align-items: start;
-  margin-bottom: 2rem;
+  margin-bottom: 2.6rem;
 }
 
 .section-head h2 {
   margin-bottom: 0;
 }
 
+/* The standfirst sits beside the heading, so it reads as a caption rather than body copy:
+   narrower measure, slightly smaller, more air between the lines. */
 .section-head p {
   margin: 0;
+  max-width: 54ch;
+  font-size: 1.03rem;
+  line-height: 1.6;
   color: var(--ink-soft);
 }
 
 .cols-2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  gap: 2rem 3rem;
+  gap: 2.5rem 3.5rem;
+}
+
+/* Separate the column's blocks so a heading always starts a new idea. */
+.cols-2 h3 {
+  margin-top: 2.2rem;
+}
+
+.cols-2 h3:first-child,
+.cols-2 *:first-child > h3:first-child {
+  margin-top: 0;
 }
 
 /* ---------- tables ---------- */
@@ -1148,11 +1199,41 @@ td.pass {
 }
 
 .hiring-list li {
-  margin-bottom: 0.55rem;
+  margin-bottom: 1rem;
+  padding-left: 0.15rem;
 }
 
+/* Tool names as a short column instead of one 40-word sentence. */
+.chips-list {
+  list-style: none;
+  margin: 0 0 1.6rem;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+
+.chips-list li {
+  position: relative;
+  padding-left: 1.1rem;
+  line-height: 1.5;
+}
+
+.chips-list li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--teal);
+}
+
+/* Lead phrase on its own line: four scannable headlines instead of four wrapped blocks. */
 .hiring-list strong {
+  display: block;
   color: var(--ink);
+  line-height: 1.35;
+  margin-bottom: 0.15rem;
 }
 
 .hiring-cta {
